@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>133781970462283113</DateTime>
+  <GameVersion>0.2.5321.24005</GameVersion>
+  <Title>deepMinerCentrifugeAutomate</Title>
+  <Description>Opens all centrifuges when reagents &lt;= 50, also turns on all centrifuges when program starts​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>alias currReagents r0
+
+define allCentrifuges 690945935
+
+start:
+sb allCentrifuges On 1
+initialize:
+sb allCentrifuges ClearMemory 1
+
+currentlyProcessingReagents:
+#loop until 50 reagents processed from dirty ore
+lb currReagents allCentrifuges Reagents Average
+bgeal currReagents 50 centrifugeDone
+sleep 1
+j currentlyProcessingReagents
+
+centrifugeDone:
+#open centrifuge
+sb allCentrifuges Open 1
+centrifugeDoneEmptyingLoop:
+#loop until export count is 50, then wait for import count to be 50
+lb currReagents allCentrifuges Reagents Average
+beq currReagents 0 centrifugeDoneImport
+sleep 1
+j centrifugeDoneEmptyingLoop
+centrifugeDoneImport:
+sb allCentrifuges Open 0
+j initialize</Instructions>
+</InstructionData>

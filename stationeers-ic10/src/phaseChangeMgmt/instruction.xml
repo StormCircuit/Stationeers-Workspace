@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>134099665667758120</DateTime>
+  <GameVersion>0.2.6085.26682</GameVersion>
+  <Title>phaseChangeMgmt</Title>
+  <Description>Tries to prevent loops from freezing​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>
+
+
+
+
+#================================================================
+#KEEP THIS DEVICE ON ITS OWN NETWORK WITH REQUIRED DEVICES!!!
+#================================================================
+alias maxTempKelvinMemory d0
+alias minTempKelvinMemory d1
+#radiatorValve is optional if you just want to turn heating on
+alias tempDevice d2
+#how long the system will remain off in seconds when idling before pulsing
+alias bounceTimeMem d3
+#set one of these if this is the end of a phase change loop.
+#the device it is set to can be anything, it will not be effected
+alias setForCooling d4
+alias setForHeating d5
+
+alias maxTempKelvin r0
+alias minTempKelvin r1
+alias currentTemp r2
+l currentTemp tempDevice Temperature
+alias bounceTime r3
+l bounceTime bounceTimeMem Setting
+
+define allEvapCham -1429782576
+define allCondCham 1420719315
+
+#get max and min temp from external memory chips, THIS VALUE ASSUMES A SAFETY MARGIN!
+l maxTempKelvin maxTempKelvinMemory Setting
+l minTempKelvin minTempKelvinMemory Setting
+
+start:
+#DEFAULT TO ON ON STARTUP TO AVOID ISSUES
+sb allEvapCham On 1
+sb allCondCham On 1
+yield
+
+initialize:
+
+noCoolingOrHeating:
+#wait 30 seconds before turning on again
+sb allEvapCham On 0
+sb allCondCham On 0
+#turn off for given time
+sleep bounceTime
+
+
+l bounceTime bounceTimeMem Setting
+l currentTemp tempDevice Temperature
+s db Setting currentTemp
+brdns setForCooling 2
+bgeal currentTemp maxTempKelvin coolingLoop
+brdns setForHeating 2
+blt currentTemp minTempKelvin heatingLoop
+
+#trigger chambers for a moment to check if heat is building up when set for cooling
+sb allEvapCham On 1
+sb allCondCham On 1
+yield
+sleep 5
+j noCoolingOrHeating
+
+coolingLoop:
+sb allEvapCham On 1
+sb allCondCham On 1
+l currentTemp tempDevice Temperature
+s db Setting currentTemp
+blt currentTemp minTempKelvin noCoolingOrHeating
+yield
+j coolingLoop
+
+heatingLoop:
+sb allEvapCham On 1
+sb allCondCham On 1
+l currentTemp tempDevice Temperature
+s db Setting currentTemp
+bgeal currentTemp maxTempKelvin noCoolingOrHeating
+yield
+j heatingLoop</Instructions>
+</InstructionData>

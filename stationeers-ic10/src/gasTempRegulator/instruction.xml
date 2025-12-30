@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>133784504731712147</DateTime>
+  <GameVersion>0.2.5367.24106</GameVersion>
+  <Title>gasTempRegulator</Title>
+  <Description>opens a valve to cooling system + turns on all pipe heaters depending on read temp from any device that can read temp​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>
+
+
+
+
+#================================================================
+#KEEP THIS DEVICE ON ITS OWN NETWORK WITH REQUIRED DEVICES!!!
+#================================================================
+alias maxTempKelvinMemory d0
+alias minTempKelvinMemory d1
+#radiatorValve is optional if you just want to turn heating on
+alias radiatorValve d2
+alias gasTempDevice d3
+
+alias maxTempKelvin r0
+alias minTempKelvin r1
+alias currentTemp r2
+
+define allGasPipeHeaters -419758574
+
+#get max and min temp from external memory chips, THIS VALUE ASSUMES A SAFETY MARGIN!
+l maxTempKelvin maxTempKelvinMemory Setting
+l minTempKelvin minTempKelvinMemory Setting
+
+start:
+#DEFAULT TO OFF ON STARTUP TO AVOID ISSUES
+sb allGasPipeHeaters On 0
+brdns radiatorValve 2
+s radiatorValve On 0
+yield
+
+initialize:
+
+noCoolingOrHeating:
+#READ THE FOLLOWING!!
+#if temp ABOVE maxTempKelvin, turn heater off and open radiator valve
+#this takes the average of ALL large insulated fuel tanks so they MUST be in the same
+# pipe subnetwork or you can get large differences in each tank equalling to maxTemp
+sb allGasPipeHeaters On 0
+brdns radiatorValve 2
+s radiatorValve On 0
+#sleep to avoid trying to change states of valves/heaters within 1 game tick
+# (multiple changes in 1 game tick will clash and override each other)
+yield
+l currentTemp gasTempDevice Temperature
+s db Setting currentTemp
+bgeal currentTemp maxTempKelvin startCooling
+blt currentTemp minTempKelvin startHeating
+yield
+#trigger chambers for a moment to check if heat is building up
+sleep 5
+yield
+j noCoolingOrHeating
+
+startCooling:
+sb allGasPipeHeaters On 0
+brdns radiatorValve 2
+s radiatorValve On 1
+coolingLoop:
+l currentTemp gasTempDevice Temperature
+s db Setting currentTemp
+blt currentTemp minTempKelvin noCoolingOrHeating
+yield
+yield
+j coolingLoop
+
+startHeating:
+sb allGasPipeHeaters On 1
+brdns radiatorValve 2
+s radiatorValve On 0
+heatingLoop:
+l currentTemp gasTempDevice Temperature
+s db Setting currentTemp
+#add 10 to current temp so we go 10 kelvin above minimum
+bgeal currentTemp minTempKelvin noCoolingOrHeating
+yield
+yield
+j heatingLoop</Instructions>
+</InstructionData>

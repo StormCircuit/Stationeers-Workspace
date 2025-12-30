@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>133787785335707606</DateTime>
+  <GameVersion>0.2.5370.24111</GameVersion>
+  <Title>portableGasMixer</Title>
+  <Description>precision gas mixer IC adapted for portable hookups
+​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>alias activationLever d0
+alias outputAnalyzer d1
+
+alias leverState r7
+
+alias outputPressure r8
+
+define purgeVents -1129453144
+define gasValves -1280984102
+
+start:
+s activationLever Open 0
+awaitInitialization:
+sb gasValves On 0
+sb purgeVents On 1
+l leverState activationLever Open
+beq leverState 1 initialization
+yield
+j awaitInitialization
+
+initialization:
+sb purgeVents On 0
+sb gasValves On 1
+calculationLoop:
+
+#check for end conditions
+l leverState activationLever Open
+beq leverState 0 start
+l outputPressure outputAnalyzer Pressure
+bgeal outputPressure 19000 start
+
+yield
+j calculationLoop</Instructions>
+</InstructionData>

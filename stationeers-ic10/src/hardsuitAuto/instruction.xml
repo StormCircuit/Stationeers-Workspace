@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>134097034775382478</DateTime>
+  <GameVersion>0.2.5954.26176</GameVersion>
+  <Title>hardsuitAuto</Title>
+  <Description>opens/closes visor, turns on/off A/C and toggles filters depending on oxygen partial pressure.​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>3620622056</WorkshopFileHandle>
+  <Instructions>alias hardsuit db
+alias helmet d0
+
+alias externalPress r0
+alias externalTemp r1
+alias helmetOverride r2
+alias oxyPartialPress r3
+alias ratioOxy r4
+alias currPress r10
+alias pressTriggeredFlag r5
+alias helmetLockedFlag r8
+alias helmetIsOpenFlag r10
+alias filterCyclingFlag r9
+
+define minSafePress 35
+define maxSafePress 200
+define minSafeTemp 284
+define maxSafeTemp 300
+
+s helmet SoundAlert 25
+sleep 3
+monitorLoop:
+#if user helmet is locked, give program control.
+#if user helmet is UNlocked, relinquish all program control until locked
+l helmetLockedFlag helmet Lock
+l helmetIsOpenFlag helmet Open
+beqz helmetLockedFlag monitorLoop
+
+#load metrics for checking and perform safety checks
+l externalTemp hardsuit TemperatureExternal
+l externalPress hardsuit PressureExternal
+l ratioOxy helmet RatioOxygen
+l currPress helmet Pressure
+mul oxyPartialPress ratioOxy currPress
+
+s hardsuit On 1
+s hardsuit AirRelease 1
+
+#perform safety checks
+bgt externalPress maxSafePress beginSuitPressurize
+blt externalPress minSafePress beginSuitPressurize
+bgt externalTemp maxSafeTemp beginSuitPressurize
+blt externalTemp minSafeTemp beginSuitPressurize
+j externalCondiSafe
+endSafetyChecks:
+
+#perform filter checks
+jal filterCycling
+
+yield
+j monitorLoop
+
+#subroutines for monitor loop above
+filterCycling:
+beq helmetIsOpenFlag 1 airFilteringNominalInit
+beq filterCyclingFlag 1 airFilteringLoop
+blt oxyPartialPress 27 airFilteringLoopInit
+airFilteringNominalInit:
+move filterCyclingFlag 0
+s hardsuit Filtration 0
+j filterCyclingEnd
+airFilteringLoopInit:
+move filterCyclingFlag 1
+s hardsuit Filtration 1
+airFilteringLoop:
+bgt oxyPartialPress 24 airFilteringNominalInit
+j filterCyclingEnd
+filterCyclingEnd:
+j ra
+
+beginSuitPressurize:
+jal closeHelmet
+bgtz pressTriggeredFlag endSafetyChecks
+move pressTriggeredFlag 1
+s helmet SoundAlert 21
+sleep 3
+j endSafetyChecks
+
+externalCondiSafe:
+jal openHelmet
+beqz pressTriggeredFlag endSafetyChecks
+move pressTriggeredFlag 0
+j endSafetyChecks
+
+closeHelmet:
+s helmet Open 0
+j ra
+openHelmet:
+s helmet Open 1
+j ra</Instructions>
+</InstructionData>

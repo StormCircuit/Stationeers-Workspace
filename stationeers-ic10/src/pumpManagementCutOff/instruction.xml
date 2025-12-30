@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>133787666731256695</DateTime>
+  <GameVersion>0.2.5370.24111</GameVersion>
+  <Title>pumpManagementCutOff</Title>
+  <Description>cuts pump off when pressure on other side exceeds an attached pressure regulator's settings​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>
+alias fillingAnalyzer d0
+alias fillingPump d1
+alias maxPumpSpeedMem d2
+alias fillingBackReg d3
+
+alias currPumpSpeed r0
+alias maxPumpSpeed r1
+alias currProgress r2
+alias maxCapacity r3
+
+alias isLiquidFlag r4
+
+l maxCapacity fillingBackReg Setting
+l maxPumpSpeed maxPumpSpeedMem Setting
+move currPumpSpeed maxPumpSpeed
+
+monitorPressure:
+l currProgress fillingAnalyzer Pressure
+add currProgress currProgress 150
+blt currProgress maxCapacity fillLoopBegin
+yield
+j monitorPressure
+
+fillLoopBegin:
+s fillingPump On 1
+div currPumpSpeed maxPumpSpeed 10
+s fillingPump Setting currPumpSpeed
+fillLoop:
+sleep 1
+
+l currProgress fillingAnalyzer Pressure
+bge currProgress maxCapacity fillLoopEnd
+
+div currProgress currProgress maxCapacity
+
+brle currProgress 0.5 4
+div currPumpSpeed maxPumpSpeed 2
+s fillingPump Setting currPumpSpeed
+j endPumpThrottle
+
+brge currProgress 0.5 4
+div currPumpSpeed maxPumpSpeed 10
+s fillingPump Setting currPumpSpeed
+j endPumpThrottle
+endPumpThrottle:
+
+s db Setting currPumpSpeed
+j fillLoop
+
+
+fillLoopEnd:
+s fillingPump On 0
+l currPumpSpeed maxPumpSpeedMem Setting
+j monitorPressure</Instructions>
+</InstructionData>

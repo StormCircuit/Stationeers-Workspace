@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>133761129731649792</DateTime>
+  <GameVersion>0.2.5284.23867</GameVersion>
+  <Title>WallheaterAutomate</Title>
+  <Description>​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>alias tempSensor d0
+alias wallHeater d1
+alias currTemp r0
+alias maxTemp r1
+alias minTemp r2
+
+#set the max and min temps we want to maintain
+add maxTemp 298 0
+add minTemp 292 0
+
+#start behavior routines:
+
+#routine for below min and max temp
+belowMinTemp:
+s wallHeater On 1
+belowMinTemploop:
+sleep 1
+l currTemp tempSensor Temperature
+ble currTemp maxTemp belowMinTemploop
+j maxTempReached
+
+#routine for when max temp reached
+maxTempReached:
+s wallHeater On 0
+maxTempLoop:
+sleep 1
+l currTemp tempSensor Temperature
+#turn heater off until min heat reached
+bge currTemp minTemp maxTempLoop
+j belowMinTemp</Instructions>
+</InstructionData>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>133784434814482223</DateTime>
+  <GameVersion>0.2.5367.24106</GameVersion>
+  <Title>rocketPump</Title>
+  <Description>hookup to fuel a rocket. Requires:
+pump&gt;holding tank&gt;pump
+also LED, Lever, and Memory​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>#README:
+#CHECK THAT PRESSURE PUMP MODES ARE CORRECT BELOW.
+#Pressurization Pump: Mode 1 is PRESSURIZING rocket
+
+alias LED d0
+alias activationLever d1
+alias rocketPipeAnalyzer d2
+alias pressurizationPump d3
+alias towerGasUmbilical d4
+alias maxHoldingMolesMemory d5
+
+alias maxMoles r0
+alias currMoles r1
+alias leverState r2
+alias previousLine r3
+alias currLED r4
+
+start:
+l maxMoles maxHoldingMolesMemory Setting
+s pressurizationPump Setting 0
+s LED On 1
+l leverState activationLever Open
+#if lever open on startup, go to safe state just in case
+beq leverState 1 safeState
+
+awaitingInitialization:
+s rocketPipeAnalyzer On 1
+s LED Color 3
+awaitingInitializationLoop:
+l leverState activationLever Open
+beq leverState 1 beginPressurization
+sleep 1
+j awaitingInitializationLoop
+
+#begin by setting umbilical pump to stop pumping
+# then set pressurization pump up to fill holding tank
+# we do this until the holding tank reports a totalMoles = to the moles set in memory chip
+beginPressurization:
+s LED Color 0
+s towerGasUmbilical Open 1
+yield
+s pressurizationPump Mode 1
+s pressurizationPump Setting 100
+move previousLine pressurizationLoop
+pressurizationLoop:
+s rocketPipeAnalyzer On 1
+l leverState activationLever Open
+l currMoles rocketPipeAnalyzer TotalMoles
+beq leverState 0 safeState
+bgeal currMoles maxMoles pressurizationEnd
+j LEDBlink
+yield
+j pressurizationLoop
+
+#close tower umbilical
+#then set the pump to reverse, to move gas stuck in pipes back to storage
+pressurizationEnd:
+s towerGasUmbilical Open 0
+yield
+s pressurizationPump Mode 0
+s pressurizationPump Setting 100
+s activationLever Open 0
+yield
+j awaitingInitialization
+
+#if lever is closed while fueling, enter safe state
+# to reset, close and re-open lever. This restarts fueling process.
+safeState:
+s LED On 1
+s LED Color 4
+s pressurizationPump Setting 0
+l leverState activationLever Open
+beq leverState 1 awaitingReset
+sleep 1
+j safeState
+awaitingReset:
+l leverState activationLever Open
+beq leverState 0 awaitingInitialization
+sleep 1
+j awaitingReset
+
+LEDBlink:
+l currLED LED On
+beq currLED 0 blinkOn
+beq currLED 1 blinkOff
+blinkOn:
+s LED On 1
+j previousLine
+blinkOff:
+s LED On 0
+j previousLine</Instructions>
+</InstructionData>

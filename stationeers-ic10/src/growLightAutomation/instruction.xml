@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>133781644098965157</DateTime>
+  <GameVersion>0.2.5321.24005</GameVersion>
+  <Title>growLightAutomation</Title>
+  <Description>​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>#requires a stop watch and a memory chip, memory must be set to
+# number of seconds of light plant needs per day
+alias lightTimeMemory d0
+alias darknessTimeMemory d1
+alias stopWatch d2
+
+define allNetworkedGrowLights -1758710260
+
+#currCycleTime is the register we use to store what time it is
+# time is given as stopwatch time modulus 1200 (1200 = 20 minutes in seconds, day length)
+alias currCycleTime r0
+alias lightTime r1
+alias darkTime r2
+
+l lightTime lightTimeMemory Setting
+l darkTime darknessTimeMemory Setting
+
+#initiate stopwatch and jump straight into a loop to begin infinite loop
+start:
+s stopWatch Activate 1
+j lightsOnCycleLoop
+
+lightsOnCycle:
+sb allNetworkedGrowLights On 1
+lightsOnCycleLoop:
+l currCycleTime stopWatch Time
+mod currCycleTime currCycleTime 1200
+bge currCycleTime lightTime lightsOffCycle
+j lightsOnCycleLoop
+
+lightsOffCycle:
+sb allNetworkedGrowLights On 0
+lightsOffCycleLoop:
+l currCycleTime stopWatch Time
+mod currCycleTime currCycleTime 1200
+bge currCycleTime darkTime lightsOnCycle
+j lightsOffCycleLoop</Instructions>
+</InstructionData>

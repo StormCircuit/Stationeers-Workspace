@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>133785394943362948</DateTime>
+  <GameVersion>0.2.5370.24111</GameVersion>
+  <Title>rocketUnload</Title>
+  <Description>unloads the cargo hold of a rocket​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions># d0 is a lever to activate process
+# d1 is the umbilical on the tower
+# d2 is an LED to show status
+alias activationLever d0
+alias cargoUmbilical d1
+alias LED d2
+
+#umbilical hashes appear to fail when used across mirrors
+#define cargoUmbilical -958884053
+define rocketCargoSmall -1493672123
+define rocketCargoMedium 1151864003
+
+alias leverState r0
+alias smallCargoQuantity r1
+alias mediumCargoQuantity r2
+alias totalCargoQuantity r3
+
+awaitingActivation:
+s LED Color 3
+l leverState activationLever Open
+beq leverState 1 unloadCargo
+j awaitingActivation
+
+unloadCargo:
+s cargoUmbilical Open 1
+sb rocketCargoSmall On 1
+sb rocketCargoMedium On 1
+sb rocketCargoSmall Open 1
+sb rocketCargoMedium Open 1
+unloadingLoop:
+s LED Color 0
+lb smallCargoQuantity rocketCargoSmall Quantity Sum
+lb mediumCargoQuantity rocketCargoMedium Quantity Sum
+add totalCargoQuantity smallCargoQuantity mediumCargoQuantity
+l leverState activationLever Open
+beq leverState 0 cargoUnloadingDone
+beq totalCargoQuantity 0 cargoUnloadingDone
+yield
+j unloadingLoop
+
+cargoUnloadingDone:
+yield
+s cargoUmbilical Open 0
+sb rocketCargoSmall Open 0
+sb rocketCargoMedium Open 0
+sb rocketCargoMedium On 0
+sb rocketCargoMedium On 0
+s activationLever Open 0
+j awaitingActivation</Instructions>
+</InstructionData>

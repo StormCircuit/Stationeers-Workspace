@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>133787753201882995</DateTime>
+  <GameVersion>0.2.5370.24111</GameVersion>
+  <Title>precisionGasMixer</Title>
+  <Description>mixes gas of different temperature precisely​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>alias inputDial d0
+alias gasMixer d1
+alias gas1Analyzer d2
+alias gas2Analyzer d3
+alias outputAnalyzer d4
+
+alias calculatedMixerSetting r0
+alias desiredMixerSetting r1
+
+alias gas1Temp r2
+alias gas2Temp r3
+alias outputOxyRatio r7
+
+alias numerator r4
+alias denominator r5
+alias denomTemp r6
+
+start:
+
+awaitInitialization:
+
+
+calculationLoop:
+s gas1Analyzer On 1
+s gas2Analyzer On 1
+s outputAnalyzer On 1
+l gas1Temp gas1Analyzer Temperature
+l gas2Temp gas2Analyzer Temperature
+l desiredMixerSetting inputDial Ratio
+sub desiredMixerSetting 1 desiredMixerSetting
+#-calculation loop, constantly updates besides on equation below-
+#r = (r'T1) / ((1-r')T2+r'T1)
+#r = calculated mixer setting
+#T1 = gas input 1 temp
+#T2 = gas input 2 temp
+#------------------
+# (r'T1)
+mul numerator desiredMixerSetting gas1Temp
+
+#(1-r')T2
+sub denominator 1 desiredMixerSetting
+mul denominator denominator gas2Temp
+#r'T1
+mul denomTemp desiredMixerSetting gas1Temp
+#((1-r')T2+r'T1
+add denominator denominator denomTemp
+#(r'T1) / ((1-r')T2+r'T1)
+div calculatedMixerSetting numerator denominator
+
+mul calculatedMixerSetting calculatedMixerSetting 100
+
+l outputOxyRatio outputAnalyzer RatioOxygen
+
+#something about this implementation is causing an incorrect output ratio so doing
+#some checks and adjusting based on error
+bgt outputOxyRatio 0.35 endOxyRatioCheck
+s gasMixer Setting 20
+yield
+j calculationLoop
+endOxyRatioCheck:
+s gasMixer Setting calculatedMixerSetting
+yield
+j calculationLoop</Instructions>
+</InstructionData>

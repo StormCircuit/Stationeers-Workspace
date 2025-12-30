@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>134101592892610933</DateTime>
+  <GameVersion>0.2.6091.26702</GameVersion>
+  <Title>hardsuitAutov2</Title>
+  <Description>lock helmet to turn program on, unlock to turn off. v2 Adds toxin detection when helmet is open.​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>alias hardsuit db
+alias helmet d0
+alias externalPress r0
+alias externalTemp r1
+alias helmetOverride r2
+alias oxyPartialPress r3
+alias ratioOxy r4
+alias currPress r5
+alias ratioToxin r6
+alias pressTriggeredFlag r7
+alias helmetLockedFlag r8
+alias helmetIsOpenFlag r9
+alias filterCyclingFlag r10
+define minSafePress 35
+define maxSafePress 200
+define minSafeTemp 284
+define maxSafeTemp 300
+s helmet SoundAlert 25
+sleep 3
+monitorLoop:
+#if user helmet is locked, give program control.
+#if user helmet is UNlocked, relinquish all program control until locked
+l helmetLockedFlag helmet Lock
+l helmetIsOpenFlag helmet Open
+beqz helmetLockedFlag monitorLoop
+#load metrics for checking and perform safety checks
+l externalTemp hardsuit TemperatureExternal
+l externalPress hardsuit PressureExternal
+l ratioOxy helmet RatioOxygen
+l currPress helmet Pressure
+mul oxyPartialPress ratioOxy currPress
+s hardsuit On 1
+s hardsuit AirRelease 1
+
+#perform safety checks
+l ratioToxin helmet Combustion
+bgtz ratioToxin beginSuitPressurize
+blt ratioOxy 0.2 beginSuitPressurize
+l ratioToxin helmet RatioCarbonDioxide
+bgt ratioToxin 0.8 beginSuitPressurize
+l ratioToxin helmet RatioNitrogen
+bgt ratioToxin 0.8 beginSuitPressurize
+l ratioToxin helmet RatioPollutant
+bgt ratioToxin 0 beginSuitPressurize
+l ratioToxin helmet RatioLiquidPollutant
+bgt ratioToxin 0 beginSuitPressurize
+l ratioToxin helmet RatioNitrousOxide
+bgt ratioToxin 0 beginSuitPressurize
+l ratioToxin helmet RatioLiquidNitrousOxide
+bgt ratioToxin 0 beginSuitPressurize
+l ratioToxin helmet RatioVolatiles
+bgt ratioToxin 0 beginSuitPressurize
+l ratioToxin helmet RatioLiquidVolatiles
+bgt ratioToxin 0 beginSuitPressurize
+endToxinCheck:
+beginSafetyChecks:
+bgt externalPress maxSafePress beginSuitPressurize
+blt externalPress minSafePress beginSuitPressurize
+bgt externalTemp maxSafeTemp beginSuitPressurize
+blt externalTemp minSafeTemp beginSuitPressurize
+j externalCondiSafe
+endSafetyChecks:
+#perform filter checks
+jal filterCycling
+
+s helmet SoundAlert 0
+yield
+j monitorLoop
+#subroutines for monitor loop above
+filterCycling:
+beq helmetIsOpenFlag 1 airFilteringNominalInit
+beq filterCyclingFlag 1 airFilteringLoop
+blt oxyPartialPress 27 airFilteringLoopInit
+airFilteringNominalInit:
+move filterCyclingFlag 0
+s hardsuit Filtration 0
+j filterCyclingEnd
+airFilteringLoopInit:
+move filterCyclingFlag 1
+s hardsuit Filtration 1
+airFilteringLoop:
+bgt oxyPartialPress 24 airFilteringNominalInit
+j filterCyclingEnd
+filterCyclingEnd:
+j ra
+
+beginSuitPressurize:
+bgtz pressTriggeredFlag endSafetyChecks
+jal closeHelmet
+move pressTriggeredFlag 1
+s helmet SoundAlert 16
+yield
+sleep 2
+s helmet SoundAlert 21
+yield
+sleep 2
+j endSafetyChecks
+externalCondiSafe:
+jal openHelmet
+beqz pressTriggeredFlag endSafetyChecks
+move pressTriggeredFlag 0
+s helmet SoundAlert 20
+yield
+sleep 2
+j endSafetyChecks
+
+closeHelmet:
+s helmet Open 0
+s helmet Flush 1
+j ra
+openHelmet:
+s helmet Open 1
+j ra</Instructions>
+</InstructionData>

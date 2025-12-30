@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>133790369545357809</DateTime>
+  <GameVersion>0.2.5370.24111</GameVersion>
+  <Title>autoTrader</Title>
+  <Description>automatically contacts traders when min watts to communicate is reached​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>alias selectionDial d0
+
+alias antenna d1
+
+alias currFilter r0
+alias prevLine r1
+alias wattsReaching r3
+alias wattsNeeded r4
+
+define noFilt -1 #disables filters
+define oreTr -1374574351 #ore 0
+define alloyTr 54412100 #alloy 1
+define foodTr -82964957 #food 2
+define seedTr -1077922067 #seed 3
+define gasTr -470575659 #gas 4
+define constructTr 175935584 #construction 5
+define liquidTr 135244511 #liquid 6
+define hardwTr 1325142661 #hardware 7
+define consumTr -1650376125 #consumables 8
+define appliTr -1590718013 #appliances 9
+
+setFilter:
+l currFilter selectionDial Setting
+brgt currFilter 0 3
+s antenna BestContactFilter -1
+j finishFilter
+brgt currFilter 1 3
+s antenna BestContactFilter -1374574351
+j finishFilter
+brgt currFilter 2 3
+s antenna BestContactFilter 54412100
+j finishFilter
+brgt currFilter 3 3
+s antenna BestContactFilter -82964957
+j finishFilter
+brgt currFilter 4 3
+s antenna BestContactFilter -1077922067
+j finishFilter
+brgt currFilter 5 3
+s antenna BestContactFilter -470575659
+j finishFilter
+brgt currFilter 6 3
+s antenna BestContactFilter 175935584
+j finishFilter
+brgt currFilter 7 3
+s antenna BestContactFilter 135244511
+j finishFilter
+brgt currFilter 8 3
+s antenna BestContactFilter 1325142661
+j finishFilter
+brgt currFilter 9 3
+s antenna BestContactFilter -1650376125
+j finishFilter
+brgt currFilter 10 3
+s antenna BestContactFilter -1590718013
+j finishFilter
+finishFilter:
+j prevLine
+
+attemptContact:
+l wattsNeeded antenna MinimumWattsToContact
+l wattsReaching antenna WattsReachingContact
+blt wattsReaching wattsNeeded findContact
+
+findContact:
+
+adjustHorizontal:
+</Instructions>
+</InstructionData>

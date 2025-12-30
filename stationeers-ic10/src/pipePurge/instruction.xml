@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <DateTime>134094638879745347</DateTime>
+  <GameVersion>0.2.5954.26176</GameVersion>
+  <Title>pipePurge</Title>
+  <Description>activates all active vents in a network when lever is down and shuts them when lever is up​</Description>
+  <Author>Rizzard of Oz</Author>
+  <WorkshopFileHandle>0</WorkshopFileHandle>
+  <Instructions>alias activationLever d0
+
+define activeVents -1129453144
+
+alias leverState r0
+
+l leverState activationLever Open
+
+sb -1129453144 On 1
+
+init:
+yield
+beq leverState 1 openVentLoop
+l leverState activationLever Open
+sb -1129453144 On 0
+
+j init
+
+
+
+openVentLoop:
+yield
+l leverState activationLever Open
+beq leverState 0 init
+sb -1129453144 On 1
+
+j openVentLoop</Instructions>
+</InstructionData>
