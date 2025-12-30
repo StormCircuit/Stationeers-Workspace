@@ -1,11 +1,7 @@
 {
-	"folders": [
-		{
-			"path": ".."
-		},
-		{
-			"path": "../../My Games/Stationeers/chipdata"
-		}
-	],
-	"settings": {}
+    "folders": [
+        {
+            "path": ".."
+        }
+    ]
 }
