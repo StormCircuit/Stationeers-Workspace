@@ -1,6 +1,7 @@
 {
   "files.associations": {
-    "*.ic10": "ic10"
+    "*.ic10": "ic10",
+    "*.xml": "ic10"
   },
   "files.exclude": {
     "**/.DS_Store": true
