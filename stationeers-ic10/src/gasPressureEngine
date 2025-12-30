@@ -1,0 +1,58 @@
+
+alias rocketEngine d0
+alias turboPump d1
+
+alias currPumpSpeed r0
+alias currPressure r1
+alias engineState r2
+
+define maxPressure 45000
+define maxPumpSpeed 100
+
+move currPumpSpeed maxPumpSpeed
+
+s turboPump On 0
+
+monitorPressure:
+l currPressure rocketEngine Pressure
+add currPressure maxPressure 150
+l engineState rocketEngine On
+breqz engineState 2
+blt currPressure maxPressure fillLoopBegin
+yield
+j monitorPressure
+
+fillLoopBegin:
+s turboPump On 1
+div currPumpSpeed maxPumpSpeed 10
+s turboPump Setting currPumpSpeed
+fillLoop:
+sleep 1
+
+l currPressure rocketEngine Pressure
+bge currPressure maxPressure fillLoopEnd
+
+l engineState rocketEngine On
+beqz engineState fillLoopEnd
+
+div currPressure currPressure maxPressure
+
+brle currPressure 0.5 4
+div currPumpSpeed maxPumpSpeed 2
+s turboPump Setting currPumpSpeed
+j endPumpThrottle
+
+brge currPressure 0.5 4
+div currPumpSpeed maxPumpSpeed 10
+s turboPump Setting currPumpSpeed
+j endPumpThrottle
+endPumpThrottle:
+
+s db Setting currPumpSpeed
+j fillLoop
+
+
+fillLoopEnd:
+s turboPump On 0
+move currPumpSpeed maxPumpSpeed
+j monitorPressure
