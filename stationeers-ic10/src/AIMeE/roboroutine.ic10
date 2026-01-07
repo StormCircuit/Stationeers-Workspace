@@ -1,0 +1,101 @@
+#AIMeE base controller based on Cows Are Evil's scripts
+#Modified by Storm to progress up and down a stack loaded set of waypoints for pathing
+
+#Short user instructions:
+#1. Set GPS locations using GPS tablet and write down coordinates
+#2. Put them into stack like so: PUSH X1 PUSH Y1 PUSH X2 PUSH Y2 until all added
+#NOTE: X1/Y1 is the unloading chute/dock location, last pair are the mining location
+
+alias robot d0         #Logic Transmitter
+alias lever d5         #Lever
+
+alias mode r1
+alias charge r2
+alias stuck r3
+
+alias maxStack r8
+
+alias WAYX r4
+alias WAYZ r5
+alias MINEX r6
+alias MINEZ r7
+#Modes
+define NONE 0
+define KILL 1
+define MOVE 2
+define MINE 3
+define UNLOAD 4
+define PATH 5
+define FULL 6
+
+goingHome:
+l maxStack db Setting
+move sp maxStack
+pop WAYX
+pop WAYZ
+s robot TargetX WAYX
+s robot TargetZ WAYZ
+jal travel
+beqz sp unloadWait
+j goingHome
+
+unloadWait:
+s robot Mode UNLOAD
+yield
+#check recall
+l r0 lever Setting
+bnez r0 recall
+#check battery
+blt charge 70000 unloadWait
+beq mode UNLOAD unloadWait
+
+#unload done, travel to mining location
+goingToWork:
+l maxStack db Setting
+add sp sp 1
+peek WAYX
+add sp sp 1
+peek WAYZ
+s robot TargetX WAYX
+s robot TargetZ WAYZ
+jal travel
+beq sp maxStack startMining
+j goingToWork
+
+#mine until full
+startMining:
+l r0 lever Setting
+bnez r0 goingHome
+#check for mineables
+l r0 robot MineablesInVicinity
+beqz r0 goingHome
+s robot Mode MINE
+mineWait:
+yield
+#check recall
+l r0 lever Setting
+bnez r0 goingHome
+beq mode MINE mineWait
+bne mode FULL startMining
+j goingToWork
+
+travel: 
+s robot Mode MOVE
+wait:
+yield
+l r0 robot VelocityMagnitude
+slt r0 r0 0.2
+mul stuck stuck r0
+add stuck stuck r0
+bgt stuck 20 pathfind
+l mode robot Mode
+beq mode MOVE wait
+j ra
+
+pathfind:
+s robot Mode PATH
+yield
+sleep 10
+s robot Mode MOVE
+move stuck 0
+j wait
