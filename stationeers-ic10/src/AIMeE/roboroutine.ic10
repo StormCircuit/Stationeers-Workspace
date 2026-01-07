@@ -7,7 +7,7 @@
 #NOTE: X1/Y1 is the unloading chute/dock location, last pair are the mining location
 
 alias robot d0         #Logic Transmitter
-alias lever d5         #Lever
+alias lever d5         #Lever to trigger recall
 
 alias mode r1
 alias charge r2
@@ -46,7 +46,9 @@ yield
 l r0 lever Setting
 bnez r0 recall
 #check battery
+l charge robot Power
 blt charge 70000 unloadWait
+l mode robot Mode
 beq mode UNLOAD unloadWait
 
 #unload done, travel to mining location
@@ -74,6 +76,7 @@ mineWait:
 yield
 #check recall
 l r0 lever Setting
+l mode robot Mode
 bnez r0 goingHome
 beq mode MINE mineWait
 bne mode FULL startMining
@@ -88,6 +91,8 @@ slt r0 r0 0.2
 mul stuck stuck r0
 add stuck stuck r0
 bgt stuck 20 pathfind
+l r0 robot PositionY
+s robot TargetY r0
 l mode robot Mode
 beq mode MOVE wait
 j ra
