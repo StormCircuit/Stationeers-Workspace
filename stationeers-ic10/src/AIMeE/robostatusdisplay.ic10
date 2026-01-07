@@ -1,0 +1,33 @@
+alias robot d0 #set to logic transmitter
+alias statusLED d1 #set to status display (must support text input)
+
+s statusLED Mode 10
+
+monitorLoop:
+l r0 robot Mode
+beq r0 2 statusMoving
+beq r0 3 statusMining
+beq r0 4 statusUnload
+beq r0 5 statusStuck
+yield
+j monitorLoop
+
+statusMoving:
+s statusLED Setting STR("Move")
+yield
+j monitorLoop
+
+statusMining:
+s statusLED Setting STR("Mine")
+yield
+j monitorLoop
+
+statusUnload:
+s statusLED Setting STR("Unload")
+yield
+j monitorLoop
+
+statusStuck:
+s statusLED Setting STR("Stuck")
+yield
+j monitorLoop
