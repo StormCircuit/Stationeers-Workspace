@@ -7,19 +7,18 @@
 #NOTE: X1/Y1 is the unloading chute/dock location, last pair are the mining location
 
 alias robot d0         #Logic Transmitter
-alias lever d5         #Lever to trigger recall
+alias lever d1         #Lever to trigger recall
+alias robomaps d2      #housing which loads stack with map data
 
 alias mode r1
 alias charge r2
 alias stuck r3
-
 alias maxStack r8
-
 alias WAYX r4
 alias WAYZ r5
 alias MINEX r6
 alias MINEZ r7
-#Modes
+
 define NONE 0
 define KILL 1
 define MOVE 2
@@ -28,9 +27,12 @@ define UNLOAD 4
 define PATH 5
 define FULL 6
 
-goingHome:
-l maxStack db Setting
+l maxStack robomaps Setting
 move sp maxStack
+
+goingHome:
+#l maxStack robomaps Setting
+#move sp maxStack
 pop WAYX
 pop WAYZ
 s robot TargetX WAYX
@@ -41,19 +43,20 @@ j goingHome
 
 unloadWait:
 s robot Mode UNLOAD
+unloadLoop:
 yield
 #check recall
 l r0 lever Setting
-bnez r0 recall
+bnez r0 unloadLoop
 #check battery
 l charge robot Power
-blt charge 70000 unloadWait
+blt charge 70000 unloadLoop
 l mode robot Mode
-beq mode UNLOAD unloadWait
+beq mode UNLOAD unloadLoop
 
 #unload done, travel to mining location
 goingToWork:
-l maxStack db Setting
+l maxStack robomaps Setting
 add sp sp 1
 peek WAYX
 add sp sp 1
@@ -86,6 +89,9 @@ travel:
 s robot Mode MOVE
 wait:
 yield
+#check recall
+l r0 lever Setting
+bnez r0 goingHome
 l r0 robot VelocityMagnitude
 slt r0 r0 0.2
 mul stuck stuck r0
@@ -94,7 +100,7 @@ bgt stuck 20 pathfind
 l r0 robot PositionY
 s robot TargetY r0
 l mode robot Mode
-beq mode MOVE wait
+bne mode 0 wait
 j ra
 
 pathfind:
