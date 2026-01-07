@@ -5,10 +5,17 @@ s statusLED Mode 10
 
 monitorLoop:
 l r0 robot Mode
+s db Setting r0
+beq r0 0 statusIdle
 beq r0 2 statusMoving
 beq r0 3 statusMining
 beq r0 4 statusUnload
 beq r0 5 statusStuck
+yield
+j monitorLoop
+
+statusIdle:
+s statusLED Setting STR("Idle")
 yield
 j monitorLoop
 
