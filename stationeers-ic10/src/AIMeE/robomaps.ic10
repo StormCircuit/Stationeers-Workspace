@@ -22,4 +22,4 @@ put robot 12 -456
 put robot 13 -941
 put robot 14 -340
 
-s robot Setting 14
+s db Setting 14
