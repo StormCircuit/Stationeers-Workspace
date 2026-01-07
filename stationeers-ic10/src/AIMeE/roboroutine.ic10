@@ -28,17 +28,18 @@ define PATH 5
 define FULL 6
 
 l maxStack robomaps Setting
-move sp maxStack
+move sp 0
+j unloadLoop
 
 goingHome:
-#l maxStack robomaps Setting
-#move sp maxStack
+yield
+beqz sp unloadWait
 pop WAYX
 pop WAYZ
 s robot TargetX WAYX
 s robot TargetZ WAYZ
+s db Setting WAYX
 jal travel
-beqz sp unloadWait
 j goingHome
 
 unloadWait:
@@ -49,13 +50,15 @@ yield
 l r0 lever Setting
 bnez r0 unloadLoop
 #check battery
-l charge robot Power
+ls charge robot 0 Charge
 blt charge 70000 unloadLoop
 l mode robot Mode
 beq mode UNLOAD unloadLoop
+j goingToWork
 
 #unload done, travel to mining location
 goingToWork:
+yield
 l maxStack robomaps Setting
 add sp sp 1
 peek WAYX
@@ -64,7 +67,7 @@ peek WAYZ
 s robot TargetX WAYX
 s robot TargetZ WAYZ
 jal travel
-beq sp maxStack startMining
+bge sp maxStack startMining
 j goingToWork
 
 #mine until full
@@ -88,6 +91,7 @@ j goingToWork
 travel: 
 s robot Mode MOVE
 wait:
+sleep 10
 yield
 #check recall
 l r0 lever Setting
