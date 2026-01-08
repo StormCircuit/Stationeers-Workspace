@@ -1,6 +1,5 @@
 #AIMeE base controller based on Cows Are Evil's scripts
 #Modified by Storm to progress up and down a stack loaded set of waypoints for pathing
-
 #Short user instructions:
 #1. Set GPS locations using GPS tablet and write down coordinates
 #2. Put them into stack like so: PUSH X1 PUSH Y1 PUSH X2 PUSH Y2 until all added
@@ -16,36 +15,33 @@ alias stuck r3
 alias maxStack r8
 alias WAYX r4
 alias WAYZ r5
-alias MINEX r6
-alias MINEZ r7
-
-define NONE 0
-define KILL 1
-define MOVE 2
-define MINE 3
-define UNLOAD 4
-define PATH 5
-define FULL 6
 
 l maxStack robomaps Setting
-move sp 0
+move sp 2
+yield
 j unloadLoop
 
+goingHomeStart:
+#accessible when reversing mid course, needed to begin reverse travel down the stack
+add sp sp 1
 goingHome:
 yield
-beqz sp unloadWait
-pop WAYX
-pop WAYZ
+sub sp sp 1
+blez sp unloadWait
+peek WAYZ
+sub sp sp 1
+peek WAYX
 s robot TargetX WAYX
 s robot TargetZ WAYZ
-s db Setting WAYX
 jal travel
 j goingHome
 
 unloadWait:
-s robot Mode UNLOAD
+move sp 0
+s robot Mode 4
 unloadLoop:
 yield
+l maxStack robomaps Setting
 #check recall
 l r0 lever Setting
 bnez r0 unloadLoop
@@ -53,13 +49,15 @@ bnez r0 unloadLoop
 ls charge robot 0 Charge
 blt charge 70000 unloadLoop
 l mode robot Mode
-beq mode UNLOAD unloadLoop
+beq mode 4 unloadLoop
 j goingToWork
 
 #unload done, travel to mining location
 goingToWork:
 yield
-l maxStack robomaps Setting
+#check recall
+l r0 lever Setting
+bnez r0 goingHomeStart
 add sp sp 1
 peek WAYX
 add sp sp 1
@@ -72,30 +70,34 @@ j goingToWork
 
 #mine until full
 startMining:
-l r0 lever Setting
-bnez r0 goingHome
+#add 1 to sp to bandaid the fact that the gohome routine subtracts at the opening
+add sp sp 1
 #check for mineables
+mineOreSearch:
 l r0 robot MineablesInVicinity
 beqz r0 goingHome
-s robot Mode MINE
+s robot Mode 3
 mineWait:
 yield
+l r0 robot VelocityMagnitude
+slt r0 r0 0.2
+mul stuck stuck r0
+add stuck stuck r0
+bgt stuck 30 mineOreSearch
 #check recall
 l r0 lever Setting
+bnez r0 goingHome
 l mode robot Mode
-bnez r0 goingHome
-beq mode MINE mineWait
-bne mode FULL startMining
-j goingToWork
+beq mode 3 mineWait
+bne mode 6 mineOreSearch
+#must be mode 6 which is assigned when AIMEE is full. Time to go unload
+j goingHome
 
-travel: 
-s robot Mode MOVE
+travel:
+s robot Mode 2
 wait:
-sleep 10
+sleep 1
 yield
-#check recall
-l r0 lever Setting
-bnez r0 goingHome
 l r0 robot VelocityMagnitude
 slt r0 r0 0.2
 mul stuck stuck r0
@@ -108,9 +110,9 @@ bne mode 0 wait
 j ra
 
 pathfind:
-s robot Mode PATH
+s robot Mode 5
 yield
 sleep 10
-s robot Mode MOVE
+s robot Mode 2
 move stuck 0
 j wait
