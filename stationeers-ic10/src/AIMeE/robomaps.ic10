@@ -6,7 +6,7 @@
 
 #remember: stack pointer points to top of stack + 1 when done
 alias robot d0 #set to robot control chip housing
-s robot Setting 0 #if robot Setting = 1, the mining site isnt viable, this is the only way to clear it
+s robot Setting 0 #if robot Setting = 1, the mining site isnt viable, this  clears it
 clr robot
 
 put robot 0 -1275
@@ -15,16 +15,16 @@ put robot 1 -654
 put robot 2 -1272
 put robot 3 -645
 
-put robot 4 -1247
-put robot 5 -596
+put robot 4 -1277
+put robot 5 -582
 
-put robot 6 -1219
-put robot 7 -571
+put robot 6 -1322
+put robot 7 -508
 
-put robot 8 -1155
-put robot 9 -515
+put robot 8 -1235
+put robot 9 -462
 
-put robot 10 -929
-put robot 11 -324
+put robot 10 -1343
+put robot 11 -295
 
 s db Setting 12
