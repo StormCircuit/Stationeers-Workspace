@@ -1,7 +1,14 @@
 alias robot d0 #set to logic transmitter
 alias statusLED d1 #set to status display (must support text input)
+alias chargeLED d2 #set to charge level display (must support numeric input)
+alias mineableLED d3 #set to mineables in vicinity when robot in mining mode
+alias miningSiteError d4 #set to mining site error indicator light (needs color)
 
 s statusLED Mode 10
+s chargeLED Mode 2
+s mineableLED Mode 0
+
+s miningSiteError Color 4
 
 monitorLoop:
 l r0 robot Mode
@@ -11,30 +18,39 @@ beq r0 2 statusMoving
 beq r0 3 statusMining
 beq r0 4 statusUnload
 beq r0 5 statusStuck
+monitorLoopStatusEnd:
+ls r0 robot 0 Charge
+s chargeLED Setting r0
+l r0 robot Mode
+bne r0 3 notCurrentlyMining
+l r0 robot MineablesInVicinity
+s mineableLED Setting r0
+notCurrentlyMining:
+l r0 robot Setting
+breq r0 0 3
+s miningSiteError On 1
+jr 2
+s miningSiteError On 0
 yield
 j monitorLoop
 
 statusIdle:
 s statusLED Setting STR("Idle")
 yield
-j monitorLoop
-
+j monitorLoopStatusEnd
 statusMoving:
 s statusLED Setting STR("Move")
 yield
-j monitorLoop
-
+j monitorLoopStatusEnd
 statusMining:
 s statusLED Setting STR("Mine")
 yield
-j monitorLoop
-
+j monitorLoopStatusEnd
 statusUnload:
 s statusLED Setting STR("Unload")
 yield
-j monitorLoop
-
+j monitorLoopStatusEnd
 statusStuck:
 s statusLED Setting STR("Stuck")
 yield
-j monitorLoop
+j monitorLoopStatusEnd
