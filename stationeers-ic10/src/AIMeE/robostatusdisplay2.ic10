@@ -11,7 +11,7 @@ s posYLED Color 2
 monitorLoop:
 l r0 robot PositionX
 s posXLED Setting r0
-l r0 robot PositionY
+l r0 robot PositionZ
 s posYLED Setting r0
 yield
 j monitorLoop
