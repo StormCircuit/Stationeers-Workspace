@@ -73,7 +73,7 @@ add sp sp 1
 #check for mineables
 mineOreSearch:
 l r0 robot MineablesInVicinity
-blt r0 0 MiningSiteError
+blt r0 0 goingHome
 s robot Mode 3
 move stuck 0
 mineWait:
