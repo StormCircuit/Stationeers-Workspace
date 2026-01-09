@@ -1,6 +1,5 @@
 #AIMeE base controller based on Cows Are Evil's scripts
 #Modified by Storm to progress up and down a stack loaded set of waypoints for pathing
-
 alias robot d0         #Logic Transmitter
 alias lever d1         #Lever to trigger recall
 alias robomaps d2      #housing which loads stack with map data
@@ -38,20 +37,20 @@ s robot Mode 4
 unloadLoop:
 yield
 l maxStack robomaps Setting
-#check recall
+#check mining site error, recall, upcoming storm, battery
+l r0 db Setting
+beq r0 1 unloadLoop
 l r0 lever Setting
 bnez r0 unloadLoop
-#check upcoming storm
 lb r0 1997212478 NextWeatherEventTime Average
 bgtz r0 unloadLoop
-#check battery
 ls charge robot 0 Charge
 blt charge 70000 unloadLoop
 l mode robot Mode
 beq mode 4 unloadLoop
+#unload done, travel to mining location
 j goingToWork
 
-#unload done, travel to mining location
 goingToWork:
 yield
 #check recall
@@ -69,26 +68,22 @@ j goingToWork
 
 #mine until full
 startMining:
-#add 1 to sp to bandaid the fact that the gohome routine subtracts at the opening
+#add 1 to sp because gohome routine subtracts at the opening
 add sp sp 1
 #check for mineables
 mineOreSearch:
 l r0 robot MineablesInVicinity
-beqz r0 goingHome
+blt r0 0 goingHome
 s robot Mode 3
+move stuck 0
 mineWait:
 yield
-#AIMEE's Mode can have reliability issues if sessions been up for a while
-l r0 robot VelocityMagnitude
-slt r0 r0 0.2
-mul stuck stuck r0
-add stuck stuck r0
-brlt stuck 30 2
-s robot Mode 0
-#check recall
+#Mining sites are only viable if ore is on surface. When aimee mines, her mode flickers.
+add stuck stuck 1
+bgt stuck 300 MiningSiteError
+#check recall, then upcoming storm, then if we're done mining
 l r0 lever Setting
 bnez r0 goingHome
-#check upcoming storm
 lb r0 1997212478 NextWeatherEventTime Average
 bgtz r0 goingHome
 l mode robot Mode
@@ -120,3 +115,7 @@ sleep 10
 s robot Mode 2
 move stuck 0
 j wait
+
+MiningSiteError:
+s db Setting 1
+j goingHome
