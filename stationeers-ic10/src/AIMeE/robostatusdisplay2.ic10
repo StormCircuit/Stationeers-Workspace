@@ -1,0 +1,17 @@
+alias robot d0 #set to logic transmitter
+alias posXLED d1 #set to position X display (must support numeric input)
+alias posYLED d2 #set to position Y display (must support numeric input)
+
+s posXLED Mode 0
+s posYLED Mode 0
+
+s posXLED Color 2
+s posYLED Color 2
+
+monitorLoop:
+l r0 robot PositionX
+s posXLED Setting r0
+l r0 robot PositionY
+s posYLED Setting r0
+yield
+j monitorLoop
