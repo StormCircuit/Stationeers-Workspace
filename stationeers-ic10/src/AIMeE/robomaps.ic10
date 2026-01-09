@@ -5,9 +5,8 @@
 #NOTE: X1/Y1 is the unloading chute/dock location, last pair are the mining location
 
 #remember: stack pointer points to top of stack + 1 when done
-
 alias robot d0 #set to robot control chip housing
-
+s robot Setting 0 #if robot Setting = 1, the mining site isnt viable, this is the only way to clear it
 clr robot
 
 put robot 0 -1275
