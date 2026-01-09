@@ -73,14 +73,14 @@ add sp sp 1
 #check for mineables
 mineOreSearch:
 l r0 robot MineablesInVicinity
-blt r0 0 goingHome
+blt r0 0 MiningSiteError
 s robot Mode 3
 move stuck 0
 mineWait:
 yield
 #Mining sites are only viable if ore is on surface. When aimee mines, her mode flickers.
 add stuck stuck 1
-bgt stuck 300 MiningSiteError
+bgt stuck 600 MiningSiteError
 #check recall, then upcoming storm, then if we're done mining
 l r0 lever Setting
 bnez r0 goingHome
