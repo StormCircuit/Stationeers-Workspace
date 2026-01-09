@@ -43,7 +43,7 @@ beq r0 1 unloadLoop
 l r0 lever Setting
 bnez r0 unloadLoop
 lb r0 1997212478 NextWeatherEventTime Average
-bgtz r0 unloadLoop
+bnez r0 unloadLoop
 ls charge robot 0 Charge
 blt charge 70000 unloadLoop
 l mode robot Mode
@@ -85,7 +85,7 @@ bgt stuck 600 MiningSiteError
 l r0 lever Setting
 bnez r0 goingHome
 lb r0 1997212478 NextWeatherEventTime Average
-bgtz r0 goingHome
+bnez r0 goingHome
 l mode robot Mode
 beq mode 3 mineWait
 bne mode 6 mineOreSearch
