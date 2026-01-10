@@ -1,0 +1,40 @@
+alias interiorButton d0
+alias exteriorButton d1
+alias airlockButton d2
+alias airlockHousing d3
+
+monitorLoop:
+yield
+l r0 interiorButton Activate
+bgtz r0 interiorPressed
+l r0 exteriorButton Activate
+bgtz r0 exteriorPressed
+l r0 airlockButton Activate
+bgtz r0 airlockPressed
+j monitorLoop
+
+cycleWait:
+s exteriorButton Lock 1
+s interiorButton Lock 1
+s airlockButton Lock 1
+s airlockHousing Setting 1
+cycleCheck:
+yield
+l r0 airlockHousing Setting
+bnez r0 cycleCheck
+s exteriorButton Lock 0
+s interiorButton Lock 0
+s airlockButton Lock 0
+j monitorLoop
+
+exteriorPressed:
+s exteriorButton Activate 0
+j monitorLoop
+
+interiorPressed:
+s interiorButton Activate 0
+j monitorLoop
+
+airlockPressed:
+s airlockButton Activate 0
+j monitorLoop
