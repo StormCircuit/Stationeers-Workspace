@@ -1,0 +1,125 @@
+alias DoorInterior d0 #credit to TryCatch on steam, modified for blast doors and buttons.
+alias DoorExterior d1
+alias VentIn d2
+alias VentOut d3 # optional
+alias Sensor d4
+alias DiodSlide d5
+alias InternalPressure r15
+alias ExternalPressure r14
+alias ClosedDoor r13
+alias OpenedDoor r12
+alias VacuumVent r11
+alias PressurizeVent r10
+alias TargetPressure r9
+alias CurrentPressure r8
+beforeAll: # reset devices
+s DoorInterior Mode 1
+s DoorExterior Mode 1
+s DoorInterior Lock 0
+s DoorExterior Lock 0
+s VentIn On 0
+brdns VentOut 2 # only for advanced mode
+s VentOut On 0 # skip when simple airlock needed
+s DiodSlide On 1
+move InternalPressure 0
+move ExternalPressure 0
+yield
+l r0 DoorInterior Open
+l r1 DoorExterior Open
+beq r0 r1 setup # only 1 door should be opened now
+nor OpenedDoor r0 0
+xor ClosedDoor r1 1
+bnezal r0 stateInterior # choose right state
+bnezal r1 stateExterior # for currently opened side
+setup: #run once, in case when both doors are closed
+s DoorInterior Open 0
+s DoorExterior Open 1
+j beforeAll
+### States Section ###
+stateInterior:
+yield # idle, wait for door button pressed
+jal isAnyDoorActivated
+bne r0 1 transitionToExterior
+j stateInterior
+stateExterior:
+yield # need to wait for door button pressed
+jal isAnyDoorActivated
+bne r0 1 transitionToInterior
+j stateExterior
+emergencyState:
+l r0 DiodSlide On # if diod is turned on
+bnez r0 beforeAll # exit and restart
+s DoorInterior Mode 0
+s DoorExterior Mode 0
+s DoorInterior Lock 0
+s DoorExterior Lock 0
+yield
+j emergencyState
+transitionToExterior:
+l InternalPressure Sensor Pressure
+move ClosedDoor 0 # set devices screw numbers
+move OpenedDoor 1
+move VacuumVent 2
+move PressurizeVent 3
+max TargetPressure ExternalPressure .001
+max CurrentPressure InternalPressure .001
+jal closeDoors # after all vars set start process
+jal depressurize
+bdseal VentOut pressurize # only advanced airlock
+jal openDoors
+j stateExterior
+transitionToInterior:
+l ExternalPressure Sensor Pressure
+move ClosedDoor 1 # set devices screw numbers
+move OpenedDoor 0
+move VacuumVent 3
+move PressurizeVent 2
+max TargetPressure InternalPressure .001
+max CurrentPressure ExternalPressure .001
+jal closeDoors # after all vars set start process
+bdseal VentOut depressurize # only advanced airlock
+jal pressurize
+jal openDoors
+j stateInterior
+isAnyDoorActivated:
+l r0 db Setting #if housing is 1 then a button was pressed and we need to cycle
+breqz r0 2
+s db Setting 0
+j ra
+closeDoors: # close door that should be closed
+s DoorExterior Lock 1
+s DoorInterior Lock 1
+s dr13 Open 0 # using ClosedDoor
+l r3 dr13 Open
+brnez r3 -1 # wait until it close
+j ra
+openDoors: # open door that should be opened
+s dr12 Open 1 # using OpenedDoor
+l r0 dr12 Open
+breqz r0 -1 # wait until it open
+s DoorExterior Lock 0
+s DoorInterior Lock 0
+s DiodSlide Setting 1
+j ra
+depressurize: # vent out atmo
+s dr11 Mode 1 # using VacuumVent
+s dr11 On 1
+l r0 DiodSlide On # check for emergency
+beqz r0 emergencyState
+l r0 Sensor Pressure
+div r1 r0 CurrentPressure # pressure ratio
+s DiodSlide Setting r1 # show that ratio
+brnez r0 -5 # wait until current atmo push out
+s dr11 On 0
+j ra
+pressurize: # pressurize with other atmo
+s dr10 Mode 0 # using PressurizeVent
+s dr10 On 1
+l r0 DiodSlide On # check for emergency
+beqz r0 emergencyState
+l r0 Sensor Pressure
+div r1 r0 TargetPressure # pressure ratio
+s DiodSlide Setting r1 # show that ratio
+brlt r0 TargetPressure -5 # wait for complete
+s dr10 On 0
+j ra
