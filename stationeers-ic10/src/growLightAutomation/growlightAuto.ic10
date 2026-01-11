@@ -1,8 +1,7 @@
 #requires a stop watch and a memory chip, memory must be set to
 # number of seconds of light plant needs per day
 alias lightTimeMemory d0
-alias darknessTimeMemory d1
-alias stopWatch d2
+alias stopWatch d1
 
 define allNetworkedGrowLights -1758710260
 
@@ -10,10 +9,8 @@ define allNetworkedGrowLights -1758710260
 # time is given as stopwatch time modulus 1200 (1200 = 20 minutes in seconds, day length)
 alias currCycleTime r0
 alias lightTime r1
-alias darkTime r2
 
 l lightTime lightTimeMemory Setting
-l darkTime darknessTimeMemory Setting
 
 #initiate stopwatch and jump straight into a loop to begin infinite loop
 start:
@@ -21,6 +18,7 @@ s stopWatch Activate 1
 j lightsOnCycleLoop
 
 lightsOnCycle:
+yield
 sb allNetworkedGrowLights On 1
 lightsOnCycleLoop:
 l currCycleTime stopWatch Time
@@ -29,9 +27,10 @@ bge currCycleTime lightTime lightsOffCycle
 j lightsOnCycleLoop
 
 lightsOffCycle:
+yield
 sb allNetworkedGrowLights On 0
 lightsOffCycleLoop:
 l currCycleTime stopWatch Time
 mod currCycleTime currCycleTime 1200
-bge currCycleTime darkTime lightsOnCycle
+blt currCycleTime lightTime lightsOnCycle
 j lightsOffCycleLoop
