@@ -23,12 +23,12 @@ lb allLargeBatteryCharge allLargeBatteries Charge Sum
 add batteryGridCharge allBatteryCharge allLargeBatteryCharge
 
 div batteryGridPercentage batteryGridCharge batteryGridMaxCharge
-
-blt batteryGridPercentage 0.3 turnAllSolidFuelGeneratorsOn
+s db Setting batteryGridPercentage
+blt batteryGridPercentage 0.3 turnAllGasFuelGeneratorsOn
 yield
 j checkCurrentGridCharge
 
-turnAllSolidFuelGeneratorsOn:
+turnAllGasFuelGeneratorsOn:
 sb allGasFuelGenerators On 1
 waitUntilBatteries90percent:
 lb allBatteryMaxCharge allBatteries Maximum Sum
@@ -41,9 +41,10 @@ add batteryGridCharge allBatteryCharge allLargeBatteryCharge
 
 div batteryGridPercentage batteryGridCharge batteryGridMaxCharge
 
-bgt batteryGridPercentage 0.9 turnAllSolidFuelGeneratorsOff
+s db Setting batteryGridPercentage
+bgt batteryGridPercentage 0.9 turnAllGasFuelGeneratorsOff
 yield
 j waitUntilBatteries90percent
-turnAllSolidFuelGeneratorsOff:
+turnAllGasFuelGeneratorsOff:
 sb allGasFuelGenerators On 0
 j checkCurrentGridCharge
