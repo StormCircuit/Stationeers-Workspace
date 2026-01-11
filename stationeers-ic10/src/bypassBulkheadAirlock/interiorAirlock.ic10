@@ -1,0 +1,119 @@
+# Bypass airlock -  CowsAreEvil - modified by Storm
+# will operate as airlock until both sides are same
+# temp and pressure then it works as a bulkhead door
+alias innerdoor d0
+alias outerdoor d1
+alias innervent d2
+alias outervent d3
+alias sensor d4
+alias LED d5
+alias airlockmode r10
+
+define PRESSUREINNER 20 #<-  Set inner pressure here
+define PRESSUREOUTER 20 #<-  Set outer pressure here
+define SENSOR -1252983604
+
+s outerdoor Mode 1
+s innerdoor Mode 1
+l r0 outerdoor Open
+beqz r0 openInner
+
+openOuter:
+s innervent On 0
+s outervent On 0
+s innerdoor Open 0
+s innerdoor Setting 0
+s outerdoor Open 1
+s outerdoor Setting 1
+waitOuter:
+yield
+jal checkMode
+l r0 outerdoor Setting
+l r1 innerdoor Setting
+bne r0 r1 waitOuter
+s outerdoor Open 0
+s outerdoor Setting 0
+s innerdoor Setting 0
+yield
+yield
+beq airlockmode 1 openInner
+s outervent Mode 1
+s outervent On 1
+s LED Color 4
+ventOuter:
+yield
+l r0 outerdoor Setting # Check for abort
+bnez r0 openOuter
+l r0 sensor Pressure
+bgtz r0 ventOuter
+s outervent On 0
+s innervent Mode 0
+s innervent On 1
+pressInner:
+yield
+l r0 innerdoor Setting # Check for skip pressurise
+bnez r0 openInner
+l r0 sensor Pressure
+blt r0 PRESSUREINNER pressInner
+
+openInner:
+s innervent On 0
+s outervent On 0
+s outerdoor Open 0
+s outerdoor Setting 0
+s innerdoor Open 1
+s innerdoor Setting 1
+waitInner:
+yield
+jal checkMode
+l r0 outerdoor Setting
+l r1 innerdoor Setting
+bne r0 r1 waitInner
+s innerdoor Open 0
+s innerdoor Setting 0
+s outerdoor Setting 0
+yield
+yield
+beq airlockmode 1 openOuter
+s innervent Mode 1
+s innervent On 1
+s LED Color 4
+ventInner:
+yield
+l r0 innerdoor Setting # Check for abort
+bnez r0 openInner
+l r0 sensor Pressure
+bnez r0 ventInner
+s innervent On 0
+s outervent Mode 0
+s outervent On 1
+pressOuter:
+yield
+l r0 outerdoor Setting # Check for skip pressurise
+bnez r0 openOuter
+l r0 sensor Pressure
+blt r0 PRESSUREOUTER pressOuter
+j openOuter
+
+checkMode:
+l r0 sensor Pressure
+lb r1 SENSOR Pressure Average
+lb r2 SENSOR Pressure Sum
+sne airlockmode r0 r2 # Check for multiple sensors
+sap r0 r0 r1 0.5 # Max pressure difference %
+and airlockmode airlockmode r0
+l r0 sensor Temperature
+lb r1 SENSOR Temperature Average
+sap r0 r0 r1 0.5 # Max temperature difference %K
+and airlockmode airlockmode r0
+lb r0 SENSOR RatioVolatiles Maximum
+slt r0 r0 0.005 # Max volatiles %
+and airlockmode airlockmode r0
+lb r0 SENSOR RatioPollutant Maximum
+slt r0 r0 0.005 # Max Pollutants %
+and airlockmode airlockmode r0
+s db Setting airlockmode
+mul r0 airlockmode -3
+add r0 r0 5
+s LED Color r0
+j ra
