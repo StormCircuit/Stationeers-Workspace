@@ -8,11 +8,11 @@ alias outervent d3
 alias sensor d4
 alias LED d5
 alias airlockmode r10
-
 define PRESSUREINNER 20 #<-  Set inner pressure here
 define PRESSUREOUTER 20 #<-  Set outer pressure here
 define SENSOR -1252983604
-
+s outervent Lock 1
+s innervent Lock 1
 s outerdoor Mode 1
 s innerdoor Mode 1
 l r0 outerdoor Open
