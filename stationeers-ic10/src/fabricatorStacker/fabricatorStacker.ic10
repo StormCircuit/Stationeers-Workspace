@@ -1,0 +1,128 @@
+define LEDDisplay2 HASH("ModularDeviceLEDdisplay2") #steamcommunity id 3643606197
+define Keypad HASH("ModularDeviceNumpad") #credit boris_fps
+define Switch HASH("ModularDeviceSwitch") #lightly modified by storm 
+define FlipSwitch HASH("ModularDeviceFlipSwitch")
+define DiodeSlide2 HASH("ModularDeviceSliderDiode2")
+define NoText STR(" ")
+define StackText STR("1Stack")
+define PurgeText STR("PURGE")
+define CraftText STR("CRAFT")
+alias fabricator d0
+alias stacker d1
+define displayProgress HASH("Progress")
+define displayAmount HASH("Amount")
+define inputPower HASH("Powerswitch")
+define inputAmount HASH("SelectAmount")
+define inputStack HASH("SelectStack")
+alias stackSize r4
+alias producedSize r5
+alias productionMode r6
+reset:
+s fabricator Activate 0
+sbn Keypad inputAmount Setting 0 
+ls r0 stacker 2 Quantity
+breqz r0 4
+move r0 500
+s stacker Setting r0
+jal exportStacker
+s fabricator ClearMemory 1
+sbn DiodeSlide2 displayProgress Color Color.Yellow
+sbn DiodeSlide2 displayProgress Setting 1
+yield
+sbn DiodeSlide2 displayProgress Setting 0
+yield
+sbn DiodeSlide2 displayProgress Setting 1
+yield
+sbn DiodeSlide2 displayProgress Setting 0
+sbn DiodeSlide2 displayProgress Color Color.Green
+idle:
+lbn r0 Switch inputPower On 1
+breq r0 1 2
+j setAllOff
+jal setAllOn
+yield
+l r0 fabricator Activate
+bnez r0 production
+l r0 fabricator Open
+bnez r0 emptyInventory
+lbn productionMode FlipSwitch inputStack On 1
+brnez productionMode 9
+lbn r0 Keypad inputAmount Setting 1
+brne r0 0 2
+move stackSize 0
+move stackSize r0
+brle stackSize 500 2
+move stackSize 500
+sbn LEDDisplay2 displayAmount Mode 0
+sbn LEDDisplay2 displayAmount Setting stackSize
+breqz productionMode 5
+sbn Keypad inputAmount Setting 0
+move stackSize 500
+sbn LEDDisplay2 displayAmount Mode 10
+sbn LEDDisplay2 displayAmount Setting StackText
+s stacker Setting stackSize
+j idle
+production:
+l r0 fabricator Activate
+beqz r0 reset
+sbn LEDDisplay2 displayAmount Mode 10
+sbn LEDDisplay2 displayAmount Setting CraftText
+l producedSize fabricator ExportCount
+brnez productionMode 2
+div r0 producedSize stackSize
+breqz productionMode 4
+ls stackSize stacker 2 MaxQuantity
+brnez stackSize 2
+move stackSize 500
+div r0 producedSize stackSize
+brne stackSize 1 2
+l r0 fabricator CompletionRatio
+sbn DiodeSlide2 displayProgress Setting r0
+beq producedSize stackSize reset
+j production
+emptyInventory:
+sbn LEDDisplay2 displayAmount Mode 10
+sbn LEDDisplay2 displayAmount Setting PurgeText
+sbn DiodeSlide2 displayProgress Color Color.Red
+sbn DiodeSlide2 displayProgress Setting 1
+l r0 fabricator Open
+beqz r0 reset
+move r0 500
+s stacker Setting r0
+ls r0 stacker 2 Quantity
+breqz r0 2
+jal exportStacker
+j emptyInventory
+exportStacker:
+yield
+s stacker Activate 1
+yield
+s stacker Activate 0
+j ra
+setAllOn:
+sbn Switch inputPower Color Color.Green
+s stacker On 1
+sbn Keypad inputAmount Color Color.Green
+sbn Keypad inputAmount On 1
+sbn DiodeSlide2 displayProgress On 1
+l r0 fabricator On
+beq r0 1 ra
+s fabricator On 1
+move r0 0
+brge r0 1 5
+add r0 r0 0.2
+sbn DiodeSlide2 displayProgress Setting r0
+yield
+jr -4
+yield
+sbn DiodeSlide2 displayProgress Setting 0
+j ra
+setAllOff:
+sbn Switch inputPower Color Color.Red
+s fabricator On 0
+s stacker On 0
+sbn Keypad inputAmount Color Color.Black
+sbn DiodeSlide2 displayProgress On 0
+sbn LEDDisplay2 displayAmount Mode 10
+sbn LEDDisplay2 displayAmount Setting NoText
+j reset
