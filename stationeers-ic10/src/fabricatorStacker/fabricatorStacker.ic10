@@ -11,15 +11,15 @@ alias fabricator d0
 alias stacker d1
 define displayProgress HASH("Progress")
 define displayAmount HASH("Amount")
-define inputPower HASH("Powerswitch")
-define inputAmount HASH("SelectAmount")
-define inputStack HASH("SelectStack")
+define inputPower HASH("Power Switch")
+define inputAmount HASH("Select Amount")
+define inputStack HASH("Stack Switch")
 alias stackSize r4
 alias producedSize r5
 alias productionMode r6
 reset:
 s fabricator Activate 0
-sbn Keypad inputAmount Setting 0 
+sbn Keypad inputAmount Setting 1
 ls r0 stacker 2 Quantity
 breqz r0 4
 move r0 500
@@ -49,10 +49,10 @@ lbn productionMode FlipSwitch inputStack On 1
 brnez productionMode 9
 lbn r0 Keypad inputAmount Setting 1
 brne r0 0 2
-move stackSize 0
+move r0 1
+brle r0 500 2
+move r0 500
 move stackSize r0
-brle stackSize 500 2
-move stackSize 500
 sbn LEDDisplay2 displayAmount Mode 0
 sbn LEDDisplay2 displayAmount Setting stackSize
 breqz productionMode 5
