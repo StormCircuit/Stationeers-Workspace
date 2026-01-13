@@ -1,0 +1,64 @@
+#Instructions:
+#1. Using GPS tablet and write down X and Z coordinates (ignore y)
+#2. Put them in for waypoints below. 
+#2a. If you do not need 8 waypoints, set LastWaypoint to the number you need (max 8)
+#3. Rename up to 6 COMPACT IC10 housings: "aimee1", "aimee2", ... , "aimee6"
+#4. To update waypoints, edit coordinates and LastWaypoint and reinsert THIS ic10 chip
+define LastWaypoint 5
+define x1 -1275
+define z1 -654
+define x2 -1272
+define z2 -645
+define x3 -1277
+define z3 -582
+define x4 -1322
+define z4 -508
+define x5 -1235
+define z5 -462
+define x6 0
+define z6 0
+define x7 0
+define z7 0
+define x8 0
+define z8 0
+#Code below
+define AIMEEhousing HASH("StructureCircuitHousingCompact")
+define AIMEE1 HASH("aimee1")
+define AIMEE2 HASH("aimee2")
+define AIMEE3 HASH("aimee3")
+define AIMEE4 HASH("aimee4")
+define AIMEE5 HASH("aimee5")
+define AIMEE6 HASH("aimee6")
+put db 0 AIMEE1
+put db 1 AIMEE2
+put db 2 AIMEE3
+put db 3 AIMEE4
+put db 4 AIMEE5
+put db 5 AIMEE6
+move sp 6
+s db Setting LastWaypoint #this gets loaded by roboroutine, is how many waypoints
+aimeeStackLoadLoop :
+beq sp 0 aimeeStackLoadLoopEnd
+pop r0
+lbn r0 AIMEEhousing r0 ReferenceId 0
+clr r0
+put r0 0 x1
+put r0 1 z1
+put r0 2 x2
+put r0 3 z2
+put r0 4 x3
+put r0 5 z3
+put r0 6 x4
+put r0 7 z4
+put r0 8 x5
+put r0 9 z5
+put r0 10 x6
+put r0 11 z6
+put r0 12 x7
+put r0 13 z7
+put r0 14 x8
+put r0 15 z8
+#resets mining site error status on AIMEE unit
+s r0 Setting 0
+aimeeStackLoadLoopEnd:
+#program end
