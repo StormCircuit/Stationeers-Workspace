@@ -9,9 +9,9 @@ l sunlightLevel solarSensor  Vertical
 checkForDayOrNightInit:
 jal addLightsToStack
 checkForDayOrNight:
-l sunlightLevel solarSensor Vertical
-bgt sunlightLevel 31 turnLightsOn
-ble sunlightLevel 30 turnLightsOff
+l sunlightLevel solarSensor Activate
+beq sunlightLevel 1 turnLightsOff
+beq sunlightLevel 0 turnLightsOn
 yield
 sleep 20
 j checkForDayOrNight
