@@ -5,20 +5,27 @@
 #3. Rename up to 6 COMPACT IC10 housings: "aimee1", "aimee2", ... , "aimee6"
 #4. To update waypoints, edit coordinates and LastWaypoint and reinsert THIS ic10 chip
 define LastWaypoint 5
-define x1 0
-define z1 0
-define x2 0
-define z2 0
-define x3 0
-define z3 0
-define x4 0
-define z4 0
-define x5 0
-define z5 0
+define x1 -918
+define z1 -1290
+
+define x2 -912
+define z2 -1286
+
+define x3 -913
+define z3 -1282
+
+define x4 -924
+define z4 -1282
+
+define x5 -1028
+define z5 -1243
+
 define x6 0
 define z6 0
+
 define x7 0
 define z7 0
+
 define x8 0
 define z8 0
 #Code below
@@ -56,7 +63,9 @@ put db 13 AIMEE14
 put db 14 AIMEE15
 put db 15 AIMEE16
 move sp 16
-s db Setting LastWaypoint #this gets loaded by roboroutine, is how many waypoints
+move r0 LastWaypoint #mult lastWaypoint as we compare it directly to SP
+mul r0 r0 2
+s db Setting r0 #this gets loaded by roboroutine, is how many waypoints
 aimeeStackLoadLoop:
 beq sp 0 aimeeStackLoadLoopEnd
 pop r0
