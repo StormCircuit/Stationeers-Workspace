@@ -80,7 +80,7 @@ mineWait:
 yield
 #Mining sites are only viable if ore is on surface. When aimee mines, her mode flickers.
 add stuck stuck 1
-bgt stuck 600 MiningSiteError
+bgt stuck 300 MiningSiteError
 #check recall, then upcoming storm, then if we're done mining
 l r0 lever Setting
 bnez r0 goingHome
