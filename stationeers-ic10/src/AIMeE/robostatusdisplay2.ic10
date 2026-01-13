@@ -36,7 +36,7 @@ add numOccupiedSlots numOccupiedSlots r0
 add r1 r1 1
 breq r1 9 2
 j occupiedSlotsCalc
-div numOccupiedSlots numOccupiedSlots 8
+div numOccupiedSlots numOccupiedSlots 7
 s progressLED Setting numOccupiedSlots
 
 #recall LED
