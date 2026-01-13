@@ -1,12 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
-<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <DateTime>134100693883473381</DateTime>
-  <GameVersion>0.2.6085.26682</GameVersion>
-  <Title>turnAllLightsOffOn</Title>
-  <Description>turns all lights off or on depending on solar irradiance from a solar sensor​</Description>
-  <Author>Rizzard of Oz</Author>
-  <WorkshopFileHandle>0</WorkshopFileHandle>
-  <Instructions>
 alias solarSensor d0
 
 alias stackVal r0
@@ -19,10 +10,10 @@ checkForDayOrNightInit:
 jal addLightsToStack
 checkForDayOrNight:
 l sunlightLevel solarSensor Vertical
-bgt sunlightLevel 60 turnLightsOn
-ble sunlightLevel 60 turnLightsOff
+bgt sunlightLevel 31 turnLightsOn
+ble sunlightLevel 30 turnLightsOff
 yield
-sleep 10
+sleep 20
 j checkForDayOrNight
 
 turnLightsOff:
@@ -51,5 +42,4 @@ push 1847265835
 push 576516101
 push 1514476632
 push 1436121888
-j ra</Instructions>
-</InstructionData>
+j ra
