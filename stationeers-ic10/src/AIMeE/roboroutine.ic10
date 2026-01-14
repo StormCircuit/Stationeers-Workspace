@@ -26,13 +26,12 @@ s robotXmitter Mode 4
 unloadLoop:
 yield
 l maxStack robomaps Setting #load new max waypoints
+l r0 recallLever Setting
+brne r0 1 3  # if recall is set, reset error state and wait for un-set
+s db Setting 0
+j unloadLoop
 l r0 db Setting #check mining site error, recall, upcoming storm, battery
 beq r0 1 unloadLoop
-l r0 recallLever Setting
-move prevLeverState r0
-bnez r0 unloadLoop
-brne r0 prevLeverState 2 # if recall was set then un-set, reset error state
-s db Setting 0
 lb r0 1997212478 NextWeatherEventTime Sum
 bnez r0 unloadLoop
 ls charge robotXmitter 0 Charge
@@ -41,11 +40,11 @@ l mode robotXmitter Mode
 beq mode 4 unloadLoop
 j goingToWork
 
-goingHomeStart: #accessible when reversing mid travel, needed to begin reverse travel
+goingHomeStart:
 add sp sp 1
 goingHome:
 yield
-mod r0 mineables 2  #try to randomize the robots waypoints a tiny bit to stop collisions
+mod r0 mineables 3  #try to randomize the robots waypoints a tiny bit to stop collisions
 sub sp sp 1
 blez sp unloadWait
 peek WAYZ
@@ -57,7 +56,7 @@ s robotXmitter TargetX WAYX
 s robotXmitter TargetZ WAYZ
 jal travel
 j goingHome
-goingToWork: #going up the stack waypoints
+goingToWork:
 yield
 l r0 recallLever Setting #check recall
 bnez r0 goingHomeStart
@@ -74,9 +73,9 @@ jal travel
 bge sp maxStack startMining
 j goingToWork
 
-startMining: #mine until full
+startMining:
 add sp sp 1 #add 1 to sp because gohome routine subtracts at the opening
-mineOreSearch: #check for mineables
+mineOreSearch:
 l mineables robotXmitter MineablesInVicinity
 blt mineables 0 goingHome
 s robotXmitter Mode 3
