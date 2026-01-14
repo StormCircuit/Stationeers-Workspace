@@ -16,7 +16,7 @@ l maxStack robomaps Setting
 l mineables robotXmitter MineablesInVicinity
 brne mineables 0 2
 move mineables 1 #seeding initial random generation if it was 0
-move sp 2
+move sp 2 #we assume AIMEE is at the unload point and can move by herself to next wayp
 yield
 j unloadLoop
 
@@ -45,8 +45,6 @@ goingHomeStart: #accessible when reversing mid travel, needed to begin reverse t
 add sp sp 1
 goingHome:
 yield
-l r0 recallLever Setting #check recall
-beqz r0 goingToWork
 mod r0 mineables 2  #try to randomize the robots waypoints a tiny bit to stop collisions
 sub sp sp 1
 blez sp unloadWait
@@ -59,7 +57,7 @@ s robotXmitter TargetX WAYX
 s robotXmitter TargetZ WAYZ
 jal travel
 j goingHome
-goingToWork:
+goingToWork: #going up the stack waypoints
 yield
 l r0 recallLever Setting #check recall
 bnez r0 goingHomeStart
