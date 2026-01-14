@@ -1,121 +1,123 @@
 #AIMeE base controller based on Cows Are Evil's scripts
 #Modified by Storm to progress up and down a stack loaded set of waypoints for pathing
-alias robot d0         #Logic Transmitter
-alias lever d1         #Lever to trigger recall
+alias robotXmitter d0  #Logic Transmitter
+alias recallLever d1   #Lever to trigger recall
 alias robomaps d2      #housing which loads stack with map data
-
 alias mode r1
 alias charge r2
 alias stuck r3
 alias maxStack r8
 alias WAYX r4
 alias WAYZ r5
+alias mineables r6
+alias prevLeverState r7
 
 l maxStack robomaps Setting
+l mineables robotXmitter MineablesInVicinity
+brne mineables 0 2
+move mineables 1 #seeding initial random generation if it was 0
 move sp 2
 yield
 j unloadLoop
 
-goingHomeStart:
-#accessible when reversing mid travel, needed to begin reverse travel down the stack
+unloadWait:
+move sp 0
+s robotXmitter Mode 4
+unloadLoop:
+yield
+l maxStack robomaps Setting #load new max waypoints
+l r0 db Setting #check mining site error, recall, upcoming storm, battery
+beq r0 1 unloadLoop
+l r0 recallLever Setting
+move prevLeverState r0
+bnez r0 unloadLoop
+brne r0 prevLeverState 2 # if recall was set then un-set, reset error state
+s db Setting 0
+lb r0 1997212478 NextWeatherEventTime Sum
+bnez r0 unloadLoop
+ls charge robotXmitter 0 Charge
+blt charge 70000 unloadLoop
+l mode robotXmitter Mode
+beq mode 4 unloadLoop
+j goingToWork
+
+goingHomeStart: #accessible when reversing mid travel, needed to begin reverse travel
 add sp sp 1
 goingHome:
 yield
+l r0 recallLever Setting #check recall
+beqz r0 goingToWork
+mod r0 mineables 2  #try to randomize the robots waypoints a tiny bit to stop collisions
 sub sp sp 1
 blez sp unloadWait
 peek WAYZ
 sub sp sp 1
 peek WAYX
-s robot TargetX WAYX
-s robot TargetZ WAYZ
+add WAYX WAYX r0
+add WAYZ WAYZ r0
+s robotXmitter TargetX WAYX
+s robotXmitter TargetZ WAYZ
 jal travel
 j goingHome
-
-unloadWait:
-move sp 0
-s robot Mode 4
-unloadLoop:
-yield
-l maxStack robomaps Setting
-#check mining site error, recall, upcoming storm, battery
-l r0 db Setting
-beq r0 1 unloadLoop
-l r0 lever Setting
-bnez r0 unloadLoop
-lb r0 1997212478 NextWeatherEventTime Average
-bnez r0 unloadLoop
-ls charge robot 0 Charge
-blt charge 70000 unloadLoop
-l mode robot Mode
-beq mode 4 unloadLoop
-#unload done, travel to mining location
-j goingToWork
-
 goingToWork:
 yield
-#check recall
-l r0 lever Setting
+l r0 recallLever Setting #check recall
 bnez r0 goingHomeStart
+mod r0 mineables 2 #try to randomize the robots waypoints a tiny bit to stop collisions
 add sp sp 1
 peek WAYX
 add sp sp 1
 peek WAYZ
-s robot TargetX WAYX
-s robot TargetZ WAYZ
+add WAYX WAYX r0
+add WAYZ WAYZ r0
+s robotXmitter TargetX WAYX
+s robotXmitter TargetZ WAYZ
 jal travel
 bge sp maxStack startMining
 j goingToWork
 
-#mine until full
-startMining:
-#add 1 to sp because gohome routine subtracts at the opening
-add sp sp 1
-#check for mineables
-mineOreSearch:
-l r0 robot MineablesInVicinity
-blt r0 0 goingHome
-s robot Mode 3
+startMining: #mine until full
+add sp sp 1 #add 1 to sp because gohome routine subtracts at the opening
+mineOreSearch: #check for mineables
+l mineables robotXmitter MineablesInVicinity
+blt mineables 0 goingHome
+s robotXmitter Mode 3
 move stuck 0
 mineWait:
 yield
-#Mining sites are only viable if ore is on surface. When aimee mines, her mode flickers.
-add stuck stuck 1
-bgt stuck 300 MiningSiteError
-#check recall, then upcoming storm, then if we're done mining
-l r0 lever Setting
+add stuck stuck 1 #Mining sites are only viable for so long, check if aimee is wandering
+bgt stuck 300 MiningSiteError #~5 minute timer for wandering
+l r0 recallLever Setting #check recall, then upcoming storm, then if we're done mining
 bnez r0 goingHome
-lb r0 1997212478 NextWeatherEventTime Average
+lb r0 1997212478 NextWeatherEventTime Sum
 bnez r0 goingHome
-l mode robot Mode
-beq mode 3 mineWait
-bne mode 6 mineOreSearch
-#must be mode 6 which is assigned when AIMEE is full. Time to go unload
+l mode robotXmitter Mode
+beq mode 3 mineWait #aimee is still mining
+bne mode 6 mineOreSearch #must be mode 6 which is when AIMEE is full. Time to go unload
 j goingHome
 
 travel:
-s robot Mode 2
+s robotXmitter Mode 2
 wait:
 sleep 1
 yield
-l r0 robot VelocityMagnitude
+l r0 robotXmitter VelocityMagnitude #perform stuck checking
 slt r0 r0 0.2
 mul stuck stuck r0
 add stuck stuck r0
 bgt stuck 20 pathfind
-l r0 robot PositionY
-s robot TargetY r0
-l mode robot Mode
+l r0 robotXmitter PositionY
+s robotXmitter TargetY r0
+l mode robotXmitter Mode
 bne mode 0 wait
 j ra
-
 pathfind:
-s robot Mode 5
+s robotXmitter Mode 5
 yield
 sleep 10
-s robot Mode 2
+s robotXmitter Mode 2
 move stuck 0
 j wait
-
 MiningSiteError:
 s db Setting 1
 j goingHome
