@@ -1,24 +1,19 @@
-#AIMeE base controller based on Cows Are Evil's scripts
-#Modified by Storm to progress up and down a stack loaded set of waypoints for pathing
-alias robotXmitter d0  #Logic Transmitter
+alias robotXmitter d0  #AIMeE controller based on Cows Are Evil modified by Storm
 alias recallLever d1   #Lever to trigger recall
 alias robomaps d2      #housing which loads stack with map data
-alias mode r1
+alias globalOverrideSwitch d3
+alias globalOverrideRecall d4
+alias globalOverrideError d5
+alias mode r1 
 alias charge r2
 alias stuck r3
 alias maxStack r8
 alias WAYX r4
 alias WAYZ r5
-alias mineables r6
-alias prevLeverState r7
+alias mineables r6 
 
 l maxStack robomaps Setting
 l mineables robotXmitter MineablesInVicinity
-brne mineables 0 2
-move mineables 1 #seeding initial random generation if it was 0
-move sp 2 #we assume AIMEE is at the unload point and can move by herself to next wayp
-yield
-j unloadLoop
 
 unloadWait:
 move sp 0
@@ -26,16 +21,18 @@ s robotXmitter Mode 4
 unloadLoop:
 yield
 l maxStack robomaps Setting #load new max waypoints
+ls charge robotXmitter 0 Charge #if charge below 70,000 kw, set error
+brgt charge 70000 3
+s db Setting 1
+j unloadLoop
 l r0 recallLever Setting
 brne r0 1 3  # if recall is set, reset error state and wait for un-set
 s db Setting 0
 j unloadLoop
-l r0 db Setting #check mining site error, recall, upcoming storm, battery
+l r0 db Setting #check mining site error, upcoming storm, battery
 beq r0 1 unloadLoop
 lb r0 1997212478 NextWeatherEventTime Sum
 bnez r0 unloadLoop
-ls charge robotXmitter 0 Charge
-blt charge 70000 unloadLoop
 l mode robotXmitter Mode
 beq mode 4 unloadLoop
 j goingToWork
@@ -60,8 +57,14 @@ goingToWork:
 yield
 l r0 recallLever Setting #check recall
 bnez r0 goingHomeStart
+sub r0 maxStack 2
+brle sp maxStack 5 #if last waypoint in the stack, randomize coords by 25
+mod r0 mineables 50
+brgt r0 25 2
+mul r0 r0 -1
+jr 2
 mod r0 mineables 2 #try to randomize the robots waypoints a tiny bit to stop collisions
-add sp sp 1
+add sp sp 1 #pop the stack, use peek to improve readability
 peek WAYX
 add sp sp 1
 peek WAYZ
@@ -103,13 +106,13 @@ slt r0 r0 0.2
 mul stuck stuck r0
 add stuck stuck r0
 bgt stuck 20 pathfind
-l r0 robotXmitter PositionY
+l r0 robotXmitter PositionY # set target Y to current Y to avoid issues
 s robotXmitter TargetY r0
 l mode robotXmitter Mode
 bne mode 0 wait
 j ra
 pathfind:
-s robotXmitter Mode 5
+s robotXmitter Mode 5 #pathfinding for when something gets in the way
 yield
 sleep 10
 s robotXmitter Mode 2
