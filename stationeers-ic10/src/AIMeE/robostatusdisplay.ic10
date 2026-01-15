@@ -40,31 +40,31 @@ beq r0 3 statusMining
 beq r0 4 statusUnload
 beq r0 5 statusStuck
 statusCheckEnd:
-sleep 1 #prevents status displays from flashing
+sleep 3 #prevents status displays from flashing
 j monitorLoop
 
 statusIdle:
-s statusLED Setting STR("Idle")
+s statusLED Setting STR("IDLE")
 j statusCheckEnd
 statusMoving:
-s statusLED Setting STR("Move")
+s statusLED Setting STR("MOVE")
 j statusCheckEnd
 statusMining:
-s statusLED Setting STR("Mine")
+s statusLED Setting STR("MINE")
 j statusCheckEnd
 statusUnload:
-s statusLED Setting STR("Unload")
+s statusLED Setting STR("UNLOAD")
 j statusCheckEnd
 statusStuck:
-s statusLED Setting STR("Stuck")
+s statusLED Setting STR("STUCK")
 j statusCheckEnd
 statusWeather:
 s statusLED Color 3
-s statusLED Setting STR("Storm")
+s statusLED Setting STR("STORM")
 sleep 2
 j monitorBattWeatherEnd
 statusBattery:
 s statusLED Color 3
-s statusLED Setting STR("Rechrg")
+s statusLED Setting STR("RECHRG")
 sleep 2
 j monitorBattWeatherEnd
