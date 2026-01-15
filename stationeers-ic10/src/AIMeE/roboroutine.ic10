@@ -1,52 +1,39 @@
-alias robotXmitter d0  #AIMeE controller based on Cows Are Evil modified by Storm
-alias recallLever d1   #Lever to trigger recall
+alias robotXmitter d0  #=AIMeE controller based on Cows Are Evil modified by Storm=
+alias recallLever d1   #flipswitch or lever to trigger recall
 alias robomaps d2      #housing which loads stack with map data
-alias globalOverrideSwitch d3
-alias globalOverrideRecall d4
-alias globalOverrideError d5
-alias mode r1 
-alias charge r2
-alias stuck r3
-alias maxStack r8
+alias modConsoleOverrideLever d3 #flip switch override (requires recall be flip switch)
+alias stuck r2
+alias maxStack r3
 alias WAYX r4
 alias WAYZ r5
-alias mineables r6 
-
-l maxStack robomaps Setting
-l mineables robotXmitter MineablesInVicinity
-
-unloadWait:
-move sp 0
-s robotXmitter Mode 4
+unload:
+move sp 0 #realign sp to prepare for goingToWork
 unloadLoop:
-yield
 l maxStack robomaps Setting #load new max waypoints
-ls charge robotXmitter 0 Charge #if charge below 70,000 kw, set error
-brgt charge 70000 3
-s db Setting 1
-j unloadLoop
-l r0 recallLever Setting
-brne r0 1 3  # if recall is set, reset error state and wait for un-set
-s db Setting 0
-j unloadLoop
-l r0 db Setting #check mining site error, upcoming storm, battery
-beq r0 1 unloadLoop
-lb r0 1997212478 NextWeatherEventTime Sum
+jal batteryWeatherRecallOverride
 bnez r0 unloadLoop
-l mode robotXmitter Mode
-beq mode 4 unloadLoop
-j goingToWork
-
+s robotXmitter Mode 4 #all checks pass, try to unload
+sleep 5 #wait a bit to allow robot mode to change back to idle
+l r0 robotXmitter Mode
+beq r0 4 unloadLoop #if still not mode=idle, loop
+beq r0 0 goingToWork
+j unloadLoop
 goingHomeStart:
-add sp sp 1
+add sp sp 1 #add 1 to sp to reverse stack (accessible when mining/goingToWork)
 goingHome:
-yield
-mod r0 mineables 3  #try to randomize the robots waypoints a tiny bit to stop collisions
+beq sp 1 unload
 sub sp sp 1
-blez sp unloadWait
 peek WAYZ
 sub sp sp 1
 peek WAYX
+brgt sp 1 6 #if first waypoint in stack, randomize coords by +4 or -4
+ls r0 robotXmitter 0 Charge
+mod r0 r0 8
+brgt r0 4 2
+mul r0 r0 -1
+sub r0 r0 4
+jr 2 #skip subing waypoints
+move r0 -1 #sub 1 from WAYX/Z to move coords to the left and avoid collisions
 add WAYX WAYX r0
 add WAYZ WAYZ r0
 s robotXmitter TargetX WAYX
@@ -54,70 +41,87 @@ s robotXmitter TargetZ WAYZ
 jal travel
 j goingHome
 goingToWork:
-yield
-l r0 recallLever Setting #check recall
-bnez r0 goingHomeStart
-sub r0 maxStack 2
-brle sp maxStack 5 #if last waypoint in the stack, randomize coords by 25
-mod r0 mineables 50
-brgt r0 25 2
-mul r0 r0 -1
-jr 2
-mod r0 mineables 2 #try to randomize the robots waypoints a tiny bit to stop collisions
+jal batteryWeatherRecallOverride
+bne r0 0 goingHomeStart
 add sp sp 1 #pop the stack, use peek to improve readability
 peek WAYX
 add sp sp 1
 peek WAYZ
+sub r0 maxStack 2
+brlt sp maxStack 7 #if last waypoint in stack, randomize coords by +151 or -149
+ls r0 robotXmitter 0 Charge
+mod r0 r0 300
+brgt r0 150 2
+mul r0 r0 -1
+sub r0 r0 150
+jr 2 #skip next to use randomized r0 value
+move r0 1
 add WAYX WAYX r0
 add WAYZ WAYZ r0
 s robotXmitter TargetX WAYX
 s robotXmitter TargetZ WAYZ
 jal travel
-bge sp maxStack startMining
+bge sp maxStack mineOreSearch
 j goingToWork
-
-startMining:
-add sp sp 1 #add 1 to sp because gohome routine subtracts at the opening
 mineOreSearch:
-l mineables robotXmitter MineablesInVicinity
-blt mineables 0 goingHome
+l r0 robotXmitter MineablesInVicinity
+ble r0 10 goingHomeStart
 s robotXmitter Mode 3
 move stuck 0
 mineWait:
-yield
 add stuck stuck 1 #Mining sites are only viable for so long, check if aimee is wandering
-bgt stuck 300 MiningSiteError #~5 minute timer for wandering
-l r0 recallLever Setting #check recall, then upcoming storm, then if we're done mining
-bnez r0 goingHome
-lb r0 1997212478 NextWeatherEventTime Sum
-bnez r0 goingHome
-l mode robotXmitter Mode
-beq mode 3 mineWait #aimee is still mining
-bne mode 6 mineOreSearch #must be mode 6 which is when AIMEE is full. Time to go unload
-j goingHome
-
+bgt stuck 600 MiningSiteError #~10 minute timer for wandering
+yield
+l r0 robotXmitter Mode
+beq r0 3 mineWait #aimee is still mining
+beq r0 6 goingHomeStart #mode 6 which is when AIMEE is full. Time to go unload
+jal batteryWeatherRecallOverride
+bne r0 0 goingHomeStart
+j mineOreSearch
 travel:
 s robotXmitter Mode 2
+sleep 1 #give aimee time to roll
 wait:
-sleep 1
 yield
+move r6 ra #store ra
+jal batteryWeatherRecallOverride
+move ra r6 #set ra back
 l r0 robotXmitter VelocityMagnitude #perform stuck checking
 slt r0 r0 0.2
 mul stuck stuck r0
 add stuck stuck r0
-bgt stuck 20 pathfind
+bge stuck 60 pathfind
 l r0 robotXmitter PositionY # set target Y to current Y to avoid issues
 s robotXmitter TargetY r0
-l mode robotXmitter Mode
-bne mode 0 wait
+l r0 robotXmitter Mode
+bne r0 0 wait
 j ra
 pathfind:
 s robotXmitter Mode 5 #pathfinding for when something gets in the way
-yield
 sleep 10
 s robotXmitter Mode 2
 move stuck 0
 j wait
 MiningSiteError:
 s db Setting 1
-j goingHome
+j goingHomeStart
+batteryWeatherRecallOverride:
+ls r1 robotXmitter 0 Charge
+slt r1 r1 70000
+breq r1 1 3 #if charge is  below 70000, jump 3 (skips weather, sets error, r0 = 1)
+lb r1 1997212478 NextWeatherEventTime Sum
+sgt r1 r1 0 #normalize r1
+move r0 r1
+brgtz r1 12 #if weather, skip past all checks, do not set error
+brdns modConsoleOverrideLever 7
+l r0 modConsoleOverrideLever Open # if override open, close recall switch cover
+breqz r0 2
+s recallLever Open 0
+l r0 modConsoleOverrideLever Setting
+breqz r0 2
+jr 3 #override lever is on, jump to r0 = 1, r1 = 0
+l r0 recallLever Setting  #check recall only if override is off
+breqz r0 2
+move r1 0
+s db Setting r1
+j ra #if any checks pass, r0 = 1 else r0 = 0.
