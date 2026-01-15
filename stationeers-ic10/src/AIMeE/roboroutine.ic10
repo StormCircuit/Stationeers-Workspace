@@ -10,7 +10,7 @@ unload:
 move sp 0 #realign sp to prepare for goingToWork
 unloadLoop:
 l maxStack robomaps Setting #load new max waypoints
-jal batteryWeatherRecallOverride
+jal recallOverrideWeatherCheck
 bnez r0 unloadLoop
 s robotXmitter Mode 4 #all checks pass, try to unload
 sleep 5 #wait a bit to allow robot mode to change back to idle
@@ -22,18 +22,17 @@ goingHomeStart:
 add sp sp 1 #add 1 to sp to reverse stack (accessible when mining/goingToWork)
 goingHome:
 beq sp 1 unload
+brgt sp 1 6 #if first waypoint in stack, randomize coords by +4 or -4
+ls r0 robotXmitter 0 Charge #use charge as seed
+mod r0 r0 4
+brgt r0 2 2
+mul r0 r0 -1
+jr 2 #skip subing waypoints
+move r0 -1 #sub 1 from WAYX/Z to move coords to the left and avoid collisions
 sub sp sp 1
 peek WAYZ
 sub sp sp 1
 peek WAYX
-brgt sp 1 6 #if first waypoint in stack, randomize coords by +4 or -4
-ls r0 robotXmitter 0 Charge
-mod r0 r0 8
-brgt r0 4 2
-mul r0 r0 -1
-sub r0 r0 4
-jr 2 #skip subing waypoints
-move r0 -1 #sub 1 from WAYX/Z to move coords to the left and avoid collisions
 add WAYX WAYX r0
 add WAYZ WAYZ r0
 s robotXmitter TargetX WAYX
@@ -41,19 +40,19 @@ s robotXmitter TargetZ WAYZ
 jal travel
 j goingHome
 goingToWork:
-jal batteryWeatherRecallOverride
+jal recallOverrideWeatherCheck
 bne r0 0 goingHomeStart
 add sp sp 1 #pop the stack, use peek to improve readability
 peek WAYX
 add sp sp 1
 peek WAYZ
 sub r0 maxStack 2
-brlt sp maxStack 7 #if last waypoint in stack, randomize coords by +151 or -149
-ls r0 robotXmitter 0 Charge
+brlt sp maxStack 7 #if last waypoint in stack, randomize coords by +151 or -149, else branch
+ls r0 robotXmitter 0 Charge #use charge as seed for randomness
 mod r0 r0 300
+sub r0 r0 150 #subtract 150 to make a range of 0-150
 brgt r0 150 2
 mul r0 r0 -1
-sub r0 r0 150
 jr 2 #skip next to use randomized r0 value
 move r0 1
 add WAYX WAYX r0
@@ -70,12 +69,12 @@ s robotXmitter Mode 3
 move stuck 0
 mineWait:
 add stuck stuck 1 #Mining sites are only viable for so long, check if aimee is wandering
-bgt stuck 600 MiningSiteError #~10 minute timer for wandering
+bgt stuck 300 MiningSiteError #~5 minute timer for wandering
 yield
 l r0 robotXmitter Mode
 beq r0 3 mineWait #aimee is still mining
 beq r0 6 goingHomeStart #mode 6 which is when AIMEE is full. Time to go unload
-jal batteryWeatherRecallOverride
+jal recallOverrideWeatherCheck
 bne r0 0 goingHomeStart
 j mineOreSearch
 travel:
@@ -84,7 +83,7 @@ sleep 1 #give aimee time to roll
 wait:
 yield
 move r6 ra #store ra
-jal batteryWeatherRecallOverride
+jal recallOverrideWeatherCheck
 move ra r6 #set ra back
 l r0 robotXmitter VelocityMagnitude #perform stuck checking
 slt r0 r0 0.2
@@ -105,7 +104,7 @@ j wait
 MiningSiteError:
 s db Setting 1
 j goingHomeStart
-batteryWeatherRecallOverride:
+recallOverrideWeatherCheck:
 ls r1 robotXmitter 0 Charge
 slt r1 r1 70000
 breq r1 1 3 #if charge is  below 70000, jump 3 (skips weather, sets error, r0 = 1)
