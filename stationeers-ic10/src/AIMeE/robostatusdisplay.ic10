@@ -1,4 +1,4 @@
-alias robot d0 #set to logic transmitter
+alias robotXmitter d0 #set to logic transmitter
 alias roboroutine d1 #roboroutine housing
 alias statusLED d2 #set to status display (must support text input)
 alias chargeLED d3 #set to charge level display (must support numeric input)
@@ -15,7 +15,7 @@ s mineableLED Mode 0
 s miningSiteError Color 3
 
 monitorLoop:
-l r0 robot Mode
+l r0 robotXmitter Mode
 s db Setting r0
 beq r0 0 statusIdle
 beq r0 2 statusMoving
@@ -23,11 +23,11 @@ beq r0 3 statusMining
 beq r0 4 statusUnload
 beq r0 5 statusStuck
 monitorLoopStatusEnd:
-ls r0 robot 0 Charge
+ls r0 robotXmitter 0 Charge
 s chargeLED Setting r0
-l r0 robot Mode
+l r0 robotXmitter Mode
 bne r0 3 notCurrentlyMining
-l r0 robot MineablesInVicinity
+l r0 robotXmitter MineablesInVicinity
 s mineableLED Setting r0
 notCurrentlyMining:
 l r0 roboroutine Setting
@@ -35,6 +35,14 @@ breq r0 0 3
 s miningSiteError On 1
 jr 2
 s miningSiteError On 0
+ls r0 robotXmitter 0 Charge #if charge below 70,000 kw, flash on status
+brgt r0 70000 4
+s statusLED Mode 0
+s statusLED Color 3
+s statusLED Setting STR("ReChrg")
+sleep 5
+s statusLED Color 2
+s statusLED Mode 10
 yield
 j monitorLoop
 
