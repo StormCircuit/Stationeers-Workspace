@@ -22,17 +22,18 @@ goingHomeStart:
 add sp sp 1 #add 1 to sp to reverse stack (accessible when mining/goingToWork)
 goingHome:
 beq sp 1 unload
-brgt sp 1 6 #if first waypoint in stack, randomize coords by +4 or -4
-ls r0 robotXmitter 0 Charge #use charge as seed
-mod r0 r0 4
-brgt r0 2 2
-mul r0 r0 -1
-jr 2 #skip subing waypoints
-move r0 -1 #sub 1 from WAYX/Z to move coords to the left and avoid collisions
 sub sp sp 1
 peek WAYZ
 sub sp sp 1
 peek WAYX
+brgt sp 1 7 #if first waypoint in stack, randomize coords by +4 or -4
+ls r0 robotXmitter 0 Charge #use charge as seed
+mod r0 r0 4
+ceil r0 r0
+brgt r0 2 2
+mul r0 r0 -1
+jr 2 #skip subing waypoints
+move r0 -1 #sub 1 from WAYX/Z to move coords to the left and avoid collisions
 add WAYX WAYX r0
 add WAYZ WAYZ r0
 s robotXmitter TargetX WAYX
@@ -47,12 +48,12 @@ peek WAYX
 add sp sp 1
 peek WAYZ
 sub r0 maxStack 2
-brlt sp maxStack 7 #if last waypoint in stack, randomize coords by +151 or -149, else branch
-ls r0 robotXmitter 0 Charge #use charge as seed for randomness
+brlt sp maxStack 7 #if last waypoint in stack, randomize coords by +151 or -149
+ls r0 robotXmitter 0 Charge #use charge as seed for random
 mod r0 r0 300
-sub r0 r0 150 #subtract 150 to make a range of 0-150
 brgt r0 150 2
 mul r0 r0 -1
+sub r0 r0 150 #subtract 150 to make a range of 0-150
 jr 2 #skip next to use randomized r0 value
 move r0 1
 add WAYX WAYX r0
@@ -89,7 +90,7 @@ l r0 robotXmitter VelocityMagnitude #perform stuck checking
 slt r0 r0 0.2
 mul stuck stuck r0
 add stuck stuck r0
-bge stuck 60 pathfind
+bge stuck 30 pathfind
 l r0 robotXmitter PositionY # set target Y to current Y to avoid issues
 s robotXmitter TargetY r0
 l r0 robotXmitter Mode
