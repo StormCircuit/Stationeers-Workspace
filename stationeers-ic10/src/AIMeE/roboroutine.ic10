@@ -5,6 +5,7 @@ alias stuck r2
 alias maxStack r3
 alias WAYX r4
 alias WAYZ r5
+alias charge r6
 s robotXmitter Mode 0
 unload:
 move sp 0 #realign sp to prepare for goingToWork
@@ -13,7 +14,7 @@ l maxStack robomaps Setting #load new max waypoints
 jal batteryWeatherCheckRecall
 bnez r0 unloadLoop
 s robotXmitter Mode 4 #all checks pass, try to unload
-sleep 5 #wait a bit to allow robot mode to change back to idle
+sleep 3 #wait a bit to allow robot mode to change back to idle
 l r0 robotXmitter Mode
 beq r0 4 unloadLoop #if mode = unload, loop
 beq r0 0 goingToWork #if mode = idle, go to work
@@ -25,12 +26,9 @@ sub sp sp 1
 peek WAYZ
 sub sp sp 1
 peek WAYX
-brgt sp 1 7 #if first waypoint in stack, randomize coords by +4 or -4
-ls r0 robotXmitter 0 Charge #use charge as seed
-mod r0 r0 4
-ceil r0 r0
-brgt r0 2 2
-mul r0 r0 -1
+brgt sp 1 4 #if first waypoint in stack, randomize coords by +4 or -4
+mod r0 charge 8
+sub r0 r0 4
 jr 2 #skip subing waypoints
 move r0 -1 #sub 1 from WAYX/Z to move coords to the left and avoid collisions
 add WAYX WAYX r0
@@ -46,11 +44,9 @@ add sp sp 1 #pop the stack, use peek to improve readability
 peek WAYX
 add sp sp 1
 peek WAYZ
-brlt sp maxStack 6 #if last waypoint in stack, randomize coords by +75 or -76
-ls r0 robotXmitter 0 Charge #use charge as seed for random
-mod r0 r0 150
-brgt r0 75 2
-mul r0 r0 -1
+brlt sp maxStack 4 #if last waypoint in stack, randomize coords by up to +150 or -150
+mod r0 charge 300
+sub r0 r0 150
 jr 2 #skip next to use randomized r0 value
 move r0 1
 add WAYX WAYX r0
@@ -77,22 +73,21 @@ bne r0 0 goingHomeStart
 j mineOreSearch
 travel:
 s robotXmitter Mode 2
+move r1 ra #store ra
 sleep 1 #give aimee time to roll
 wait:
 yield
-move r6 ra #store ra
 jal batteryWeatherCheckRecall
-move ra r6 #set ra back
 l r0 robotXmitter VelocityMagnitude #perform stuck checking
 slt r0 r0 0.2
 mul stuck stuck r0
 add stuck stuck r0
-bge stuck 30 pathfind
+bge stuck 61 pathfind
 l r0 robotXmitter PositionY # set target Y to current Y to avoid issues
 s robotXmitter TargetY r0
 l r0 robotXmitter Mode
 bne r0 0 wait
-j ra
+j r1 #use stored ra
 pathfind:
 s robotXmitter Mode 5 #pathfinding for when something gets in the way
 sleep 10
@@ -103,8 +98,8 @@ MiningSiteError:
 s db Setting 1
 j goingHomeStart
 batteryWeatherCheckRecall:
-ls r0 robotXmitter 0 Charge
-slt r0 r0 70000
+ls charge robotXmitter 0 Charge
+slt r0 charge 70000
 breq r0 1 7 #if charge is  below 70000, go straight to error
 lb r0 1997212478 NextWeatherEventTime Sum
 sgt r0 r0 0 #normalize r1
