@@ -1,7 +1,6 @@
 alias robotXmitter d0  #=AIMeE controller based on Cows Are Evil modified by Storm=
 alias recallLever d1   #flipswitch or lever to trigger recall
 alias robomaps d2      #housing which loads stack with map data
-alias modConsoleOverrideLever d3 #flip switch override (requires recall be flip switch)
 alias stuck r2
 alias maxStack r3
 alias WAYX r4
@@ -11,14 +10,13 @@ unload:
 move sp 0 #realign sp to prepare for goingToWork
 unloadLoop:
 l maxStack robomaps Setting #load new max waypoints
-jal recallOverrideWeatherCheck
+jal batteryWeatherCheckRecall
 bnez r0 unloadLoop
 s robotXmitter Mode 4 #all checks pass, try to unload
 sleep 5 #wait a bit to allow robot mode to change back to idle
 l r0 robotXmitter Mode
-beq r0 4 unloadLoop #if still not mode=idle, loop
-beq r0 0 goingToWork
-j unloadLoop
+beq r0 4 unloadLoop #if mode = unload, loop
+beq r0 0 goingToWork #if mode = idle, go to work
 goingHomeStart:
 add sp sp 1 #add 1 to sp to reverse stack (accessible when mining/goingToWork)
 goingHome:
@@ -42,19 +40,17 @@ s robotXmitter TargetZ WAYZ
 jal travel
 j goingHome
 goingToWork:
-jal recallOverrideWeatherCheck
+jal batteryWeatherCheckRecall
 bne r0 0 goingHomeStart
 add sp sp 1 #pop the stack, use peek to improve readability
 peek WAYX
 add sp sp 1
 peek WAYZ
-sub r0 maxStack 2
-brlt sp maxStack 7 #if last waypoint in stack, randomize coords by +151 or -149
+brlt sp maxStack 6 #if last waypoint in stack, randomize coords by +75 or -76
 ls r0 robotXmitter 0 Charge #use charge as seed for random
-mod r0 r0 300
-brgt r0 150 2
+mod r0 r0 150
+brgt r0 75 2
 mul r0 r0 -1
-sub r0 r0 150 #subtract 150 to make a range of 0-150
 jr 2 #skip next to use randomized r0 value
 move r0 1
 add WAYX WAYX r0
@@ -76,7 +72,7 @@ yield
 l r0 robotXmitter Mode
 beq r0 3 mineWait #aimee is still mining
 beq r0 6 goingHomeStart #mode 6 which is when AIMEE is full. Time to go unload
-jal recallOverrideWeatherCheck
+jal batteryWeatherCheckRecall
 bne r0 0 goingHomeStart
 j mineOreSearch
 travel:
@@ -85,7 +81,7 @@ sleep 1 #give aimee time to roll
 wait:
 yield
 move r6 ra #store ra
-jal recallOverrideWeatherCheck
+jal batteryWeatherCheckRecall
 move ra r6 #set ra back
 l r0 robotXmitter VelocityMagnitude #perform stuck checking
 slt r0 r0 0.2
@@ -106,23 +102,16 @@ j wait
 MiningSiteError:
 s db Setting 1
 j goingHomeStart
-recallOverrideWeatherCheck:
-ls r1 robotXmitter 0 Charge
-slt r1 r1 70000
-breq r1 1 15 #if charge is  below 70000, go straight to error
-lb r1 1997212478 NextWeatherEventTime Sum
-sgt r1 r1 0 #normalize r1
-move r0 r1
-brgtz r1 12 #if weather, skip past all checks, do not set error
-brdns modConsoleOverrideLever 7
-l r0 modConsoleOverrideLever Open # if override open, close recall switch cover
-breqz r0 2
-s recallLever Open 0
-l r0 modConsoleOverrideLever Setting
-breqz r0 2
-jr 3 #override lever is on, jump to r0 = 1, r1 = 0
-l r0 recallLever Setting  #check recall only if override is off
-breqz r0 2
-move r1 0
-s db Setting r1
+batteryWeatherCheckRecall:
+ls r0 robotXmitter 0 Charge
+slt r0 r0 70000
+breq r0 1 7 #if charge is  below 70000, go straight to error
+lb r0 1997212478 NextWeatherEventTime Sum
+sgt r0 r0 0 #normalize r1
+brgtz r0 5 #if weather, skip past all checks, do not set error
+l r0 recallLever Setting  #check recall
+breqz r0 4 #if lever off, do not do anything to error
+move r0 0 #if lever on, reset error and set r0 = 1
+s db Setting r0
+move r0 1
 j ra #if any checks pass, r0 = 1 else r0 = 0.
