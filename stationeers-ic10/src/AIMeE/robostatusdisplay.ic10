@@ -53,7 +53,7 @@ statusMining:
 s statusLED Setting STR("MINE")
 j statusCheckEnd
 statusUnload:
-s statusLED Setting STR("UNLOAD")
+s statusLED Setting STR("OFFLD")
 j statusCheckEnd
 statusStuck:
 s statusLED Setting STR("STUCK")
