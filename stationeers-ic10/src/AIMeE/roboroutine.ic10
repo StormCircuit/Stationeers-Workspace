@@ -6,6 +6,7 @@ alias stuck r2
 alias maxStack r3
 alias WAYX r4
 alias WAYZ r5
+s robotXmitter Mode 0
 unload:
 move sp 0 #realign sp to prepare for goingToWork
 unloadLoop:
