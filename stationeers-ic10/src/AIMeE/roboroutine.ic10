@@ -26,10 +26,11 @@ sub sp sp 1
 peek WAYZ
 sub sp sp 1
 peek WAYX
-brgt sp 1 4 #if first waypoint in stack, randomize coords by +4 or -4
-mod r0 charge 8
+brgt sp 1 5 #if first waypoint in stack, randomize coords by +4 or -4
+rand r0
+mul r0 r0 8
 sub r0 r0 4
-jr 2 #skip subing waypoints
+jr 2 #use random number for r0, skip using -1
 move r0 -1 #sub 1 from WAYX/Z to move coords to the left and avoid collisions
 add WAYX WAYX r0
 add WAYZ WAYZ r0
@@ -44,8 +45,9 @@ add sp sp 1 #pop the stack, use peek to improve readability
 peek WAYX
 add sp sp 1
 peek WAYZ
-brlt sp maxStack 4 #if last waypoint in stack, randomize coords by up to +150 or -150
-mod r0 charge 300
+brlt sp maxStack 5 #if last waypoint in stack, randomize coords by up to +150 or -150
+rand r0
+mul r0 r0 300
 sub r0 r0 150
 jr 2 #skip next to use randomized r0 value
 move r0 1
@@ -98,8 +100,8 @@ MiningSiteError:
 s db Setting 1
 j goingHomeStart
 batteryWeatherCheckRecall:
-ls charge robotXmitter 0 Charge
-slt r0 charge 70000
+ls r0 robotXmitter 0 Charge
+slt r0 r0 70000
 breq r0 1 7 #if charge is  below 70000, go straight to error
 lb r0 1997212478 NextWeatherEventTime Sum
 sgt r0 r0 0 #normalize r1
