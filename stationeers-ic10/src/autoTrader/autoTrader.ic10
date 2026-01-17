@@ -1,12 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <DateTime>133790369545357809</DateTime>
-  <GameVersion>0.2.5370.24111</GameVersion>
-  <Title>autoTrader</Title>
-  <Description>automatically contacts traders when min watts to communicate is reached​</Description>
-  <Author>Rizzard of Oz</Author>
-  <WorkshopFileHandle>0</WorkshopFileHandle>
-  <Instructions>alias selectionDial d0
+alias selectionDial d0
 
 alias antenna d1
 
@@ -73,5 +65,3 @@ blt wattsReaching wattsNeeded findContact
 findContact:
 
 adjustHorizontal:
-</Instructions>
-</InstructionData>
