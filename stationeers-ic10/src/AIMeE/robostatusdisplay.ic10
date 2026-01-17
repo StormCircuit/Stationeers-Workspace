@@ -7,7 +7,10 @@ alias errorLED d5 #set to mining site error indicator light (needs color)
 
 monitorLoop:
 
-brdns statusLED 15
+brdns statusLED 15 #if damage, flash on screen
+ls r0 robotXmitter 0 Damage
+bgtz r0 statusDmg
+statusDmgEnd:
 ls r0 robotXmitter 0 Charge #if charge below 70,000 kw, flash on status
 blt r0 70000 statusBattery
 statusBattEnd:
@@ -77,3 +80,8 @@ sleep 1
 s statusLED Color 3
 s statusLED Setting STR("CHRG")
 j statusBattEnd
+statusDmg:
+sleep 1
+s statusLED Color 3
+s statusLED Setting STR("DMGD")
+j statusDmgEnd
