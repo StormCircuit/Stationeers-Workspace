@@ -4,8 +4,13 @@
 #2a. If you do not need 15 waypoints, set LastWaypoint to the number you need (max 15)
 #4. To update waypoints, edit coordinates, LastWaypoint, MiningRange
 #5. Export to this chip, reinsert this ic10 chip into the robomaps housing
+
+#Note: minimum ore and OreError can be left alone
 define MiningRange 225 #radius from center of mining site to search
-define LastWaypoint 7
+define LastWaypoint 7 #the mining site waypoint (must be last waypoint)
+define MinimumError 3 #See "Error variables" in readme for an explanation on error
+define MaximumError 15
+define TimeoutError 300 
 define x1 -917
 define z1 -1287
 define x2 -912
@@ -108,8 +113,11 @@ put r0 26 x14
 put r0 27 z14
 put r0 28 x15
 put r0 29 z15
-put r0 40 r2 #mining range * 2
-put r0 41 r1 #last waypoint * 2
+put r0 511 r1 #last waypoint * 2
+put r0 510 r2 #mining range * 2
+put r0 509 MinimumError
+put r0 508 MaximumError
+put r0 507 TimeoutError
 yield
 j aimeeStackLoadLoop
 aimeeStackLoadLoopEnd:
