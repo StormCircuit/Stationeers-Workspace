@@ -3,9 +3,8 @@ Instructions for using the AIMEE scripts in this folder:
 1. Setup 3 COMPACT ic10 HOUSING roboroutine per aimee. Do NOT turn any of them on.
 2. Setup transmitter per aimee. Do NOT turn any of them on.
 3. Setup 1 switch of some kind per aimee for recalling them (set them to on after placing them)
-4. Choose either robomaps or robomapsParallel for an army of AIMEES. Note that robomapsParallel supports up to 6 aimees on a private subnet (utilizes name hashes)
-5. Set the device pins as labeled
-6. If using robomapsParallel, set the names of the housings containing roboroutine as required
+5. Set the device pins as per their device alias's (recallSwitch must be a switch for example)
+6. Set the names of the housings containing roboroutine as per robomapsParallel
 7. Turn everything on
 8. Turn lever/switch off to enable aimee units
 
@@ -16,6 +15,6 @@ Resetting a stuck/broken aimee unit:
 
 Error modes:
 Aimee will set roboroutine's housing Setting to 1 to indicate an error.
-This could mean a couple things:
+This could mean one of two things:
 1. The mining site is not viable (go out and check or just set a new site)
 2. Her battery is below 70,000 Kw. Small batteries will instantly error her.
