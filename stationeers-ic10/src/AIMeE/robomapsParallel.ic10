@@ -8,9 +8,9 @@
 #Note: minimum ore and OreError can be left alone
 define MiningRange 225 #radius from center of mining site to search
 define LastWaypoint 7 #the mining site waypoint (must be last waypoint)
-define MinimumError 3 #See "Error variables" in readme for an explanation on error
-define MaximumError 15
-define TimeoutError 300 
+define MinimumError 3 #LESS THAN
+define MaximumError 15 #EQUAL OR GREATER TO
+define TimeoutError 300 #EQUAL OR GREATER TO
 define x1 -917
 define z1 -1287
 define x2 -912
