@@ -1,39 +1,39 @@
-alias robotXmitter d0  #=AIMeE controller based on Cows Are Evil modified by Storm=
-alias recallLever d1   #flipswitch or lever to trigger recall
-alias robomaps d2      #housing which loads stack with map data
-alias stuck r2
+alias robotXmitter d0  #=Based on Cows Are Evil, modified EXTENSIVELY by StormCircuit=
+alias recallLever d1        #flipswitch or lever to trigger recall
+alias robomaps d2           #housing which loads stack with map data
+alias stuck r2              #if no memory device is set, defaults to 450
 alias maxStack r3
 alias WAYX r4
 alias WAYZ r5
-alias charge r6
 s robotXmitter Mode 0
 unload:
-move sp 0 #realign sp to prepare for goingToWork
+move sp 0 #realign sp to prepare for travel to unload point
 unloadLoop:
-l maxStack robomaps Setting #load new max waypoints
+get maxStack db 41 #load new max waypoints at unload position
 jal batteryWeatherCheckRecall
 bnez r0 unloadLoop
-s robotXmitter Mode 4 #all checks pass, try to unload
-sleep 3 #wait a bit to allow robot mode to change back to idle
+s robotXmitter Mode 4
+sleep 1
 l r0 robotXmitter Mode
-beq r0 4 unloadLoop #if mode = unload, loop
-beq r0 0 goingToWork #if mode = idle, go to work
+beq r0 4 unloadLoop
+beq r0 0 goingToWork
 goingHomeStart:
 add sp sp 1 #add 1 to sp to reverse stack (accessible when mining/goingToWork)
 goingHome:
-beq sp 1 unload
+ble sp 1 unload
 sub sp sp 1
 peek WAYZ
 sub sp sp 1
 peek WAYX
-brgt sp 1 5 #if first waypoint in stack, randomize coords by +4 or -4
+brgt sp 1 5 #if first waypoint in stack, randomize coords by +2.5 or -2.5
 rand r0
-mul r0 r0 8
-sub r0 r0 4
+mul r0 r0 5
+sub r0 r0 2.5
 jr 2 #use random number for r0, skip using -1
 move r0 -1 #sub 1 from WAYX/Z to move coords to the left and avoid collisions
 add WAYX WAYX r0
 add WAYZ WAYZ r0
+yield
 s robotXmitter TargetX WAYX
 s robotXmitter TargetZ WAYZ
 jal travel
@@ -41,18 +41,21 @@ j goingHome
 goingToWork:
 jal batteryWeatherCheckRecall
 bne r0 0 goingHomeStart
-add sp sp 1 #pop the stack, use peek to improve readability
+add sp sp 1
 peek WAYX
 add sp sp 1
 peek WAYZ
-brlt sp maxStack 5 #if last waypoint in stack, randomize coords by up to +150 or -150
+brlt sp maxStack 10 #if last waypoint in stack, randomize coords by given memory
 rand r0
-mul r0 r0 300
-sub r0 r0 150
+get r1 db 40 # mining range is stored at stack address 40 by robomaps
+mul r0 r0 r1
+div r1 r1 2
+sub r0 r0 r1
 jr 2 #skip next to use randomized r0 value
 move r0 1
 add WAYX WAYX r0
 add WAYZ WAYZ r0
+yield
 s robotXmitter TargetX WAYX
 s robotXmitter TargetZ WAYZ
 jal travel
@@ -60,38 +63,45 @@ bge sp maxStack mineOreSearch
 j goingToWork
 mineOreSearch:
 l r0 robotXmitter MineablesInVicinity
-ble r0 10 goingHomeStart
+ble r0 10 goingHomeStart  #if theres 10 or less mineables, go home
 s robotXmitter Mode 3
 move stuck 0
 mineWait:
-add stuck stuck 1 #Mining sites are only viable for so long, check if aimee is wandering
-bgt stuck 300 MiningSiteError #~5 minute timer for wandering
-yield
-l r0 robotXmitter Mode
-beq r0 3 mineWait #aimee is still mining
-beq r0 6 goingHomeStart #mode 6 which is when AIMEE is full. Time to go unload
+l r0 robotXmitter MineablesInVicinity
 jal batteryWeatherCheckRecall
 bne r0 0 goingHomeStart
+add stuck stuck 1
+brlt stuck 300 3 #~5 minute timer for wandering
+bgt r0 15 goingHomeStart #if theres more than 15 mineables, do NOT error, just go home
+j MiningSiteError #if 10 <= mineables <= 15 AND wandering, error
+yield
+l r0 robotXmitter Mode
+beq r0 3 mineWait
+beq r0 6 goingHomeStart
 j mineOreSearch
 travel:
 s robotXmitter Mode 2
 move r1 ra #store ra
-sleep 1 #give aimee time to roll
 wait:
-yield
-jal batteryWeatherCheckRecall
-l r0 robotXmitter VelocityMagnitude #perform stuck checking
+l r0 robotXmitter PositionY
+s robotXmitter TargetY r0  #set target Y to current Y to avoid path issues
+jal batteryWeatherCheckRecall #Check if error is reset
+breqz r0 5 #error/lever signal 0, so continue operation/skip next
+brlt r1 goingToWork 4 # if from gohome, skip next
+move r1 goingHomeStart
+sub sp sp 2 #store gohome in r1, get last waypoint
+s robotXmitter Mode 0 #set robot to idle to trigger instant reverse
+l r0 robotXmitter VelocityMagnitude
 slt r0 r0 0.2
 mul stuck stuck r0
 add stuck stuck r0
-bge stuck 61 pathfind
-l r0 robotXmitter PositionY # set target Y to current Y to avoid issues
-s robotXmitter TargetY r0
+bge stuck 70 pathfind  #perform stuck checking, give aimee a chance to bounce
+yield
 l r0 robotXmitter Mode
 bne r0 0 wait
-j r1 #use stored ra
+j r1 #use stored ra, if error/recall is on then this is goingHome
 pathfind:
-s robotXmitter Mode 5 #pathfinding for when something gets in the way
+s robotXmitter Mode 5
 sleep 10
 s robotXmitter Mode 2
 move stuck 0
@@ -104,7 +114,7 @@ ls r0 robotXmitter 0 Charge
 slt r0 r0 70000
 breq r0 1 7 #if charge is  below 70000, go straight to error
 lb r0 1997212478 NextWeatherEventTime Sum
-sgt r0 r0 0 #normalize r1
+sgt r0 r0 0
 brgtz r0 5 #if weather, skip past all checks, do not set error
 l r0 recallLever Setting  #check recall
 breqz r0 4 #if lever off, do not do anything to error
