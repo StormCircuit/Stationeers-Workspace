@@ -31,8 +31,6 @@ Her battery is below 70,000 Kw. Small batteries will instantly error her.
 **Error variables:**
 All these variables can probably be left alone, I tuned them on my own save on the moon.
 Still, I exposed them in case I want to make an Aimee super army
-**SP 511** is waypoints * 2, in other words the top of the stack.
-**SP 510** is MiningRange, how far from the work site aimee will go randomly.
 **SP 509** is MinimumOreError, if Aimee sees LESS ore than this, she will go home once TimeoutError is reached
 **SP 508** is TimeoutError. Aimee will drive in circles doing nothing for this many seconds before she gives up and flags an error
 
