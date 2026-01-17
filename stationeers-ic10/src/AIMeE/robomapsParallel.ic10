@@ -1,41 +1,41 @@
 #Instructions:
 #1. Using GPS tablet and write down X and Z coordinates (ignore y)
 #2. Put them in for waypoints below.
-#2a. If you do not need 8 waypoints, set LastWaypoint to the number you need (max 8)
-#3. Rename up to 6 COMPACT IC10 housings: "aimee1", "aimee2", ... , "aimee6"
-#4. To update waypoints, edit coordinates and LastWaypoint and reinsert THIS ic10 chip
-# REMEMBER MINING SITES HAVE A RANGE OF ABOUT 150 SO AIMEES CAN DRIVE OFF THE MAP!
+#2a. If you do not need 15 waypoints, set LastWaypoint to the number you need (max 15)
+#4. To update waypoints, edit coordinates, LastWaypoint, MiningRange
+#5. Export to this chip, reinsert this ic10 chip into the robomaps housing
+define MiningRange 225 #radius from center of mining site to search
 define LastWaypoint 7
 define x1 -917
 define z1 -1287
-
 define x2 -912
 define z2 -1287
-
 define x3 -912
 define z3 -1281
-
 define x4 -925
 define z4 -1281
-
 define x5 -937
 define z5 -1266
-
 define x6 -1037
 define z6 -1281
-
 define x7 -1224
 define z7 -1554
-
 define x8 0
 define z8 0
-
 define x9 0
 define z9 0
-
 define x10 0
 define z10 0
-
+define x11 0
+define z11 0
+define x12 0
+define z12 0
+define x13 0
+define z13 0
+define x14 0
+define z14 0
+define x15 0
+define z15 0
 #Code below
 define AIMEEhousing HASH("StructureCircuitHousingCompact")
 define AIMEE1 HASH("aimee1")
@@ -70,11 +70,8 @@ put db 12 AIMEE13
 put db 13 AIMEE14
 put db 14 AIMEE15
 put db 15 AIMEE16
-move r0 LastWaypoint #mult lastWaypoint as we compare it directly to SP
-mul r0 r0 2
-s db Setting r0 #this gets loaded by roboroutine, is how many waypoints
-
-#constantly set waypoints in case we add more aimee units to network
+mul r1 LastWaypoint 2 #mul lastwaypoint by 2 as it's compared to sp
+mul r2 MiningRange 2 #mul mining range by 2 because AIMEE uses it as a diameter
 move sp 16
 aimeeStackLoadLoop:
 beq sp 0 aimeeStackLoadLoopEnd
@@ -97,14 +94,25 @@ put r0 12 x7
 put r0 13 z7
 put r0 14 x8
 put r0 15 z8
-put r0 16 x9
-put r0 17 z9
+put r0 16 x9 #this whole thing is the most basic form of dataloading for aimee
+put r0 17 z9 #don't judge me
 put r0 18 x10
 put r0 19 z10
+put r0 20 x11
+put r0 21 z11
+put r0 22 x12
+put r0 23 z12
+put r0 24 x13
+put r0 25 z13
+put r0 26 x14
+put r0 27 z14
+put r0 28 x15
+put r0 29 z15
+put r0 40 r2 #mining range * 2
+put r0 41 r1 #last waypoint * 2
 yield
 j aimeeStackLoadLoop
 aimeeStackLoadLoopEnd:
 move sp 16
 sleep 30
 j aimeeStackLoadLoop
-#program end
