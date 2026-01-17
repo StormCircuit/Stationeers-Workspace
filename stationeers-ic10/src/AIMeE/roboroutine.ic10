@@ -45,7 +45,7 @@ add sp sp 1
 peek WAYX
 add sp sp 1
 peek WAYZ
-brlt sp maxStack 10 #if last waypoint in stack, randomize coords by given memory
+brlt sp maxStack 7 #if last waypoint in stack, randomize coords by given memory
 rand r0
 get r1 db 40 # mining range is stored at stack address 40 by robomaps
 mul r0 r0 r1
