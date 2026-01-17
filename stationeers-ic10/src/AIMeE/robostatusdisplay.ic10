@@ -6,18 +6,12 @@ alias mineableLED d4 #set to mineables in vicinity when robot in mining mode
 alias errorLED d5 #set to mining site error indicator light (needs color)
 
 monitorLoop:
-s statusLED Color 2
-s chargeLED Color 2
-s mineableLED Color 2
-s statusLED Mode 10
-s chargeLED Mode 2
-s mineableLED Mode 0
-s errorLED Color 3
 ls r0 robotXmitter 0 Charge #if charge below 70,000 kw, flash on status
 blt r0 70000 statusBattery
+statusBattEnd:
 lb r0 1997212478 NextWeatherEventTime Sum #if weather != 0, set storm status
 bnez r0 statusWeather
-monitorBattWeatherEnd:
+statusWeatherEnd:
 ls r0 robotXmitter 0 Charge
 s chargeLED Setting r0
 l r0 robotXmitter Mode
@@ -30,17 +24,23 @@ breq r0 0 3
 s errorLED On 1
 jr 2
 s errorLED On 0
-s statusLED Color 2
-s statusLED Mode 10
 l r0 robotXmitter Mode
 s db Setting r0
+
+sleep 2
+s statusLED Color 2
+s chargeLED Color 2
+s mineableLED Color 2
+s statusLED Mode 10
+s chargeLED Mode 2
+s mineableLED Mode 0
+s errorLED Color 3
 beq r0 0 statusIdle
 beq r0 2 statusMoving
 beq r0 3 statusMining
 beq r0 4 statusUnload
-beq r0 5 statusStuck
+beq r0 5 statusStuck #corresponds to Aimee's pathing mode
 statusCheckEnd:
-sleep 3 #prevents status displays from flashing
 j monitorLoop
 
 statusIdle:
@@ -53,18 +53,18 @@ statusMining:
 s statusLED Setting STR("MINE")
 j statusCheckEnd
 statusUnload:
-s statusLED Setting STR("OFFLD")
+s statusLED Setting STR("OFLD")
 j statusCheckEnd
 statusStuck:
-s statusLED Setting STR("STUCK")
+s statusLED Setting STR("STCK")
 j statusCheckEnd
 statusWeather:
+sleep 1
 s statusLED Color 3
-s statusLED Setting STR("STORM")
-sleep 2
-j monitorBattWeatherEnd
+s statusLED Setting STR("STRM")
+j statusWeatherEnd
 statusBattery:
+sleep 1
 s statusLED Color 3
-s statusLED Setting STR("RECHRG")
-sleep 2
-j monitorBattWeatherEnd
+s statusLED Setting STR("CHRG")
+j statusBattEnd

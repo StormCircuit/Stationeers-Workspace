@@ -28,7 +28,7 @@ occupiedSlotsCalc:
 ls r0 robotXmitter r1 Occupied
 add numOccupiedSlots numOccupiedSlots r0
 add r1 r1 1
-breq r1 9 2
+breq r1 10 2
 j occupiedSlotsCalc
 div numOccupiedSlots numOccupiedSlots 8
 s progressLED Setting numOccupiedSlots
