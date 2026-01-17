@@ -1,8 +1,7 @@
 alias robotXmitter d0  #=Based on Cows Are Evil, modified EXTENSIVELY by StormCircuit=
-alias recallLever d1        #flipswitch or lever to trigger recall
+alias recallLever d1        #Anything with a Setting. 1 = recall/reset error
 alias spMemory d2           #OPTIONAL. Records last visited waypoint*2 (it's the SP).
-alias stuck r2 #r3 is topOfStack, r4 is WAYX, #r5 is WAYZ
-s robotXmitter Mode 0
+s robotXmitter Mode 0 # stuck is r2 r3 is topOfStack, r4 is WAYX, #r5 is WAYZ
 unload:
 move sp 0 #realign sp to prepare for travel to unload point
 unloadLoop:
@@ -16,8 +15,7 @@ beq r0 4 unloadLoop
 beq r0 0 goingToWork
 goingHomeStart:
 add sp sp 1 #add 1 to sp to reverse stack (accessible when mining/goingToWork)
-goingHome:
-ble sp 1 unload
+ble sp 1 unload #==BEGIN GOING HOME LOOP==#
 sub sp sp 1
 peek r5
 sub sp sp 1
@@ -34,7 +32,7 @@ yield
 s robotXmitter TargetX r4
 s robotXmitter TargetZ r5
 jal travel
-j goingHome
+jr -17 #==END GOING HOME LOOP==
 goingToWork:
 jal batteryWeatherCheckRecall
 bne r0 0 goingHomeStart
@@ -59,46 +57,44 @@ jal travel
 bge sp r3 mineOreSearch
 j goingToWork
 mineOreSearch:
-l r0 robotXmitter MineablesInVicinity
-get r1 db 509 #if theres less ore than the number at this stack, go home
-ble r0 r1 goingHomeStart
 s robotXmitter Mode 3
-move stuck 0
-mineWait:
-jal batteryWeatherCheckRecall
+move r2 0
+jal batteryWeatherCheckRecall  #==BEGIN MINING WAIT LOOP==#
 bne r0 0 goingHomeStart
-add stuck stuck 1
+add r2 r2 1
 get r0 db 507 #timeout max stored at 507, if we go over we potentialy trigger a error
-brlt stuck r0 5
+brlt r2 r0 8
 l r0 robotXmitter MineablesInVicinity
-get r1 db 508 #if theres MORE than the number at this stack, go home, do not error
-bgt r0 15 goingHomeStart
-j MiningSiteError #if 10 <= mineables <= 15 AND wandering, error
+get r1 db 509 #if theres less ore than the number at this stack, error
+brle r0 r1 4
+get r1 db 508 #if theres MORE than the number at this stack, find new spot, do not error
+brlt r0 r1 3
+sub sp sp 2 #move stack back 2 to previous waypoint, find new spot
+j MiningSiteError #if SP 509 <= mineables <= SP 508 AND wandering, error
 yield
 l r0 robotXmitter Mode
-beq r0 3 mineWait
+breq r0 3 -14 #==END MINING WAIT LOOP==
 beq r0 6 goingHomeStart
 j mineOreSearch
 travel:
 s robotXmitter Mode 2
 move r1 ra #store ra
-wait:
-l r0 robotXmitter PositionY
+l r0 robotXmitter PositionY #==BEGIN TRAVEL WAIT LOOP ON THIS LINE==
 s robotXmitter TargetY r0  #set target Y to current Y to avoid path issues
-jal batteryWeatherCheckRecall #Check if error is reset
-breqz r0 5 #error/lever signal 0, so continue operation/skip next
+jal batteryWeatherCheckRecall
+breqz r0 5
 brlt r1 goingToWork 4 # if from gohome, skip next
 move r1 goingHomeStart
 sub sp sp 2 #store gohome in r1, get last waypoint
 s robotXmitter Mode 0 #set robot to idle to trigger instant reverse
 l r0 robotXmitter VelocityMagnitude
 slt r0 r0 0.2
-mul stuck stuck r0
-add stuck stuck r0
-bge stuck 70 pathfind  #perform stuck checking, give aimee a chance to bounce
+mul r2 r2 r0
+add r2 r2 r0
+bge r2 70 pathfind  #perform r2 checking, give aimee a chance to bounce
 yield
 l r0 robotXmitter Mode
-bne r0 0 wait
+brne r0 0 -15 #==END TRAVEL WAIT LOOP ON THIS LINE==
 brdns spMemory 2
 s spMemory Setting sp #store last visited sp for external use
 j r1 #use stored ra, if error/recall is on then this is goingHome
@@ -106,12 +102,15 @@ pathfind:
 s robotXmitter Mode 5
 sleep 10
 s robotXmitter Mode 2
-move stuck 0
-j wait
+move r2 0
+jr -24 #==LOOP BACK TO BEGIN TRAVEL WAIT LOOP==
 MiningSiteError:
 s db Setting 1
 j goingHomeStart
 batteryWeatherCheckRecall:
+ls r0 robotXmitter 0 Damage #check damage, go straight to error if not 0
+sgtz r0 r0
+breq r0 1 10
 ls r0 robotXmitter 0 Charge
 slt r0 r0 70000
 breq r0 1 7 #if charge is  below 70000, go straight to error
