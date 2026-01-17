@@ -1,4 +1,17 @@
 
+
+
+
+
+
+
+
+#DEPRECATED, USE robomapsParallel REGARDLESS OF HOW MANY AIMEE UNITS
+
+
+
+
+
 #Short user instructions:
 #1. Set GPS locations using GPS tablet and write down coordinates
 #2. Put them into stack like so: PUSH X1 PUSH Y1 PUSH X2 PUSH Y2 until all added
