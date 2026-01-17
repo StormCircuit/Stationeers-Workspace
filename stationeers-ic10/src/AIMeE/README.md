@@ -1,5 +1,5 @@
 **Setup:**
-1. Setup 3 COMPACT ic10 HOUSING roboroutine per aimee. Do NOT turn any of them on.
+1. Setup 3 COMPACT ic10 HOUSING per aimee. Do NOT turn any of them on.
 2. Setup transmitter per aimee. Do NOT turn any of them on.
 3. Setup 1 switch of some kind per aimee for recalling them. Set them to ON after placing them.
 4. Set the device pins as per their device alias's (recallSwitch must be a switch for example)
