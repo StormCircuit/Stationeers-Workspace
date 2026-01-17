@@ -1,0 +1,33 @@
+alias activationLever d0
+alias outputAnalyzer d1
+
+alias leverState r7
+
+alias outputPressure r8
+
+define purgeVents -1129453144
+define gasValves -1280984102
+
+start:
+s activationLever Open 0
+awaitInitialization:
+sb gasValves On 0
+sb purgeVents On 1
+l leverState activationLever Open
+beq leverState 1 initialization
+yield
+j awaitInitialization
+
+initialization:
+sb purgeVents On 0
+sb gasValves On 1
+calculationLoop:
+
+#check for end conditions
+l leverState activationLever Open
+beq leverState 0 start
+l outputPressure outputAnalyzer Pressure
+bgeal outputPressure 19000 start
+
+yield
+j calculationLoop
