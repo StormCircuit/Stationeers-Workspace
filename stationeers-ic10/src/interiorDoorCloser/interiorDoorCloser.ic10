@@ -17,19 +17,19 @@ jal checkMode
 breq airlockmode 1 3
 s outerdoor Open 0
 s innerdoor Open 0
-sleep 15
+sleep 7
 j monitorLoop
 
 checkMode:
 l r0 sensor Pressure
 lb r1 SENSOR Pressure Average
-lb r2 SENSOR Pressure Sum
+lb r2 SENSOR Pressure Minimum
 sne airlockmode r0 r2 # Check for multiple sensors
-sap r0 r0 r1 0.5 # Max pressure difference %
+sap r0 r0 r1 0.1 # Max pressure difference %
 and airlockmode airlockmode r0
 l r0 sensor Temperature
-lb r1 SENSOR Temperature Average
-sap r0 r0 r1 0.5 # Max temperature difference %K
+lb r1 SENSOR Temperature Minimum
+sap r0 r0 r1 0.1 # Max temperature difference %K
 and airlockmode airlockmode r0
 lb r0 SENSOR RatioVolatiles Maximum
 slt r0 r0 0.005 # Max volatiles %
