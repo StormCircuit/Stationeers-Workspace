@@ -11,7 +11,6 @@
 define MiningRange 225 #radius from center of mining site to search
 define LastWaypoint 7 #the mining site waypoint (must be last waypoint)
 define MinimumOreError 0 #EQUAL OR LESS THAN THIS CAUSES ERROR
-define MaximumOreError 3 #GREATER THAN THIS PREVENTS ERROR
 define TimeoutError 600 #EQUAL OR GREATER CAUSES ERROR CHECK
 define x1 -917
 define z1 -1287
@@ -112,14 +111,13 @@ put r0 23 z12
 put r0 24 x13
 put r0 25 z13
 put r0 26 x14
-put r0 27 z14
-put r0 28 x15
+put r0 27 z14 #if you wanted, you could fill almost the entire stack with waypoints.
+put r0 28 x15 #addresses past 500 are in use
 put r0 29 z15
 put r0 511 r1 #last waypoint * 2
 put r0 510 r2 #mining range * 2
 put r0 509 MinimumOreError
-put r0 508 MaximumOreError
-put r0 507 TimeoutError
+put r0 508 TimeoutError
 yield
 j aimeeStackLoadLoop
 aimeeStackLoadLoopEnd:
