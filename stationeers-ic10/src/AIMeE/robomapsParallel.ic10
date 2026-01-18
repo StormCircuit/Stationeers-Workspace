@@ -1,13 +1,4 @@
-#Instructions:
-#1. Using GPS tablet and write down X and Z coordinates (ignore y)
-#2. Put them in for waypoints below.
-#2a. If you do not need 15 waypoints, set LastWaypoint to the number you need (max 500)
-#4. To update waypoints, edit coordinates, LastWaypoint, MiningRange
-#5. Export to this chip, reinsert this ic10 chip into the robomaps housing
-#Note: MinimumError, and TimeoutError can be left alone
-
-#CAUTION: AIMEE CAN WANDER FROM HER MINING AREA, TIGHTEN TIMEOUT TIME AND
-#MINING RANGE IN DANGEROUS AREAS!!! SHE HAS NO GEOFENCING!!
+#see readme online if this looks like french to you
 define MiningRange 225 #radius from center of mining site to search
 define LastWaypoint 7 #the mining site waypoint (must be last waypoint)
 define MinimumOreError 0 #EQUAL OR LESS THAN THIS CAUSES ERROR
@@ -43,6 +34,9 @@ define z14 0
 define x15 0
 define z15 0
 #Code below
+alias minOre r5 #Holding register for MinimumOreError
+#move minOre MinimumOreError #comment below, uncomment this; use MinimumOreError instead
+move minOre -1 #Use -1 for 20 minutes before setting it to MinimumOreError to fully mine
 define AIMEEhousing HASH("StructureCircuitHousingCompact")
 define AIMEE1 HASH("aimee1")
 define AIMEE2 HASH("aimee2")
@@ -116,11 +110,12 @@ put r0 28 x15 #addresses past 500 are in use
 put r0 29 z15
 put r0 511 r1 #last waypoint * 2
 put r0 510 r2 #mining range * 2
-put r0 509 MinimumOreError
+put r0 509 minOre
 put r0 508 TimeoutError
 yield
 j aimeeStackLoadLoop
 aimeeStackLoadLoopEnd:
 move sp 16
-sleep 30
+sleep 1200 #after 20 minutes, set configured minimum ore
+move minOre MinimumOreError
 j aimeeStackLoadLoop
