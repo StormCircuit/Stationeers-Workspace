@@ -10,6 +10,7 @@
 9. Set waypoints and configuration using stack/robomapsParallel
 10. Turn lever off to turn on aimee
 
+This is readme mentioned in robomapsParallel for those who don't know french:
 **Using RobomapsParallel**
 Instructions:
 1. Using GPS tablet and write down X and Z coordinates (ignore y)
