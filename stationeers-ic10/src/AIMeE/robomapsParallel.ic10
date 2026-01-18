@@ -1,8 +1,9 @@
 #see readme online if this looks like french to you
-define MiningRange 225 #radius from center of mining site to search
+define MiningRange 100 #radius from center of mining site to search
 define LastWaypoint 7 #the mining site waypoint (must be last waypoint)
-define MinimumOreError 0 #EQUAL OR LESS THAN THIS CAUSES ERROR
-define TimeoutError 600 #EQUAL OR GREATER CAUSES ERROR CHECK
+define MinimumOreError 0 #EQUAL OR LESS than this causes error, will return home
+define TimeoutError 600 #EQUAL OR GREATER in seconds, after which checks MinimumOreError
+define PauseTimeOutAtStart 0 #1 for On, 0 for Off. Keeps aimee out until full for 20 mins
 define x1 -917
 define z1 -1287
 define x2 -912
@@ -35,8 +36,9 @@ define x15 0
 define z15 0
 #Code below
 alias minOre r5 #Holding register for MinimumOreError
-#move minOre MinimumOreError #comment below, uncomment this; use MinimumOreError instead
 move minOre -1 #Use -1 for 20 minutes before setting it to MinimumOreError to fully mine
+breq PauseTimeOutAtStart 1 2
+move minOre MinimumOreError #if pausetimeout 0, use minimumoreerror instantly
 define AIMEEhousing HASH("StructureCircuitHousingCompact")
 define AIMEE1 HASH("aimee1")
 define AIMEE2 HASH("aimee2")
