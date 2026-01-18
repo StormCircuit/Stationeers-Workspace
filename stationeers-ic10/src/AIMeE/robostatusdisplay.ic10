@@ -45,7 +45,7 @@ notCurrentlyMining:
 brdns errorLED 9
 s errorLED Color 3
 l r0 roboroutine Setting
-breq r0 0 3
+breqz r0 3
 s errorLED On 1
 jr 2
 s errorLED On 0
