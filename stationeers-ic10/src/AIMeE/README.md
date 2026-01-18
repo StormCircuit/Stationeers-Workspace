@@ -47,7 +47,6 @@ Still, I exposed them in case I want to make an Aimee super army
 **SP 508** is TimeoutError. Aimee will drive in circles doing nothing for this many seconds, attempting to mine, before she gives up and flags an error
 
 **Other Variables:**
-<<<<<<< HEAD
 **SP 507** is MineablesInVicinity. it is written to during every mining check
 **SP 506** is Charge. It is written to every recall check
 **SP 505** is Damage of Battery. It is written to every recall check
@@ -55,12 +54,3 @@ Still, I exposed them in case I want to make an Aimee super army
 **SP 503** is aimee's mode. This is written every recall check
 **SP 502** is Aimee's PositionZ
 **SP 501** is Aimee's PositionX
-=======
-**SP 506** is MineablesInVicinity. it is written to during every mining check
-**SP 505** is Charge. It is written to every recall check
-**SP 504** is Damage of Battery. It is written to every recall check
-**SP 503** is last visited waypoint SP.
-**SP 502** is aimee's mode. This is written every recall check
-**SP 501** is Aimee's PositionZ
-**SP 500** is Aimee's PositionX
->>>>>>> cdf5b7c2dbefdbb4376dc6a3f2757ab747d96db8
