@@ -10,6 +10,17 @@
 9. Set waypoints and configuration using stack/robomapsParallel
 10. Turn lever off to turn on aimee
 
+**Using RobomapsParallel**
+Instructions:
+1. Using GPS tablet and write down X and Z coordinates (ignore y)
+2. Put them in for waypoints below.
+3. If you do not need 15 waypoints, set LastWaypoint to the number you need (max 250)
+4. To update waypoints, edit coordinates, LastWaypoint, MiningRange
+5. Export to this chip, reinsert this ic10 chip into the robomaps housing
+Note: MinimumError, and TimeoutError can be left alone
+**CAUTION: AIMEE CAN WANDER FROM HER MINING AREA, TIGHTEN TIMEOUT TIME AND**
+**MINING RANGE IN DANGEROUS AREAS!!! SHE HAS NO GEOFENCING!!**
+
 **Resetting a stuck/broken aimee unit:**
 1. Turn recall lever on
 2. Pull roboroutine chip out and put it back in
@@ -32,13 +43,13 @@ Her battery is below 70,000 Kw. Small batteries will instantly error her.
 All these variables can probably be left alone, I tuned them on my own save on the moon.
 Still, I exposed them in case I want to make an Aimee super army
 **SP 509** is MinimumOreError, if Aimee sees LESS ore than this, she will go home once TimeoutError is reached
-**SP 508** is TimeoutError. Aimee will drive in circles doing nothing for this many seconds before she gives up and flags an error
+**SP 508** is TimeoutError. Aimee will drive in circles doing nothing for this many seconds, attempting to mine, before she gives up and flags an error
 
 **Other Variables:**
-**SP 506** is MineablesInVicinity. it is written to during every mining check
-**SP 505** is Charge. It is written to every recall check
-**SP 504** is Damage of Battery. It is written to every recall check
-**SP 503** is last visited waypoint SP.
-**SP 502** is aimee's mode. This is written every recall check
-**SP 501** is Aimee's PositionZ
-**SP 500** is Aimee's PositionX
+**SP 507** is MineablesInVicinity. it is written to during every mining check
+**SP 506** is Charge. It is written to every recall check
+**SP 505** is Damage of Battery. It is written to every recall check
+**SP 504** is current SP.
+**SP 503** is aimee's mode. This is written every recall check
+**SP 502** is Aimee's PositionZ
+**SP 501** is Aimee's PositionX
