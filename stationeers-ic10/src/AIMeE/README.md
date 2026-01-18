@@ -1,5 +1,5 @@
 **Setup:**
-1. Setup 3 COMPACT ic10 HOUSING roboroutine per aimee. Do NOT turn any of them on.
+1. Setup 3 COMPACT ic10 HOUSING per aimee. Do NOT turn any of them on.
 2. Setup transmitter per aimee. Do NOT turn any of them on.
 3. Setup 1 switch of some kind per aimee for recalling them. Set them to ON after placing them.
 4. Set the device pins as per their device alias's (recallSwitch must be a switch for example)
@@ -47,6 +47,7 @@ Still, I exposed them in case I want to make an Aimee super army
 **SP 508** is TimeoutError. Aimee will drive in circles doing nothing for this many seconds, attempting to mine, before she gives up and flags an error
 
 **Other Variables:**
+<<<<<<< HEAD
 **SP 507** is MineablesInVicinity. it is written to during every mining check
 **SP 506** is Charge. It is written to every recall check
 **SP 505** is Damage of Battery. It is written to every recall check
@@ -54,3 +55,12 @@ Still, I exposed them in case I want to make an Aimee super army
 **SP 503** is aimee's mode. This is written every recall check
 **SP 502** is Aimee's PositionZ
 **SP 501** is Aimee's PositionX
+=======
+**SP 506** is MineablesInVicinity. it is written to during every mining check
+**SP 505** is Charge. It is written to every recall check
+**SP 504** is Damage of Battery. It is written to every recall check
+**SP 503** is last visited waypoint SP.
+**SP 502** is aimee's mode. This is written every recall check
+**SP 501** is Aimee's PositionZ
+**SP 500** is Aimee's PositionX
+>>>>>>> cdf5b7c2dbefdbb4376dc6a3f2757ab747d96db8
