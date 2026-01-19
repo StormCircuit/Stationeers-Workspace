@@ -7,30 +7,26 @@ get r3 db 511 #load new max waypoints at unload position
 jal batteryWeatherCheckRecall
 brnez r6 -2 #skip back to unload loop
 s robotXmitter Mode 4
+unloadWait:
 yield  #=BEGIN UNLOAD LOOP=
 l r0 robotXmitter Mode
-breq r0 4 -2  #=END UNLOAD LOOP=
+beq r0 4 unloadWait  #=END UNLOAD LOOP=
 beq r0 0 goingToWork
 goingHomeStart:
 add sp sp 1 #accessible if mining/goingToWork
-jal batteryWeatherCheckRecall #update stack
-ble sp 1 unload #==BEGIN GOING HOME LOOP==#
+goingHomeLoop:
+jal batteryWeatherCheckRecall #==BEGIN GOING HOME LOOP==# update stack
+ble sp 1 unload 
 sub sp sp 1
 peek r5
 sub sp sp 1
 peek r4
-brgt sp 1 5 #collision avoidance
-rand r0
-mul r0 r0 5
-sub r0 r0 2.5
-jr 2 #use random number for r0, skip using -1
-move r0 -1
-add r4 r4 r0
-add r5 r5 r0
+sub r4 r4 1 #collision avoidance
+sub r5 r5 1
 s robotXmitter TargetX r4
 s robotXmitter TargetZ r5
 jal travel
-jr -17 #==END GOING HOME LOOP==
+j goingHomeLoop #==END GOING HOME LOOP==
 goingToWork:
 jal batteryWeatherCheckRecall
 bne r6 0 goingHomeStart
@@ -56,12 +52,14 @@ j goingToWork
 mineOreSearch:
 s robotXmitter Mode 3
 move r2 0
+miningWaitLoop:
 jal batteryWeatherCheckRecall  #==BEGIN MINING WAIT LOOP==#
 bne r6 0 goingHomeStart
 add r2 r2 1 #add to stuck
 get r0 db 508 #timeout max stored at 508, if we go over we potentialy trigger a error
-brlt r2 r0 8
+brlt r2 r0 9
 get r1 db 509 #if theres less ore than the number at this stack, error
+l r0 robotXmitter MineablesInVicinity
 brle r0 r1 3
 sub sp sp 2
 j goingToWork
@@ -70,13 +68,14 @@ move r7 1
 j goingHomeStart #if mineables <= SP 509 AND wandering, error
 yield
 l r0 robotXmitter Mode
-breq r0 3 -14 #==END MINING WAIT LOOP==
+beq r0 3 miningWaitLoop #==END MINING WAIT LOOP==
 beq r0 6 goingHomeStart
 j mineOreSearch
 travel:
-s robotXmitter Mode 2
 move r15 ra #store ra
-l r0 robotXmitter PositionY #==BEGIN TRAVEL WAIT LOOP ON THIS LINE==
+travelLoop: #==BEGIN TRAVEL WAIT LOOP ON THIS LINE==
+s robotXmitter Mode 2  
+l r0 robotXmitter PositionY
 s robotXmitter TargetY r0
 jal batteryWeatherCheckRecall
 breqz r6 5
@@ -91,14 +90,13 @@ add r2 r2 r0
 bge r2 70 pathfind  #perform r2 checking, give aimee a chance to bounce
 yield
 l r0 robotXmitter Mode
-brne r0 0 -15 #==END TRAVEL WAIT LOOP ON THIS LINE==
+bne r0 0 travelLoop #==END TRAVEL WAIT LOOP ON THIS LINE==
 j r15 #use stored ra, if error/recall is on then this is goingHome
 pathfind:
 s robotXmitter Mode 5
 sleep 10
-s robotXmitter Mode 2
 move r2 0
-jr -22 #==LOOP BACK TO BEGIN TRAVEL WAIT LOOP==
+jr travelLoop #==GO BACK TO BEGIN TRAVEL WAIT LOOP==
 batteryWeatherCheckRecall:
 put db 507 sp #sp, all these are read only
 put db 506 ra #ra
