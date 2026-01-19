@@ -7,7 +7,7 @@ get r3 db 511 #load new max waypoints at unload position
 jal batteryWeatherCheckRecall
 brnez r6 -2 #skip back to unload loop
 s robotXmitter Mode 4
-yield  #=BEGIN UNLOAD LOOP= 
+yield  #=BEGIN UNLOAD LOOP=
 l r0 robotXmitter Mode
 breq r0 4 -2  #=END UNLOAD LOOP=
 beq r0 0 goingToWork
@@ -24,13 +24,13 @@ rand r0
 mul r0 r0 5
 sub r0 r0 2.5
 jr 2 #use random number for r0, skip using -1
-move r0 -1 
+move r0 -1
 add r4 r4 r0
 add r5 r5 r0
 s robotXmitter TargetX r4
 s robotXmitter TargetZ r5
 jal travel
-jr -16 #==END GOING HOME LOOP==
+jr -17 #==END GOING HOME LOOP==
 goingToWork:
 jal batteryWeatherCheckRecall
 bne r6 0 goingHomeStart
@@ -100,14 +100,20 @@ s robotXmitter Mode 2
 move r2 0
 jr -22 #==LOOP BACK TO BEGIN TRAVEL WAIT LOOP==
 batteryWeatherCheckRecall:
-put db 507 sp #store sp for external use
-put db 506 ra #store ra for external use
-ls r0 robotXmitter 0 Damage
-ls r1 robotXmitter 0 Charge
-slt r1 r1 70000 #Do not use wireless batteries with aimee, they are too small
-or r6 r0 r1 #r6 = 1 if either are bad
-brnez r6 7 #if damage/charge check = 1 then skip lever, SET error SIGNAL/Setting
+put db 507 sp #store sp for external read
+put db 506 ra #store ra for external read
+put db 504 r2 #store stuck value for external read
+ls r0 robotXmitter 0 Charge #check if below SP 505
+get r1 db 505 #check charge value against SP 505 in watts
+slt r6 r0 r1
+ls r0 robotXmitter 0 Damage #check BATTERY damage
+get r1 db 503
+sgt r0 r0 r1 #check BATTERY damage value against SP 503 in PERCENTAGE
+or r6 r6 r0 #r6 = 1 if either are bad
+brnez r6 9 #if damage/charge check = 1 then skip rest, SET error SIGNAL/Setting
+or r6 r6 r7 #if any above OR mining error, recall
 l r0 recallLever Setting
+seq r0 r0 1 #normalize the recall signal, MUST = 1
 or r6 r6 r0 #if lever OR damage/charge = 1 then r6 = 1
 breqz r0 4 #if lever set, error SIGNAL/Setting must clear, MiningError must clear
 s db Setting 0
@@ -115,8 +121,5 @@ move r7 0
 jr 2
 s db Setting r6 #this means you can clear a battery or damage error by just fixing it
 lb r0 1997212478 NextWeatherEventTime Sum
-or r6 r6 r0 #If damage/charge OR lever OR weather THEN set recall, maintain error
-or r6 r6 r7 #if any above OR mining error, recall
+or r6 r6 r0 #If damage/charge/Mining Error/recall signal/ then r6 = 1
 j ra
-
-

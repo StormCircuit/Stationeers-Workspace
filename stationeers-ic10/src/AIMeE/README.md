@@ -13,14 +13,13 @@
 This is readme mentioned in robomapsParallel for those who don't know french:
 **Using RobomapsParallel**
 Instructions:
-1. Using GPS tablet and write down X and Z coordinates (ignore y)
-2. Put them in for waypoints below.
-3. If you do not need 15 waypoints, set LastWaypoint to the number you need (max 250)
-4. To update waypoints, edit coordinates, LastWaypoint, MiningRange
-5. Export to this chip, reinsert this ic10 chip into the robomaps housing
-Note: MinimumError, and TimeoutError can be left alone
-**CAUTION: AIMEE CAN WANDER FROM HER MINING AREA, TIGHTEN TIMEOUT TIME AND**
-**MINING RANGE IN DANGEROUS AREAS!!! SHE HAS NO GEOFENCING!!**
+1. Run robomapsStackloading once on the housing you intend to use.
+2. rename your roboroutine housings to aimee1 up to a max of aimee16.
+3. Using GPS tablet and write down X and Z coordinates (ignore y)
+4. Put them in for waypoints in robomapsParallel
+5. Set LastWaypoint to the number you need (max 250)
+6. Edit the configuration variables or leave them alone
+7. Export to the chip, reinsert the ic10 chip into the robomaps housing
 
 **Resetting a stuck/broken aimee unit:**
 1. Turn recall lever on
@@ -40,21 +39,31 @@ Mining site errors can be cleared by having recallLever's Setting = 1. Doing so 
 Battery and damage errors can only be cleared by repairing aimee
 
 **Configuration:**
+**robotXmitter** is a transmitter connected to an Aimee unit
+**recallLever** is a device with a Setting. If this Setting = 1, and only 1, aimee will go and stay at home.
 **SP 511** is the last waypoint multiplied by 2 which is literally the last SP address aimee will use before she begins mining
-**SP 510** is the diameter of the mining range centered on the final waypoint. Aimees will randomly go to a coordinate pair within that diameter, creating a circle around the waypoint over time
+**SP 510** is the radius of the mining range centered on the final waypoint. Aimees will randomly go to a coordinate pair within that diameter, creating a circle around the waypoint over time
+**CAUTION: AIMEE CAN WANDER FROM HER MINING AREA, TIGHTEN TIMEOUT TIME, MINIMUM ORE ERROR,**
+**AND MINING RANGE IN DANGEROUS AREAS!!! SHE HAS NO GEOFENCING!!**
 
 **Error variables:**
 These can be adjusted in real time as they are loaded when checked.
 **SP 509** is MinimumOreError, if Aimee sees LESS ore than this, she will go home once TimeoutError is reached
 **SP 508** is TimeoutError. Aimee will drive in circles doing nothing for this many seconds, attempting to mine, before she gives up and flags an error
+**SP 505** is Charge Error. Aimee will flag a charge error if below this number in Watts
+**SP 503** is Damage Error. Aimee will flag a damage error if BATTERY damage is ABOVE this PERCENTAGE
 
 **Other Variables:**
 **SP 507** is current SP.
 **SP 506** is Aimee's ra register. You can determine where she is in the program with this
 Valid numbers are:
-Traveling: 83
+Traveling: 81
 Mining: 59
 Going to mine site: 35
 Going home: 16
-Unloading: 7
-**SP 506** is Aimee's internal stuck register. You can read how high the timeout currently is when traveling and when mining. Once this value is equal to SP 508, she will trigger pathfinding mode while traveling or while mining she triggers a mining error if MineablesInVicinity are less than SP 509.
+Unloading/Idling: 7
+Note: Aimee will only idle if the recall device has Setting = 1
+**SP 504** is Aimee's internal stuck register. You can read how high the timeout currently is when traveling and when mining. Once this value is equal to SP 508, she will trigger pathfinding mode while traveling or while mining she triggers a mining error if MineablesInVicinity are less than SP 509.
+**SP 502** is the set TargetZ
+**SP 501** is the set TargetX
+**SP 500** is the internal error value. This will only not = Setting when a storm is active but no other error is

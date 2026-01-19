@@ -4,6 +4,8 @@ define LastWaypoint 7 #the mining site waypoint (must be last waypoint)
 define MinimumOreError 0 #EQUAL OR LESS than this causes error, will return home
 define TimeoutError 600 #EQUAL OR GREATER in seconds, after which checks MinimumOreError
 define PauseTimeOutAtStart 0 #1 for On, 0 for Off. Keeps aimee out until full for 20 mins
+define ChargeError 70000 #the watts level below which aimee flags a charge error
+define DamageError 0 #the percentage her BATTERY has damage above which Aimee flags error
 define x1 -917
 define z1 -1287
 define x2 -912
@@ -35,45 +37,12 @@ define z14 0
 define x15 0
 define z15 0
 #Code below
+define AIMEEhousing HASH("StructureCircuitHousingCompact")
 alias minOre r5 #Holding register for MinimumOreError
 move minOre -1 #Use -1 for 20 minutes before setting it to MinimumOreError to fully mine
 breq PauseTimeOutAtStart 1 2
 move minOre MinimumOreError #if pausetimeout 0, use minimumoreerror instantly
-define AIMEEhousing HASH("StructureCircuitHousingCompact")
-define AIMEE1 HASH("aimee1")
-define AIMEE2 HASH("aimee2")
-define AIMEE3 HASH("aimee3")
-define AIMEE4 HASH("aimee4")
-define AIMEE5 HASH("aimee5")
-define AIMEE6 HASH("aimee6")
-define AIMEE7 HASH("aimee7")
-define AIMEE8 HASH("aimee8")
-define AIMEE9 HASH("aimee9")
-define AIMEE10 HASH("aimee10")
-define AIMEE11 HASH("aimee11")
-define AIMEE12 HASH("aimee12")
-define AIMEE13 HASH("aimee13")
-define AIMEE14 HASH("aimee14")
-define AIMEE15 HASH("aimee15")
-define AIMEE16 HASH("aimee16")
-put db 0 AIMEE1
-put db 1 AIMEE2
-put db 2 AIMEE3
-put db 3 AIMEE4
-put db 4 AIMEE5
-put db 5 AIMEE6
-put db 6 AIMEE7
-put db 7 AIMEE8
-put db 8 AIMEE9
-put db 9 AIMEE10
-put db 10 AIMEE11
-put db 11 AIMEE12
-put db 12 AIMEE13
-put db 13 AIMEE14
-put db 14 AIMEE15
-put db 15 AIMEE16
 mul r1 LastWaypoint 2 #mul lastwaypoint by 2 as it's compared to sp
-mul r2 MiningRange 2 #mul mining range by 2 because AIMEE uses it as a diameter
 move sp 16
 aimeeStackLoadLoop:
 beq sp 0 aimeeStackLoadLoopEnd
@@ -111,9 +80,11 @@ put r0 27 z14 #if you wanted, you could fill almost the entire stack with waypoi
 put r0 28 x15 #addresses past 500 are in use
 put r0 29 z15
 put r0 511 r1 #last waypoint * 2
-put r0 510 r2 #mining range * 2
+put r0 510 r2 #mining range
 put r0 509 minOre
 put r0 508 TimeoutError
+put r0 505 ChargeError
+put r0 503 DamageError
 yield
 j aimeeStackLoadLoop
 aimeeStackLoadLoopEnd:
