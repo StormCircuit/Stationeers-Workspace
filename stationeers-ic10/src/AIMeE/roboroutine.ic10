@@ -100,11 +100,12 @@ s robotXmitter Mode 2
 move r2 0
 jr -22 #==LOOP BACK TO BEGIN TRAVEL WAIT LOOP==
 batteryWeatherCheckRecall:
-put db 507 sp #store sp for external read
-put db 506 ra #store ra for external read
-put db 504 r2 #store stuck value for external read
-put db 502 r5 #WAYZ, meaning TargetZ
-put db 501 r4 #WAYX, meaning TargetX
+put db 507 sp #sp, all these are read only
+put db 506 ra #ra
+put db 504 r2 #stuck
+put db 502 r5 #WAYZ
+put db 501 r4 #WAYX
+put db 500 r7 #MiningErrorFlag
 ls r0 robotXmitter 0 Charge #check if below SP 505
 get r1 db 505 #check charge value against SP 505 in watts
 slt r6 r0 r1
