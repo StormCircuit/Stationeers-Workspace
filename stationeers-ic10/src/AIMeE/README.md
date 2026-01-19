@@ -31,26 +31,30 @@ Note: MinimumError, and TimeoutError can be left alone
 
 **Error modes:**
 Aimee will set roboroutine's housing Setting to 1 to indicate an error.
-This could mean one of two things:
+This could mean one of three things:
 The mining site is not viable (go out and check or just set a new site)
 Her battery is below 70,000 Kw. Small batteries will instantly error her.
-
+Her damage is over 0
+Any of these errors will cause the housing of roboroutine to have Setting = 1.
+Mining site errors can be cleared by having recallLever's Setting = 1. Doing so will make the roboroutine housing Setting go from 1 to 0.
+Battery and damage errors can only be cleared by repairing aimee
 
 **Configuration:**
 **SP 511** is the last waypoint multiplied by 2 which is literally the last SP address aimee will use before she begins mining
 **SP 510** is the diameter of the mining range centered on the final waypoint. Aimees will randomly go to a coordinate pair within that diameter, creating a circle around the waypoint over time
 
 **Error variables:**
-All these variables can probably be left alone, I tuned them on my own save on the moon.
-Still, I exposed them in case I want to make an Aimee super army
+These can be adjusted in real time as they are loaded when checked.
 **SP 509** is MinimumOreError, if Aimee sees LESS ore than this, she will go home once TimeoutError is reached
 **SP 508** is TimeoutError. Aimee will drive in circles doing nothing for this many seconds, attempting to mine, before she gives up and flags an error
 
 **Other Variables:**
-**SP 507** is MineablesInVicinity. it is written to during every mining check
-**SP 506** is Charge. It is written to every recall check
-**SP 505** is Damage of Battery. It is written to every recall check
-**SP 504** is current SP.
-**SP 503** is aimee's mode. This is written every recall check
-**SP 502** is Aimee's PositionZ
-**SP 501** is Aimee's PositionX
+**SP 507** is current SP.
+**SP 506** is Aimee's ra register. You can determine where she is in the program with this
+Valid numbers are:
+Traveling: 83
+Mining: 59
+Going to mine site: 35
+Going home: 16
+Unloading: 7
+**SP 506** is Aimee's internal stuck register. You can read how high the timeout currently is when traveling and when mining. Once this value is equal to SP 508, she will trigger pathfinding mode while traveling or while mining she triggers a mining error if MineablesInVicinity are less than SP 509.

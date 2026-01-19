@@ -1,31 +1,30 @@
 alias robotXmitter d0  #=Based on Cows Are Evil, modified EXTENSIVELY by StormCircuit=
 alias recallLever d1   #Anything with a Setting. 1 = recall/reset error
-s robotXmitter Mode 0 #stuck is r2, r3 is topOfStack, r4 is WAYX, r5 is WAYZ
-s db Setting 0
-unload:
-move sp 0 #realign sp to prepare for travel to unload point
-unloadLoop:
+s robotXmitter Mode 0  #r2=stuck,r3=topOfStack,r4=WAYX,r5=WAYZ,r6=Error,r7=MiningError
+unload:               #r15=ra
+move sp 0 #realign sp
 get r3 db 511 #load new max waypoints at unload position
 jal batteryWeatherCheckRecall
-bnez r0 unloadLoop
+brnez r6 -2 #skip back to unload loop
 s robotXmitter Mode 4
-sleep 1
+yield  #=BEGIN UNLOAD LOOP= 
 l r0 robotXmitter Mode
-beq r0 4 unloadLoop
+breq r0 4 -2  #=END UNLOAD LOOP=
 beq r0 0 goingToWork
 goingHomeStart:
-add sp sp 1 #add 1 to sp to reverse stack (accessible when mining/goingToWork)
+add sp sp 1 #accessible if mining/goingToWork
+jal batteryWeatherCheckRecall #update stack
 ble sp 1 unload #==BEGIN GOING HOME LOOP==#
 sub sp sp 1
 peek r5
 sub sp sp 1
 peek r4
-brgt sp 1 5 #if first waypoint in stack, randomize coords by +2.5 or -2.5
+brgt sp 1 5 #collision avoidance
 rand r0
 mul r0 r0 5
 sub r0 r0 2.5
 jr 2 #use random number for r0, skip using -1
-move r0 -1 #sub 1 from r4/Z to move coords to the left and avoid collisions
+move r0 -1 
 add r4 r4 r0
 add r5 r5 r0
 s robotXmitter TargetX r4
@@ -34,7 +33,7 @@ jal travel
 jr -16 #==END GOING HOME LOOP==
 goingToWork:
 jal batteryWeatherCheckRecall
-bne r0 0 goingHomeStart
+bne r6 0 goingHomeStart
 add sp sp 1
 peek r4
 add sp sp 1
@@ -45,7 +44,7 @@ get r1 db 510 # mining range is stored at stack address 510 by robomaps
 mul r0 r0 r1
 div r1 r1 2
 sub r0 r0 r1
-jr 2 #skip next to use randomized r0 value
+jr 2
 move r0 1
 add r4 r4 r0
 add r5 r5 r0
@@ -58,17 +57,17 @@ mineOreSearch:
 s robotXmitter Mode 3
 move r2 0
 jal batteryWeatherCheckRecall  #==BEGIN MINING WAIT LOOP==#
-bne r0 0 goingHomeStart
-add r2 r2 1
+bne r6 0 goingHomeStart
+add r2 r2 1 #add to stuck
 get r0 db 508 #timeout max stored at 508, if we go over we potentialy trigger a error
-brlt r2 r0 8
-l r0 robotXmitter MineablesInVicinity
-put db 507 r0 #put MineablesInVicinity in 507 for external reading
+brlt r2 r0 10
 get r1 db 509 #if theres less ore than the number at this stack, error
 brle r0 r1 3
-sub sp sp 2 #move stack back 2 to previous waypoint, find new spot
+sub sp sp 2
 j goingToWork
-j MiningSiteError #if mineables <= SP 509 AND wandering, error
+s db Setting 1 #mining error triggered
+move r7 1
+j goingHomeStart #if mineables <= SP 509 AND wandering, error
 yield
 l r0 robotXmitter Mode
 breq r0 3 -14 #==END MINING WAIT LOOP==
@@ -76,13 +75,13 @@ beq r0 6 goingHomeStart
 j mineOreSearch
 travel:
 s robotXmitter Mode 2
-move r1 ra #store ra
+move r15 ra #store ra
 l r0 robotXmitter PositionY #==BEGIN TRAVEL WAIT LOOP ON THIS LINE==
-s robotXmitter TargetY r0  #set target Y to current Y to avoid path issues
+s robotXmitter TargetY r0
 jal batteryWeatherCheckRecall
-breqz r0 5
-brlt r1 goingToWork 4 # if from gohome, skip next
-move r1 goingHomeStart
+breqz r6 5
+brlt r15 goingToWork 4 # if from gohome, skip next
+move r15 goingHomeStart
 sub sp sp 2 #store gohome in r1, get last waypoint
 s robotXmitter Mode 0 #set robot to idle to trigger instant reverse
 l r0 robotXmitter VelocityMagnitude
@@ -93,36 +92,31 @@ bge r2 70 pathfind  #perform r2 checking, give aimee a chance to bounce
 yield
 l r0 robotXmitter Mode
 brne r0 0 -15 #==END TRAVEL WAIT LOOP ON THIS LINE==
-put db 504 sp #store last visited sp for external use
-j r1 #use stored ra, if error/recall is on then this is goingHome
+j r15 #use stored ra, if error/recall is on then this is goingHome
 pathfind:
 s robotXmitter Mode 5
 sleep 10
 s robotXmitter Mode 2
 move r2 0
-jr -23 #==LOOP BACK TO BEGIN TRAVEL WAIT LOOP==
-MiningSiteError:
-s db Setting 1
-move r0 1
-j goingHomeStart
+jr -22 #==LOOP BACK TO BEGIN TRAVEL WAIT LOOP==
 batteryWeatherCheckRecall:
-l r0 robotXmitter PositionX
-put db 501 r0
-l r0 robotXmitter PositionZ
-put db 502 r0
+put db 507 sp #store sp for external use
+put db 506 ra #store ra for external use
 ls r0 robotXmitter 0 Damage
-put db 505 r0
-brnez r0 4
-ls r0 robotXmitter 0 Charge
-put db 506 r0
-slt r0 r0 70000
-breq r0 1 7 #go straight to error
-lb r0 1997212478 NextWeatherEventTime Sum
-brnez r0 7 #if weather, skip Setting and lever
+ls r1 robotXmitter 0 Charge
+slt r1 r1 70000 #Do not use wireless batteries with aimee, they are too small
+or r6 r0 r1 #r6 = 1 if either are bad
+brnez r6 7 #if damage/charge check = 1 then skip lever, SET error SIGNAL/Setting
 l r0 recallLever Setting
-brne r0 1 5 #if lever on, reset error and set r0 = 1
+or r6 r6 r0 #if lever OR damage/charge = 1 then r6 = 1
+breqz r0 4 #if lever set, error SIGNAL/Setting must clear, MiningError must clear
 s db Setting 0
-jr 3
-move r0 1
-s db Setting r0
-j ra #if any checks pass, r0 = 1 else r0 = 0.
+move r7 0
+jr 2
+s db Setting r6 #this means you can clear a battery or damage error by just fixing it
+lb r0 1997212478 NextWeatherEventTime Sum
+or r6 r6 r0 #If damage/charge OR lever OR weather THEN set recall, maintain error
+or r6 r6 r7 #if any above OR mining error, recall
+j ra
+
+
