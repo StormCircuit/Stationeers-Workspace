@@ -4,6 +4,8 @@ alias topStack r15
 push HASH("ItemPureIceVolatiles")
 push HASH("ItemPureIceLiquidVolatiles")
 push HASH("ItemVolatiles")
+#push HASH("ItemBiomass") #if you want biomass too, as they make volatiles
+#push HASH("ItemCobaltOre") #if you want cobalt too, as they have a small amount of vols
 
 programLoop:
 #get the hash
