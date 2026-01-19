@@ -1,0 +1,23 @@
+alias sorterToProgram d0
+alias topStack r15
+
+push HASH("ItemSpaceIce")
+
+programLoop:
+#get the hash
+pop r0
+
+#pack hash by adjusting it to the left 8
+#if this doesn't make sense, remember:
+#bits are read from the right to the left
+sll r0 r0 8 #offset 8 for opcode
+
+#OR it with instruction we want in the sorter to put the opcode in
+or r0 r0 SorterInstruction.FilterPrefabHashNotEquals
+
+#put it in stack of sorter, use sp for address
+put d0 sp r0
+
+brle sp 0 2
+j programLoop
+#program end
