@@ -66,4 +66,3 @@ Note: Aimee will only idle if the recall device has Setting = 1
 **SP 504** is Aimee's internal stuck register. You can read how high the timeout currently is when traveling and when mining. Once this value is equal to SP 508, she will trigger pathfinding mode while traveling or while mining she triggers a mining error if MineablesInVicinity are less than SP 509.
 **SP 502** is the set TargetZ
 **SP 501** is the set TargetX
-**SP 500** is the internal error value. This will only not = Setting when a storm is active but no other error is
