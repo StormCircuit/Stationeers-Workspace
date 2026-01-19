@@ -96,7 +96,7 @@ pathfind:
 s robotXmitter Mode 5
 sleep 10
 move r2 0
-jr travelLoop #==GO BACK TO BEGIN TRAVEL WAIT LOOP==
+j travelLoop #==GO BACK TO BEGIN TRAVEL WAIT LOOP==
 batteryWeatherCheckRecall:
 put db 507 sp #sp, all these are read only
 put db 506 ra #ra
