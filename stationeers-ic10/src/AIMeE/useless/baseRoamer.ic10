@@ -1,0 +1,13 @@
+s db Mode 1
+yield
+sleep 10
+s db Mode 0
+yield
+sleep 7
+s db Mode 3
+yield
+sleep 7
+s db Mode 0
+yield
+sleep 20
+j 0
