@@ -1,0 +1,22 @@
+alias sorterToProgram d0
+
+push HASH("ItemPureIce")
+push HASH("ItemIce")
+push HASH("ItemPureIceSteam")
+
+programLoop:
+pop r0
+#pack hash by adjusting it to the left 8
+#if this doesn't make sense, remember:
+#bytes (8 bits) are read from the right to the left
+sll r0 hash 8 #offset 8 for opcode
+
+#or it with instruction we want in the sorter
+or r0 r0 SorterInstruction.FilterPrefabHashNotEquals
+
+#put it in stack address 0 of the sorter
+put d0 0 r0
+
+breq sp 1 2
+j programLoop
+#program end

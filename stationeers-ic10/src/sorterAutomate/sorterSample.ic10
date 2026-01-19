@@ -1,0 +1,16 @@
+
+
+alias sorterToProgram d0
+
+define r0 HASH("ItemPureIceVolatiles")
+
+#pack hash by adjusting it to the left 8
+#if this doesn't make sense, remember:
+#bytes (8 bits) are read from the right to the left
+sll r0 hash 8 #offset 8 for opcode
+
+#or it with instruction to put the opcode at the beginning
+or r0 r0 SorterInstruction.FilterPrefabHashNotEquals
+
+#put it in stack address 0 of the sorter
+put d0 0 r0
