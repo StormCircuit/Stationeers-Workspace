@@ -1,0 +1,97 @@
+#a fun script I made while bug testing aimee roboroutine
+#aimee does a circuit with the waypoints given.
+#assumes line of sight to each given
+
+alias robotXmitter d0  #=Based on Cows Are Evil, modified EXTENSIVELY by StormCircuit=
+alias recallLever d1   #Anything with a Setting. 1 = recall/reset error
+s robotXmitter Mode 0 
+#r2=stuck,r3=topOfStack,r4=WAYX,r5=WAYZ,r6=Error.r15=ra
+
+unload:               
+get r3 db 511 #load new max waypoints now that we did a circuit
+jal batteryWeatherCheckRecall #if error, loop since we are at waypoint 0
+brnez r6 2
+move sp 0
+j goingToWork
+
+goingHomeStart:
+add sp sp 1 #accessible if mining/goingToWork
+jal batteryWeatherCheckRecall #update stack
+ble sp 1 unload #==BEGIN GOING HOME LOOP==#
+sub sp sp 1
+peek r5
+sub sp sp 1
+peek r4
+move r0 -1 
+add r4 r4 r0
+add r5 r5 r0
+s robotXmitter TargetX r4
+s robotXmitter TargetZ r5
+jal travel
+jr -12 #==END GOING HOME LOOP==
+goingToWork:
+jal batteryWeatherCheckRecall
+bne r6 0 goingHomeStart
+add sp sp 1
+peek r4
+add sp sp 1
+peek r5
+move r0 1
+add r4 r4 r0
+add r5 r5 r0
+s robotXmitter TargetX r4
+s robotXmitter TargetZ r5
+jal travel
+bge sp r3 unload
+j goingToWork
+
+
+travel:
+s robotXmitter Mode 2
+move r15 ra #store ra
+l r0 robotXmitter PositionY #==BEGIN TRAVEL WAIT LOOP ON THIS LINE==
+s robotXmitter TargetY r0
+jal batteryWeatherCheckRecall
+breqz r6 5
+brlt r15 goingToWork 4 # if from gohome, skip next
+move r15 goingHomeStart
+sub sp sp 2 #store gohome in r1, get last waypoint
+s robotXmitter Mode 0 #set robot to idle to trigger instant reverse
+l r0 robotXmitter VelocityMagnitude
+slt r0 r0 0.2
+mul r2 r2 r0
+add r2 r2 r0
+bge r2 70 pathfind  #perform r2 checking, give aimee a chance to bounce
+yield
+l r0 robotXmitter Mode
+brne r0 0 -15 #==END TRAVEL WAIT LOOP ON THIS LINE==
+j r15 #use stored ra, if error/recall is on then this is goingHome
+pathfind:
+s robotXmitter Mode 5
+sleep 10
+s robotXmitter Mode 2
+move r2 0
+jr -22 #==LOOP BACK TO BEGIN TRAVEL WAIT LOOP==
+
+
+batteryWeatherCheckRecall:
+put db 507 sp #store sp for external use
+put db 506 ra #store ra for external use
+put db 505 r2 #put current stuck value for external use
+ls r0 robotXmitter 0 Damage
+ls r1 robotXmitter 0 Charge
+slt r1 r1 70000 #Do not use wireless batteries with aimee, they are too small
+or r6 r0 r1 #r6 = 1 if either are bad
+brnez r6 7 #if damage/charge check = 1 then skip lever, SET error SIGNAL/Setting
+l r0 recallLever Setting
+or r6 r6 r0 #if lever OR damage/charge = 1 then r6 = 1
+breqz r0 4 #if lever set, error SIGNAL/Setting must clear, MiningError must clear
+s db Setting 0
+move r7 0
+jr 2
+s db Setting r6 #this means you can clear a battery or damage error by just fixing it
+lb r0 1997212478 NextWeatherEventTime Sum
+or r6 r6 r0 #If damage/charge OR lever OR weather THEN set recall, maintain error
+j ra
+
+
