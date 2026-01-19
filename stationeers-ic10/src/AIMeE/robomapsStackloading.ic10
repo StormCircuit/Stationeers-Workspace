@@ -1,0 +1,32 @@
+define AIMEE1 HASH("aimee1")
+define AIMEE2 HASH("aimee2")
+define AIMEE3 HASH("aimee3")
+define AIMEE4 HASH("aimee4")
+define AIMEE5 HASH("aimee5")
+define AIMEE6 HASH("aimee6")
+define AIMEE7 HASH("aimee7")
+define AIMEE8 HASH("aimee8")
+define AIMEE9 HASH("aimee9")
+define AIMEE10 HASH("aimee10")
+define AIMEE11 HASH("aimee11")
+define AIMEE12 HASH("aimee12")
+define AIMEE13 HASH("aimee13")
+define AIMEE14 HASH("aimee14")
+define AIMEE15 HASH("aimee15")
+define AIMEE16 HASH("aimee16")
+put db 0 AIMEE1
+put db 1 AIMEE2
+put db 2 AIMEE3
+put db 3 AIMEE4
+put db 4 AIMEE5
+put db 5 AIMEE6
+put db 6 AIMEE7
+put db 7 AIMEE8
+put db 8 AIMEE9
+put db 9 AIMEE10
+put db 10 AIMEE11
+put db 11 AIMEE12
+put db 12 AIMEE13
+put db 13 AIMEE14
+put db 14 AIMEE15
+put db 15 AIMEE16
