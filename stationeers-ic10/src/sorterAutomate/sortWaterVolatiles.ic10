@@ -1,0 +1,86 @@
+alias sorterVolatiles d0
+alias sorterOre d1
+alias sorterWater d2
+
+sb HASH("StructureLogicSorter") On 1
+
+push HASH("ItemPureIceVolatiles")
+push HASH("ItemPureIceLiquidVolatiles")
+push HASH("ItemVolatiles")
+
+bdns sorterVolatiles programLoopEnd
+s sorterVolatiles Mode 1
+programLoop:
+pop r0
+#pack hash by adjusting it to the left 8
+#if this doesn't make sense, remember:
+#bytes (8 bits) are read from the right to the left
+sll r0 r0 8 #offset 8 for opcode
+
+#or it with instruction we want in the sorter
+or r0 r0 SorterInstruction.FilterPrefabHashEquals
+
+#put it in stack address 0 of the sorter
+put sorterVolatiles sp r0
+
+beq sp 0 programLoopEnd
+j programLoop
+programLoopEnd:
+
+push HASH("ItemReagentMix")
+push HASH("ItemIronOre")
+push HASH("ItemCopperOre")
+push HASH("ItemCoalOre")
+push HASH("ItemSiliconOre")
+push HASH("ItemGoldOre")
+push HASH("ItemSilverOre")
+push HASH("ItemCobaltOre")
+push HASH("ItemLeadOre")
+push HASH("ItemNickelOre")
+push HASH("ItemUraniumOre")
+
+bdns sorterOre programLoopEnd1
+s sorterOre Mode 1
+programLoop1:
+pop r0
+#pack hash by adjusting it to the left 8
+#if this doesn't make sense, remember:
+#bytes (8 bits) are read from the right to the left
+sll r0 r0 8 #offset 8 for opcode
+
+#or it with instruction we want in the sorter
+or r0 r0 SorterInstruction.FilterPrefabHashEquals
+
+#put it in stack address 0 of the sorter
+put sorterOre sp r0
+
+beq sp 0 programLoopEnd1
+j programLoop1
+programLoopEnd1:
+
+
+push HASH("ItemPureIce")
+push HASH("ItemIce")
+push HASH("ItemPureIceSteam")
+
+bdns sorterWater programLoopEnd1
+s sorterWater Mode 1
+programLoop2:
+pop r0
+#pack hash by adjusting it to the left 8
+#if this doesn't make sense, remember:
+#bytes (8 bits) are read from the right to the left
+sll r0 r0 8 #offset 8 for opcode
+
+#or it with instruction we want in the sorter
+or r0 r0 SorterInstruction.FilterPrefabHashEquals
+
+#put it in stack address 0 of the sorter
+put sorterWater sp r0
+
+beq sp 0 programLoopEnd2
+j programLoop2
+programLoopEnd2:
+
+
+#program end
