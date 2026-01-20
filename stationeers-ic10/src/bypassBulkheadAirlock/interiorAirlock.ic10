@@ -100,11 +100,11 @@ l r0 sensor Pressure
 lb r1 SENSOR Pressure Average
 lb r2 SENSOR Pressure Minimum
 sne airlockmode r0 r2 # Check for multiple sensors
-sap r0 r0 r1 0.1 # Max pressure difference %
+sap r0 r0 r1 0.15 # Max pressure difference %
 and airlockmode airlockmode r0
 l r0 sensor Temperature
 lb r1 SENSOR Temperature Minimum
-sap r0 r0 r1 0.1 # Max temperature difference %K
+sap r0 r0 r1 0.15 # Max temperature difference %K
 and airlockmode airlockmode r0
 lb r0 SENSOR RatioVolatiles Maximum
 slt r0 r0 0.005 # Max volatiles %

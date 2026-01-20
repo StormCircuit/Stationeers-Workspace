@@ -1,0 +1,13 @@
+#setup alias's
+alias furnace d0
+alias isFull r0
+start:
+# if furnace is full jump to activateFurnace, else jump to end
+ls isFull furnace 0 Occupied
+bne isFull 0 activateFurnace
+j end
+activateFurnace:
+s furnace Activate 1
+end:
+sleep 3
+j start

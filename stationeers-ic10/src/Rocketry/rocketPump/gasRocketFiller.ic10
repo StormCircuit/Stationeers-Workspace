@@ -1,14 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <DateTime>133784434814482223</DateTime>
-  <GameVersion>0.2.5367.24106</GameVersion>
-  <Title>rocketPump</Title>
-  <Description>hookup to fuel a rocket. Requires:
-pump&gt;holding tank&gt;pump
-also LED, Lever, and Memory​</Description>
-  <Author>Rizzard of Oz</Author>
-  <WorkshopFileHandle>0</WorkshopFileHandle>
-  <Instructions>#README:
+#README:
 #CHECK THAT PRESSURE PUMP MODES ARE CORRECT BELOW.
 #Pressurization Pump: Mode 1 is PRESSURIZING rocket
 
@@ -63,12 +53,9 @@ yield
 j pressurizationLoop
 
 #close tower umbilical
-#then set the pump to reverse, to move gas stuck in pipes back to storage
 pressurizationEnd:
 s towerGasUmbilical Open 0
-yield
-s pressurizationPump Mode 0
-s pressurizationPump Setting 100
+s pressurizationPump Setting 0
 s activationLever Open 0
 yield
 j awaitingInitialization
@@ -98,5 +85,4 @@ s LED On 1
 j previousLine
 blinkOff:
 s LED On 0
-j previousLine</Instructions>
-</InstructionData>
+j previousLine

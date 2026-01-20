@@ -1,0 +1,29 @@
+
+alias radiatorValve d0
+alias gasTempDevice d2
+
+alias currPressure r2
+
+define minPressurePa 5000
+define maxPressurePa 5500
+
+
+#simple schmitt trigger
+
+start:
+
+lowPressure:
+s db Mode 0
+l currPressure db PressureInput
+s db Setting currPressure
+bgeal currPressure maxPressurePa highPressure
+yield
+j lowPressure
+
+highPressure:
+s db Mode 1
+l currPressure gasTempDevice Temperature
+s db Setting currPressure
+blt currPressure minPressurePa lowPressure
+yield
+j highPressure

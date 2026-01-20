@@ -4,8 +4,8 @@ alias gasTempDevice d1
 
 alias currentTemp r2
 
-define minTempKelvin 450
-define maxTempKelvin 460
+define minTempKelvin 650
+define maxTempKelvin 700
 
 
 #simple schmitt trigger
