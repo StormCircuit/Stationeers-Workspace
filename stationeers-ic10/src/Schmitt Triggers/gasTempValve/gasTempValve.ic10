@@ -3,7 +3,8 @@ alias gasTempDevice d3
 
 alias currentTemp r2
 
-define maxTempKelvin 292
+define minTempKelvin 290
+define maxTempKelvin 295
 
 start:
 #DEFAULT TO OFF ON STARTUP TO AVOID ISSUES
@@ -16,7 +17,7 @@ closeValve:
 s gateValve On 0
 l currentTemp gasTempDevice Temperature
 s db Setting currentTemp
-ble currentTemp maxTempKelvin openValve
+ble currentTemp minTempKelvin openValve
 yield
 sleep 10
 j closeValve
