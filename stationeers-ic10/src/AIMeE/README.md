@@ -46,7 +46,7 @@ Battery and damage errors can only be cleared by repairing aimee
 **CAUTION: AIMEE CAN WANDER FROM HER MINING AREA, TIGHTEN TIMEOUT TIME, MINIMUM ORE ERROR,**
 **AND MINING RANGE IN DANGEROUS AREAS!!! SHE HAS NO GEOFENCING!!**
 
-**Error variables:**
+**Error Configuration:**
 These can be adjusted in real time as they are loaded when checked.
 **SP 509** is MinimumOreError, if Aimee sees LESS ore than this, she will go home once TimeoutError is reached
 **SP 508** is TimeoutError. Aimee will drive in circles doing nothing for this many seconds, attempting to mine, before she gives up and flags an error
@@ -65,4 +65,4 @@ Mining: 2
 **SP 504** is Aimee's internal stuck register. You can read how high the timeout currently is when traveling and when mining. Once this value is equal to SP 508, she will trigger pathfinding mode while traveling or while mining she triggers a mining error if MineablesInVicinity are less than SP 509.
 **SP 502** is the set TargetZ
 **SP 501** is the set TargetX
-**SP 500** is the MiningError flag, aimees flag this if they feel a site is not viable
+**SP 500** is the MiningError flag, aimees flag this if the site has less than SP 509
