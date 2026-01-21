@@ -14,6 +14,10 @@ define AIMEE13 HASH("aimee13")
 define AIMEE14 HASH("aimee14")
 define AIMEE15 HASH("aimee15")
 define AIMEE16 HASH("aimee16")
+define AIMEE17 HASH("aimee17")
+define AIMEE18 HASH("aimee18")
+define AIMEE19 HASH("aimee19")
+define AIMEE20 HASH("aimee20")
 put db 0 AIMEE1
 put db 1 AIMEE2
 put db 2 AIMEE3
@@ -30,3 +34,7 @@ put db 12 AIMEE13
 put db 13 AIMEE14
 put db 14 AIMEE15
 put db 15 AIMEE16
+put db 16 AIMEE17
+put db 17 AIMEE18
+put db 18 AIMEE19
+put db 19 AIMEE20
