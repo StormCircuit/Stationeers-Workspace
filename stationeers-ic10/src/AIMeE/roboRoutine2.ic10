@@ -1,0 +1,118 @@
+alias robotXmitter d0  #=Based on Cows Are Evil, modified EXTENSIVELY by StormCircuit=
+alias recallSignal d1   #Anything with a Setting. 1 = recall/reset error
+s robotXmitter Mode 0  #r2=stuck,r3=topOfStack,r4=WAYX,r5=WAYZ,r6=Error,r7=MiningError
+                        #r8=stackDirection,r15=ra
+unload:                
+move r8 0
+move sp 0 #realign sp
+get r3 db 511 #load new max waypoints at unload position
+jal batteryWeatherCheckRecall
+brnez r6 -2 #skip back to unload loop
+s robotXmitter Mode 4
+move r8 -2
+unloadWait:
+yield
+jal batteryWeatherCheckRecall #perform error checking
+brnez r6 -1 #wait for recall signal off
+l r0 robotXmitter Mode
+beq r0 4 unloadWait
+beq r0 0 goingToWorkStart
+
+goingHomeStart:
+add sp sp 1 #accessible if mining/goingToWork
+move r8 -1
+j getNewWaypoint
+goingToWorkStart:
+move r8 1
+getNewWaypoint:
+jal batteryWeatherCheckRecall
+bnez r6 goingHomeStart
+add sp sp r8 #add 1 if going to mine, add -1 if going home
+peek r4
+add sp sp r8
+peek r5
+brlt sp r3 7 #if last waypoint, randomize coords by mining radius, else add 1 if outgoing
+rand r0
+get r1 db 510 # mining range is stored at stack address 510 by robomaps
+mul r0 r0 r1
+div r1 r1 2
+sub r0 r0 r1
+jr 2
+seq r0 r8 1 #if going to work, add 1 to coords. Else, add 0 (collision avoidance)
+add r4 r4 r0
+add r5 r5 r0
+s robotXmitter TargetX r4
+s robotXmitter TargetZ r5
+jal travel #initiate travel
+ble sp 1 unload #if first waypoint then unload
+bge sp r3 mineOreSearch #if sp = last waypoint, start mining
+j getNewWaypoint
+
+travel:
+move r15 ra #store ra
+travelLoop: #==BEGIN TRAVEL WAIT LOOP ON THIS LINE==
+s robotXmitter Mode 2  
+l r0 robotXmitter PositionY
+s robotXmitter TargetY r0
+jal batteryWeatherCheckRecall
+breqz r0 5
+breq r8 -1 4 # if goingHome, skip next
+move r15 goingHomeStart
+sub sp sp 2 #store gohome in r15, get last waypoint
+s robotXmitter Mode 0 #set robot to idle to trigger instant reverse
+yield
+l r0 robotXmitter Mode
+bne r0 0 travelLoop #==END TRAVEL WAIT LOOP ON THIS LINE==
+j r15 #use stored ra, if error/recall is on then this is goingHomeStart
+
+mineOreSearch:
+s robotXmitter Mode 3
+move r2 0
+move r8 2
+miningWaitLoop:
+jal batteryWeatherCheckRecall
+bne r6 0 goingHomeStart
+add r2 r2 1 #add to stuck
+get r0 db 508 #timeout max stored at 508, if we go over we potentialy trigger a error
+brlt r2 r0 9
+get r1 db 509 #if theres less ore than the number at this stack, error
+l r0 robotXmitter MineablesInVicinity
+brle r0 r1 3
+sub sp sp 2
+j goingToWorkStart
+s db Setting 1 #mining error triggered
+move r7 1
+j goingHomeStart #if mineables <= SP 509 AND wandering, error
+yield
+l r0 robotXmitter Mode
+beq r0 3 miningWaitLoop
+beq r0 6 goingHomeStart
+j mineOreSearch
+
+batteryWeatherCheckRecall:
+put db 507 sp #sp, all these are read only
+put db 506 r8 #r8, stack direction (going out or going home)
+put db 504 r2 #stuck
+put db 502 r5 #WAYZ
+put db 501 r4 #WAYX
+put db 500 r7 #MiningErrorFlag
+ls r0 robotXmitter 0 Charge #check if below SP 505
+get r1 db 505 #check charge value against SP 505 in watts
+slt r6 r0 r1
+ls r0 robotXmitter 0 Damage #check BATTERY damage
+get r1 db 503
+sgt r0 r0 r1 #check BATTERY damage value against SP 503 in PERCENTAGE
+or r6 r6 r0 #r6 = 1 if either are bad
+brnez r6 9 #if damage/charge check = 1 then skip rest, SET error SIGNAL/Setting
+or r6 r6 r7 #if any above OR mining error, recall
+l r0 recallSignal Setting
+seq r0 r0 1 #normalize the recall signal, MUST = 1
+or r6 r6 r0 #if lever OR damage/charge = 1 then r6 = 1
+breqz r0 4 #if lever set, error SIGNAL/Setting must clear, MiningError must clear
+s db Setting 0
+move r7 0
+jr 2
+s db Setting r6 #this means you can clear a battery or damage error by just fixing it
+lb r0 1997212478 NextWeatherEventTime Sum
+or r6 r6 r0 #If damage/charge/Mining Error/recall signal/ then r6 = 1
+j ra

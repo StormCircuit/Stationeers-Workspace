@@ -55,14 +55,13 @@ These can be adjusted in real time as they are loaded when checked.
 
 **Other Variables:**
 **SP 507** is current SP.
-**SP 506** is Aimee's ra register. You can determine where she is in the program with this
+**SP 506** is Aimee's r8 register, indicating where she is in the program
 Valid numbers are:
-Traveling: 81
-Mining: 59
-Going to mine site: 35
-Going home: 16
-Unloading/Idling: 7
-Note: Aimee will only idle if the recall device has Setting = 1
+Unloading: -2
+Going home: -1
+Idling: 0
+Going to work: 1
+Mining: 2
 **SP 504** is Aimee's internal stuck register. You can read how high the timeout currently is when traveling and when mining. Once this value is equal to SP 508, she will trigger pathfinding mode while traveling or while mining she triggers a mining error if MineablesInVicinity are less than SP 509.
 **SP 502** is the set TargetZ
 **SP 501** is the set TargetX
