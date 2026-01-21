@@ -1,0 +1,11 @@
+#mirror aimees logic variables
+#save some sanity and just edit this file with what you need
+
+alias aimee d0
+
+monitorLoop:
+l r0 aimee Power
+push r0
+
+yield
+j monitorLoop
