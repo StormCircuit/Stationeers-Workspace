@@ -36,9 +36,11 @@ add sp sp 1
 peek r5
 brlt sp r3 7 #if last waypoint in stack, randomize coords by given memory
 rand r0
+rand r1
+brgt r1 0.5 2 #randomly invert sign of random offset
+mul r0 r0 -1
 get r1 db 510 # mining range is stored at stack address 510 by robomaps
 mul r0 r0 r1
-div r1 r1 2
 sub r0 r0 r1
 jr 2
 move r0 1
@@ -83,20 +85,10 @@ brlt r15 goingToWork 4 # if from gohome, skip next
 move r15 goingHomeStart
 sub sp sp 2 #store gohome in r1, get last waypoint
 s robotXmitter Mode 0 #set robot to idle to trigger instant reverse
-l r0 robotXmitter VelocityMagnitude
-slt r0 r0 0.2
-mul r2 r2 r0
-add r2 r2 r0
-bge r2 70 pathfind  #perform r2 checking, give aimee a chance to bounce
 yield
 l r0 robotXmitter Mode
 bne r0 0 travelLoop #==END TRAVEL WAIT LOOP ON THIS LINE==
 j r15 #use stored ra, if error/recall is on then this is goingHome
-pathfind:
-s robotXmitter Mode 5
-sleep 10
-move r2 0
-j travelLoop #==GO BACK TO BEGIN TRAVEL WAIT LOOP==
 batteryWeatherCheckRecall:
 put db 507 sp #sp, all these are read only
 put db 506 ra #ra

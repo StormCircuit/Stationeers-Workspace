@@ -1,9 +1,9 @@
 #see readme online if this looks like french to you
-define MiningRange 100 #radius from center of mining site to search
+define MiningRange 212 #radius from center of mining site to search
 define LastWaypoint 7 #the mining site waypoint (must be last waypoint)
 define MinimumOreError 0 #EQUAL OR LESS than this causes error, will return home
 define TimeoutError 600 #EQUAL OR GREATER in seconds, after which checks MinimumOreError
-define PauseTimeOutAtStart 0 #1 for On, 0 for Off. Keeps aimee out until full for 20 mins
+define PauseTimeOutAtStart 1 #1 for On, 0 for Off. Keeps aimee out until full for 20 mins
 define ChargeError 70000 #the watts level below which aimee flags a charge error
 define DamageError 0 #the percentage her BATTERY has damage above which Aimee flags error
 define UnloadRadius 2.5 #the radius from the unload point we can stop when unloading
@@ -18,11 +18,11 @@ define z4 -1281
 define x5 -937
 define z5 -1266
 define x6 -1037
-define z6 -1281
-define x7 -1371
-define z7 -1298
-define x8 0
-define z8 0
+define z6 -1127
+define x7 -1200
+define z7 -1400
+define x8 -1068
+define z8 -1800
 define x9 0
 define z9 0
 define x10 0
@@ -42,7 +42,7 @@ lbn r0 AIMEEhousing r0 ReferenceId 1
 beqz r0 aimeeStackLoadLoop
 rand r4  #use randomize radius of x1, z1
 mul r4 UnloadRadius r4
-div r4 r4 2
+mul r4 r4 2
 sub r2 r4 UnloadRadius
 add r3 x1 r2 #put randomized unloading point in x1, z1
 put r0 0 r3
@@ -75,11 +75,10 @@ put r0 503 DamageError
 yield
 j aimeeStackLoadLoop
 aimeeStackLoadLoopEnd:
-move sp 16
+move sp 20
 move minOre MinimumOreError
 sleep 1800
-lb r0 -693235651 MineablesInVicinity Average
-brlt r0 MinimumOreError 2
-move minOre -1 #if the average mineables > MinimumOreError, set -1 again
+#lb r0 -693235651 MineablesInVicinity Average
+#brlt r0 MinimumOreError 2
+#move minOre -1 #if the average mineables > MinimumOreError, set -1 again
 j aimeeStackLoadLoop   #else, use minimum ore error
-
