@@ -1,13 +1,13 @@
 #see readme online if this looks like french to you
-define MiningRange 212 #radius from center of mining site to search
-define LastWaypoint 7 #the mining site waypoint (must be last waypoint)
-define MinimumOreError 0 #EQUAL OR LESS than this causes error, will return home
-define TimeoutError 600 #EQUAL OR GREATER in seconds, after which checks MinimumOreError
+define MiningRange 100 #radius from center of mining site to search
+define LastWaypoint 8 #the mining site waypoint (must be last waypoint)
+define MinimumOreError 5 #EQUAL OR LESS than this causes error, will return home
+define TimeoutError 300 #EQUAL OR GREATER in seconds, after which checks MinimumOreError
 define PauseTimeOutAtStart 1 #1 for On, 0 for Off. Keeps aimee out until full for 20 mins
 define ChargeError 70000 #the watts level below which aimee flags a charge error
 define DamageError 0 #the percentage her BATTERY has damage above which Aimee flags error
 define UnloadRadius 2.5 #the radius from the unload point we can stop when unloading
-define x1 -917
+define x1 -916
 define z1 -1288
 define x2 -912
 define z2 -1287
@@ -18,7 +18,7 @@ define z4 -1281
 define x5 -937
 define z5 -1266
 define x6 -1037
-define z6 -1127
+define z6 -1287
 define x7 -1200
 define z7 -1400
 define x8 -1068
@@ -30,55 +30,63 @@ define z10 0
 #Code below
 define AIMEEhousing HASH("StructureCircuitHousingCompact")
 alias minOre r5 #Holding register for MinimumOreError
+alias lstwp r6
+mul lstwp LastWaypoint 2 #mul lastwaypoint by 2 as it's compared to sp
 move minOre -1 #Use -1 for 20 minutes before checking average mineables > MinimumOreError
 breq PauseTimeOutAtStart 1 2
 move minOre MinimumOreError #if pausetimeout 0, use minimumoreerror instantly
-mul r1 LastWaypoint 2 #mul lastwaypoint by 2 as it's compared to sp
 move sp 16
 aimeeStackLoadLoop:
 beq sp 0 aimeeStackLoadLoopEnd
-pop r0
-lbn r0 AIMEEhousing r0 ReferenceId 1
-beqz r0 aimeeStackLoadLoop
-rand r4  #use randomize radius of x1, z1
-mul r4 UnloadRadius r4
-mul r4 r4 2
-sub r2 r4 UnloadRadius
-add r3 x1 r2 #put randomized unloading point in x1, z1
-put r0 0 r3
-add r3 z2 r2
-put r0 1 r3
-put r0 2 x2
-put r0 3 z2
-put r0 4 x3
-put r0 5 z3
-put r0 6 x4
-put r0 7 z4
-put r0 8 x5
-put r0 9 z5
-put r0 10 x6
-put r0 11 z6
-put r0 12 x7
-put r0 13 z7
-put r0 14 x8
-put r0 15 z8
-put r0 16 x9 #this is an example of loading waypoints for aimee.
-put r0 17 z9 #aimee uses SP 500 and up so you can have about 249 waypoints
-put r0 18 x10
-put r0 19 z10
-put r0 511 r1 #last waypoint * 2
-put r0 510 MiningRange
-put r0 509 minOre
-put r0 508 TimeoutError
-put r0 505 ChargeError
-put r0 503 DamageError
+pop r15
+lbn r15 AIMEEhousing r15 ReferenceId 1
+beqz r15 aimeeStackLoadLoop
+
+#randomly offset unload
+jal getUnloadOffset
+add r3 x1 r0
+put r15 0 r3
+jal getUnloadOffset
+add r3 z1 r0
+put r15 1 r3
+
+put r15 2 x2
+put r15 3 z2
+put r15 4 x3
+put r15 5 z3
+put r15 6 x4
+put r15 7 z4
+put r15 8 x5
+put r15 9 z5
+put r15 10 x6
+put r15 11 z6
+put r15 12 x7
+put r15 13 z7
+put r15 14 x8
+put r15 15 z8
+put r15 16 x9 #this is an example of loading waypoints for aimee.
+put r15 17 z9 #aimee uses SP 500 and up so you can have about 249 waypoints
+put r15 18 x10
+put r15 19 z10
+put r15 511 lstwp #last waypoint * 2
+put r15 510 MiningRange
+put r15 509 minOre
+put r15 508 TimeoutError
+put r15 505 ChargeError
+put r15 503 DamageError
 yield
 j aimeeStackLoadLoop
 aimeeStackLoadLoopEnd:
 move sp 20
 move minOre MinimumOreError
 sleep 1800
-#lb r0 -693235651 MineablesInVicinity Average
-#brlt r0 MinimumOreError 2
-#move minOre -1 #if the average mineables > MinimumOreError, set -1 again
-j aimeeStackLoadLoop   #else, use minimum ore error
+j aimeeStackLoadLoop
+
+getUnloadOffset:
+move r1 UnloadRadius # Unload range is our max range
+rand r0
+mul r0 r1 r0
+rand r1 #randomly flip sign
+brgt r1 0.5 2
+mul r0 r0 -1
+j ra #go back to goingToWork
