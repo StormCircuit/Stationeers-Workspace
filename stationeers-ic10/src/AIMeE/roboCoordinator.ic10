@@ -1,9 +1,9 @@
 #user input section
-define MiningRange 50 #radius from center of mining site to search
+define MiningRange 75 #radius from center of mining site to search
 define LastWaypoint 7 #the mining site waypoint (must be last waypoint)
 define MinimumOreError 0 #EQUAL OR LESS than this causes error, will return home
 define TimeoutError 300 #EQUAL OR GREATER in seconds, after which checks MinimumOreError
-define PauseTimeOutAtStart 1 #1 for On, 0 for Off. Keeps aimee out until full for 20 mins
+define PauseTimeOutAtStart 0 #1 for On, 0 for Off. Keeps aimee out until full for 20 mins
 define ChargeError 70000 #the watts level below which aimee flags a charge error
 define DamageError 0 #the percentage her BATTERY has damage above which Aimee flags error
 define UnloadRadius 2.5 #the radius from the unload point we can stop when unloading
@@ -23,13 +23,11 @@ define x7 -1202
 define z7 -1347
 define x8 0
 define z8 0
-define x9 0
-define z9 0
-define x10 0
-define z10 0
 #Code below
 alias YourHardsuit d0
 alias YourTablet d1
+alias miningXLED d2
+alias miningZLED d3
 alias minOre r5 #Holding register for MinimumOreError
 move minOre -1 #Use -1 for 20 minutes before checking average mineables > MinimumOreError
 alias lstwp r6 #holding register for last waypoint
@@ -38,6 +36,10 @@ alias WAYX r7
 move WAYX x1
 alias WAYZ r8
 move WAYZ z1
+l r0 db Setting
+brne r0 1 3
+get WAYX db 510
+get WAYZ db 511
 alias timer r9
 move timer 0
 define AIMEEhousing HASH("StructureCircuitHousingCompact")
@@ -47,6 +49,12 @@ move sp 20
 aimeeStackLoadLoop:
 beq sp 0 aimeeStackLoadLoopEnd
 jal getTabletCoords
+ceil r0 WAYX
+brdns miningXLED 2
+s miningXLED Setting r0
+ceil r0 WAYZ
+brdns miningZLED 2
+s miningZLED Setting r0
 pop r15
 lbn r15 AIMEEhousing r15 ReferenceId 1
 beqz r15 aimeeStackLoadLoop
@@ -73,10 +81,6 @@ put r15 12 x7
 put r15 13 z7
 put r15 14 x8
 put r15 15 z8
-put r15 16 x9 #this is an example of loading waypoints for aimee.
-put r15 17 z9 #aimee uses SP 500 and up so you can have about 249 waypoints
-put r15 18 x10
-put r15 19 z10
 put r15 511 lstwp #last waypoint * 2
 put r15 510 MiningRange
 put r15 509 minOre
@@ -114,6 +118,9 @@ bdns d1 ra
 l r0 YourTablet Activate
 bne r0 1 ra
 l WAYX YourHardsuit PositionX
+put db 510 WAYX
 l WAYZ YourHardsuit PositionZ
+put db 511 WAYZ
+s db Setting 1
 s YourTablet Activate 0
 j ra
