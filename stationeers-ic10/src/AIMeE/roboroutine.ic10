@@ -16,7 +16,7 @@ goingHomeStart:
 add sp sp 1 #accessible if mining/goingToWork
 goingHomeLoop:
 jal batteryWeatherCheckRecall #==BEGIN GOING HOME LOOP==# update stack
-ble sp 1 unload 
+ble sp 1 unload
 sub sp sp 1
 peek r5
 sub sp sp 1
@@ -27,6 +27,7 @@ s robotXmitter TargetX r4
 s robotXmitter TargetZ r5
 jal travel
 j goingHomeLoop #==END GOING HOME LOOP==
+
 goingToWork:
 jal batteryWeatherCheckRecall
 bne r6 0 goingHomeStart
@@ -34,23 +35,26 @@ add sp sp 1
 peek r4
 add sp sp 1
 peek r5
-brlt sp r3 7 #if last waypoint in stack, randomize coords by given memory
-rand r0
-rand r1
-brgt r1 0.5 2 #randomly invert sign of random offset
-mul r0 r0 -1
-get r1 db 510 # mining range is stored at stack address 510 by robomaps
-mul r0 r0 r1
-sub r0 r0 r1
-jr 2
-move r0 1
-add r4 r4 r0
-add r5 r5 r0
+blt sp r3 noOffset #if last waypoint in stack, randomize coords by given memory
+jal getMiningOffset
+add r4 r4 r0 #load WAYX
+jal getMiningOffset
+add r5 r5 r0 #load WAYZ
+noOffset:
 s robotXmitter TargetX r4
 s robotXmitter TargetZ r5
 jal travel
 bge sp r3 mineOreSearch
 j goingToWork
+getMiningOffset:
+get r1 db 510 # mining range is stored at stack address 510 / is our max range
+rand r0
+mul r0 r1 r0 #store offset in r0 then randomly flip sign
+rand r1 #randomly flip sign
+brgt r1 0.5 2
+mul r0 r0 -1
+j ra #go back to goingToWork
+
 mineOreSearch:
 s robotXmitter Mode 3
 move r2 0
@@ -73,6 +77,7 @@ l r0 robotXmitter Mode
 beq r0 3 miningWaitLoop #==END MINING WAIT LOOP==
 beq r0 6 goingHomeStart
 j mineOreSearch
+
 travel:
 move r15 ra #store ra
 travelLoop: #==BEGIN TRAVEL WAIT LOOP ON THIS LINE==
