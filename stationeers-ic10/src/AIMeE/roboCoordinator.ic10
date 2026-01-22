@@ -1,14 +1,14 @@
-#see readme online if this looks like french to you
-define MiningRange 100 #radius from center of mining site to search
-define LastWaypoint 8 #the mining site waypoint (must be last waypoint)
-define MinimumOreError 5 #EQUAL OR LESS than this causes error, will return home
+#user input section
+define MiningRange 50 #radius from center of mining site to search
+define LastWaypoint 7 #the mining site waypoint (must be last waypoint)
+define MinimumOreError 0 #EQUAL OR LESS than this causes error, will return home
 define TimeoutError 300 #EQUAL OR GREATER in seconds, after which checks MinimumOreError
 define PauseTimeOutAtStart 1 #1 for On, 0 for Off. Keeps aimee out until full for 20 mins
 define ChargeError 70000 #the watts level below which aimee flags a charge error
 define DamageError 0 #the percentage her BATTERY has damage above which Aimee flags error
 define UnloadRadius 2.5 #the radius from the unload point we can stop when unloading
-define x1 -916
-define z1 -1288
+define x1 -917
+define z1 -1287
 define x2 -912
 define z2 -1287
 define x3 -912
@@ -17,27 +17,36 @@ define x4 -925
 define z4 -1281
 define x5 -937
 define z5 -1266
-define x6 -1037
-define z6 -1287
-define x7 -1200
-define z7 -1400
-define x8 -1068
-define z8 -1800
+define x6 -1062
+define z6 -1317
+define x7 -1202
+define z7 -1347
+define x8 0
+define z8 0
 define x9 0
 define z9 0
 define x10 0
 define z10 0
 #Code below
-define AIMEEhousing HASH("StructureCircuitHousingCompact")
+alias YourHardsuit d0
+alias YourTablet d1
 alias minOre r5 #Holding register for MinimumOreError
-alias lstwp r6
-mul lstwp LastWaypoint 2 #mul lastwaypoint by 2 as it's compared to sp
 move minOre -1 #Use -1 for 20 minutes before checking average mineables > MinimumOreError
+alias lstwp r6 #holding register for last waypoint
+mul lstwp LastWaypoint 2 #mul lastwaypoint by 2 as it's compared to sp
+alias WAYX r7
+move WAYX x1
+alias WAYZ r8
+move WAYZ z1
+alias timer r9
+move timer 0
+define AIMEEhousing HASH("StructureCircuitHousingCompact")
 breq PauseTimeOutAtStart 1 2
 move minOre MinimumOreError #if pausetimeout 0, use minimumoreerror instantly
-move sp 16
+move sp 20
 aimeeStackLoadLoop:
 beq sp 0 aimeeStackLoadLoopEnd
+jal getTabletCoords
 pop r15
 lbn r15 AIMEEhousing r15 ReferenceId 1
 beqz r15 aimeeStackLoadLoop
@@ -74,12 +83,20 @@ put r15 509 minOre
 put r15 508 TimeoutError
 put r15 505 ChargeError
 put r15 503 DamageError
+sub r0 lstwp 1
+put r15 r0 WAYZ
+sub r0 lstwp 2
+put r15 r0 WAYX
+add timer timer 1
 yield
 j aimeeStackLoadLoop
 aimeeStackLoadLoopEnd:
 move sp 20
+add timer timer 1
+brlt timer 1800 3
+move timer 0
 move minOre MinimumOreError
-sleep 1800
+yield
 j aimeeStackLoadLoop
 
 getUnloadOffset:
@@ -90,3 +107,13 @@ rand r1 #randomly flip sign
 brgt r1 0.5 2
 mul r0 r0 -1
 j ra #go back to goingToWork
+
+getTabletCoords:
+bdns d0 ra
+bdns d1 ra
+l r0 YourTablet Activate
+bne r0 1 ra
+l WAYX YourHardsuit PositionX
+l WAYZ YourHardsuit PositionZ
+s YourTablet Activate 0
+j ra
