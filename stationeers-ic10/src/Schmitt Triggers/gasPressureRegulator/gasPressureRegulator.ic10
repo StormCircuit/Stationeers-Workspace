@@ -14,7 +14,7 @@ start:
 
 lowPressure:
 s valve On 1
-l currPressure db PressureInput
+l currPressure pressureReadingDevice Pressure
 s db Setting currPressure
 l currPressure pressureReadingDevice Pressure
 bgeal currPressure maxPressurePa highPressure
