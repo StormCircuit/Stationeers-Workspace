@@ -1,11 +1,9 @@
-alias inputDial d0
-alias gasMixer d1
-alias gas1Analyzer d2
-alias gas2Analyzer d3
-alias outputAnalyzer d4
+alias gasMixer d0
+alias gas1Analyzer d1
+alias gas2Analyzer d2
+alias outputAnalyzer d3
 
 alias calculatedMixerSetting r0
-alias desiredMixerSetting r1
 
 alias gas1Temp r2
 alias gas2Temp r3
@@ -14,6 +12,9 @@ alias outputOxyRatio r7
 alias numerator r4
 alias denominator r5
 alias denomTemp r6
+
+#for vol/ox. Assumes gas 1 is volatiles
+define desiredMixerSetting 0.65
 
 start:
 
@@ -26,8 +27,6 @@ s gas2Analyzer On 1
 s outputAnalyzer On 1
 l gas1Temp gas1Analyzer Temperature
 l gas2Temp gas2Analyzer Temperature
-l desiredMixerSetting inputDial Ratio
-sub desiredMixerSetting 1 desiredMixerSetting
 #-calculation loop, constantly updates besides on equation below-
 #r = (r'T1) / ((1-r')T2+r'T1)
 #r = calculated mixer setting
@@ -49,15 +48,8 @@ div calculatedMixerSetting numerator denominator
 
 mul calculatedMixerSetting calculatedMixerSetting 100
 
-l outputOxyRatio outputAnalyzer RatioOxygen
-
-#something about this implementation is causing an incorrect output ratio so doing
-#some checks and adjusting based on error
-bgt outputOxyRatio 0.35 endOxyRatioCheck
-s gasMixer Setting 20
-yield
-j calculationLoop
-endOxyRatioCheck:
+#when trickling, it gets set to 0 and can cause impurities over time so skip if 0
+breq calculatedMixerSetting 0 2
 s gasMixer Setting calculatedMixerSetting
 yield
 j calculationLoop
