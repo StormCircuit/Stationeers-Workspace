@@ -1,12 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <DateTime>134101592892610933</DateTime>
-  <GameVersion>0.2.6091.26702</GameVersion>
-  <Title>hardsuitAutov2</Title>
-  <Description>lock helmet to turn program on, unlock to turn off. v2 Adds toxin detection when helmet is open.​</Description>
-  <Author>Rizzard of Oz</Author>
-  <WorkshopFileHandle>0</WorkshopFileHandle>
-  <Instructions>alias hardsuit db
+alias hardsuit db
 alias helmet d0
 alias externalPress r0
 alias externalTemp r1
@@ -118,5 +110,4 @@ s helmet Flush 1
 j ra
 openHelmet:
 s helmet Open 1
-j ra</Instructions>
-</InstructionData>
+j ra
