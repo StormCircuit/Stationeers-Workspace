@@ -50,6 +50,10 @@ mul calculatedMixerSetting calculatedMixerSetting 100
 
 #when trickling, it gets set to 0 and can cause impurities over time so skip if 0
 breq calculatedMixerSetting 0 2
+l r1 outputAnalyzer RatioVolatiles
+brle r1 0.65 2
+move calculatedMixerSetting 100
+
 s gasMixer Setting calculatedMixerSetting
 yield
 j calculationLoop
