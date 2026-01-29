@@ -32,7 +32,7 @@ blt r0 minWattsContact findContact
 j attemptContact #if the checks pass, proceed to contact routine
 
 attemptContact:
-move currDishOffset 10
+move currDishOffset 3
 l r0 dishMedium SignalID #set BestContactFilter to our signal ID we found
 s dishMedium BestContactFilter r0
 s dishMedium Activate 0
@@ -70,10 +70,10 @@ moveDish:
 l r1 dishMedium Horizontal #sweep dish, check filter
 add r0 r1 currDishOffset
 s dishMedium Horizontal r0
-mul r0 r1 0.7
+mul r0 r1 0.05
 sin r0 r0
-mul r0 r0 22
-add r0 r0 55
+mul r0 r0 70
+add r0 r0 70
 s dishMedium Vertical r0
 l r0 dishMedium Idle
 yield
