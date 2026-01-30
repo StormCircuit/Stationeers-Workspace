@@ -1,0 +1,163 @@
+define A 3.977
+define B 6.88
+define deg2rada 0.0694117438141256949  # deg2rad * A
+define deg2radab 0.477552797441184780912 # deg2rada * B
+
+# Errors have flipped order due to how `convertloop` converts values
+define _H0 0
+define _V0 1
+define E2 2
+define _H1 3
+define _V1 4
+define E1 5
+define _H2 6
+define _V2 7
+define E0 8
+define TOP 9
+
+alias x0 r2
+alias y0 r3
+alias z0 r4
+alias x1 r5
+alias y1 r6
+alias z1 r7
+alias x2 r8
+alias y2 r9
+alias z2 r10 # shared
+
+alias _v r10 # shared
+alias h r11
+alias v r12 # shared
+alias d r12 # shared
+alias e r13 # shared
+alias x r13 # shared
+alias y r14
+alias z r15
+
+# Wait until triangulation is requested
+start:
+  yield
+  l r0 db Setting
+beqz r0 start
+  move sp TOP
+  move r1 2 # r1 will contain the first target register (for x)
+  # Convert all HVE to XYZE and store in registers
+
+  # Calculate target x, y, z
+  # d = X0 * (Y1 * Z2 - Z1 * Y2) - Y0 * (X1 * Z2 - Z1 * X2) + Z0 * (X1 * Y2 - Y1 * X2)
+  mul r0 x1 z2 # Y0 * (X1 * Z2 - Z1 * X2)
+  mul r1 z1 x2
+  sub r0 r0 r1
+  mul d y0 r0
+
+  mul r0 x1 y2 # Z0 * (X1 * Y2 - Y1 * X2)
+  mul r1 y1 x2
+  sub r0 r0 r1
+  mul r0 z0 r0
+  sub d r0 d
+
+  mul r0 y1 z2 # X0 * (Y1 * Z2 - Z1 * Y2)
+  mul r1 z1 y2
+  sub r1 r0 r1
+  mul r0 x0 r1
+  add d d r0
+
+  # x = ((Y1 * Z2 - Z1 * Y2) * e0 - (Y0 * Z2 - Z0 * Y2) * e1 + (Y0 * Z1 - Z0 * Y1) * e2) / d;
+  # (Y1 * Z2 - Z1 * Y2) is in r1
+  get r0 db E0 # ((Y1 * Z2 - Z1 * Y2) * e0
+  mul x r1 r0
+
+  mul r0 y0 z2 # (Y0 * Z2 - Z0 * Y2) * e1
+  mul r1 z0 y2
+  sub r0 r0 r1
+  get r1 db E1
+  mul r0 r0 r1
+  sub x x r0
+
+  mul r0 y0 z1 # (Y0 * Z1 - Z0 * Y1) * e2
+  mul r1 z0 y1
+  sub r0 r0 r1
+  get r1 db E2
+  mul r0 r0 r1
+  add x x r0
+  div x x d
+
+  # y = ((X0 * Z2 - Z0 * X2) * e1 - (X1 * Z2 - Z1 * X2) * e0 - (X0 * Z1 - Z0 * X1) * e2) / d
+  mul r0 x0 z1 # (X0 * Z1 - Z0 * X1) * e2
+  mul y z0 x1
+  sub y r0 y
+  mul y y r1 # r1 contains E2 from earlier
+
+  mul r0 x0 z2 # (X0 * Z2 - Z0 * X2) * e1
+  mul r1 z0 x2
+  sub r0 r0 r1
+  get r1 db E1
+  mul r0 r0 r1
+  sub y r0 y
+
+  mul r0 x1 z2 # (X1 * Z2 - Z1 * X2) * e0
+  mul r1 z1 x2
+  sub r0 r0 r1
+  get r1 db E0
+  mul r0 r0 r1
+  sub y y r0
+  div y y d
+
+  # z = ((X1 * Y2 - Y1 * X2) * e0 - (X0 * Y2 - Y0 * X2) * e1 + (X0 * Y1 - Y0 * X1) * e2) / d
+  mul r0 x1 y2
+  mul z y1 x2
+  sub r0 r0 z
+  mul z r0 r1 # r1 contains E0 from earlier
+
+  mul r0 x0 y2
+  mul r1 y0 x2
+  sub r0 r0 r1
+  get r1 db E1
+  mul r0 r0 r1
+  sub z z r0
+
+  mul r0 x0 y1
+  mul r1 y0 x1
+  sub r0 r0 r1
+  get r1 db E2
+  mul r0 r0 r1
+  add z z r0
+  div z z d
+
+  # Convert x, y, z vector back to HV
+  mul h x -1 # h = atan2(z, -x) * rad2deg
+  atan2 h z h
+  mul h h rad2deg
+
+  mul _v x x # _v = sqrt(x^2 + z^2)
+  mul r0 z z
+  add _v _v r0
+  sqrt _v _v
+
+  atan2 _v _v y # _v = atan2(v, y) * rad2deg
+  mul _v _v rad2deg
+
+  move v _v
+  move r2 3
+  invertVLoop:
+    mul r0 v deg2rada # r0 = v - B * Math.sin(vCor * deg2rada) - _v
+    sin r0 r0
+    mul r0 r0 B
+    sub r0 v r0
+    sub r0 r0 _v
+
+    mul r1 v deg2rada # r1 = 1 - deg2radab * Math.cos(v * deg2rada)
+    cos r1 r1
+    mul r1 r1 deg2radab
+    sub r1 1 r1
+
+    div r0 r0 r1 # v -= r0 / r1
+    sub v v r0
+    sub r2 r2 1
+  bgez r2 invertVLoop
+
+  # we have the h, v coords in registers h, v
+  put db 0 h
+  put db 1 v
+  s db Setting 0
+j start
