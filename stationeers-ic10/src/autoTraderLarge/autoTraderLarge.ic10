@@ -17,6 +17,7 @@ yield
 brne r0 1 -2 #wait for dish to idle
 findContact:
 s antennaDish BestContactFilter -1
+s largeDish BestContactFilter -1
 s antennaDish Setting 3000
 s largeDish Setting 3000
 jal moveScannerDish
@@ -116,9 +117,9 @@ l r0 solver Setting
 yield
 breq r0 1 -2 #wait for solver Setting to = 0
 get r0 solver 0
-s largeDish Horizontal r0
-get r0 solver 1
 s largeDish Vertical r0
+get r0 solver 1
+s largeDish Horizontal r0
 l r0 largeDish Idle
 yield
 brne r0 1 -2 #wait for dish to idle
