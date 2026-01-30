@@ -1,0 +1,41 @@
+alias selectionDial d0
+alias selectionLED d1
+
+monitorLoop:
+
+bdns selectionLED statusCheckEnd #if damage, flash on screen
+sleep 2 #sleep to avoid flashing
+s selectionLED Color 2
+s selectionLED Mode 10
+beq r0 -1374574351 traderOre
+beq r0 2 statusMoving
+beq r0 3 statusMining
+beq r0 4 statusUnload
+beq r0 4 statusUnload
+beq r0 4 statusUnload
+beq r0 4 statusUnload
+beq r0 4 statusUnload
+beq r0 4 statusUnload
+beq r0 4 statusUnload
+beq r0 4 statusUnload
+beq r0 5 statusStuck #corresponds to Aimee's pathing mode
+statusCheckEnd:
+
+yield
+j monitorLoop
+
+statusIdle:
+s selectionLED Setting STR("IDLE")
+j statusCheckEnd
+statusMoving:
+s selectionLED Setting STR("MOVE")
+j statusCheckEnd
+statusMining:
+s selectionLED Setting STR("MINE")
+j statusCheckEnd
+statusUnload:
+s selectionLED Setting STR("OFLD")
+j statusCheckEnd
+statusStuck:
+s selectionLED Setting STR("STCK")
+j statusCheckEnd
