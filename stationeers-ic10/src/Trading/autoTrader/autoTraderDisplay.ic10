@@ -1,41 +1,76 @@
 alias selectionDial d0
 alias selectionLED d1
+alias trackerProgram d2
+alias foundTraderLED d3
 
 monitorLoop:
 
-bdns selectionLED statusCheckEnd #if damage, flash on screen
-sleep 2 #sleep to avoid flashing
+bdns selectionLED statusCheckEnd #check dial
 s selectionLED Color 2
 s selectionLED Mode 10
-beq r0 -1374574351 traderOre
-beq r0 2 statusMoving
-beq r0 3 statusMining
-beq r0 4 statusUnload
-beq r0 4 statusUnload
-beq r0 4 statusUnload
-beq r0 4 statusUnload
-beq r0 4 statusUnload
-beq r0 4 statusUnload
-beq r0 4 statusUnload
-beq r0 4 statusUnload
-beq r0 5 statusStuck #corresponds to Aimee's pathing mode
+l r0 selectionDial Setting
+beq r0 0 traderNone
+beq r0 1 traderOre
+beq r0 2 traderAlloy
+beq r0 3 traderFood
+beq r0 4 traderSeed
+beq r0 5 traderGas
+beq r0 6 traderConstruction
+beq r0 7 traderLiquid
+beq r0 8 traderTools
+beq r0 9 traderConsumables
+beq r0 10 traderAppliances
+beq r0 11 traderGenetics
+beq r0 12 traderRare
+j traderNone #default to none
 statusCheckEnd:
+
+bdns foundTraderLED foundTraderEnd #check program status
+bdns trackerProgram foundTraderEnd
+l r0 trackerProgram Setting
+s foundTraderLED Color 6
+s foundTraderLED On r0
+foundTraderEnd:
 
 yield
 j monitorLoop
 
-statusIdle:
-s selectionLED Setting STR("IDLE")
+traderNone:
+s selectionLED Setting STR("NONE")
 j statusCheckEnd
-statusMoving:
-s selectionLED Setting STR("MOVE")
+traderOre:
+s selectionLED Setting STR("ORE")
 j statusCheckEnd
-statusMining:
-s selectionLED Setting STR("MINE")
+traderAlloy:
+s selectionLED Setting STR("ALOY")
 j statusCheckEnd
-statusUnload:
-s selectionLED Setting STR("OFLD")
+traderFood:
+s selectionLED Setting STR("FOOD")
 j statusCheckEnd
-statusStuck:
-s selectionLED Setting STR("STCK")
+traderSeed:
+s selectionLED Setting STR("SEED")
+j statusCheckEnd
+traderGas:
+s selectionLED Setting STR("GAS")
+j statusCheckEnd
+traderConstruction:
+s selectionLED Setting STR("BULD")
+j statusCheckEnd
+traderLiquid:
+s selectionLED Setting STR("LIQD")
+j statusCheckEnd
+traderTools:
+s selectionLED Setting STR("TOOL")
+j statusCheckEnd
+traderConsumables:
+s selectionLED Setting STR("CNSM")
+j statusCheckEnd
+traderAppliances:
+s selectionLED Setting STR("APPL")
+j statusCheckEnd
+traderGenetics:
+s selectionLED Setting STR("GENE")
+j statusCheckEnd
+traderRare:
+s selectionLED Setting STR("RARE")
 j statusCheckEnd
