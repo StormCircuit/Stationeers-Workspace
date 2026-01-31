@@ -94,9 +94,8 @@ mul r12 r13 r13 # r12 = sqrt(r13^2 + r15^2)
 mul r0 r15 r15
 add r12 r12 r0
 sqrt r12 r12
-atan2 r12 r12 r14 # r12 = atan2(r12, r14) * rad2deg + 0.01 (we add a very minor offset to avoid a bug)
+atan2 r12 r12 r14 # r12 = atan2(r12, r14) * rad2deg
 mul r12 r12 rad2deg
-add r12 r12 0.01
 put db 0 r11
 put db 1 r12
 s db Setting 0

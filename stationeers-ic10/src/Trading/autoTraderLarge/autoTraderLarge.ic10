@@ -7,14 +7,9 @@ alias largeDish d4
 alias currFilter r4
 alias prevSignal r6
 define topOfStack 12 #change this to how many filters you have (if starting at 0, +1)
-define minWattsContact 100 #100 and above are far traders. Far (6x6+) need a large dish
+define minWattsContact 200 #100 and above are far traders. Far (6x6+) need a large dish
 move sp topOfStack
-s antennaDish Setting 0
 s db Setting 0
-s antennaDish Vertical 45
-l r0 antennaDish Idle
-yield
-brne r0 1 -2 #wait for dish to idle
 findContact:
 s antennaDish BestContactFilter -1 # ==SCANNING ROUTINE==
 s largeDish BestContactFilter -1
@@ -39,19 +34,22 @@ l r0 antennaDish SignalID
 beq r0 prevSignal findContact #avoid re-contacting same trader
 l r0 antennaDish SignalID#if the checks pass, proceed to contact routine
 s largeDish BestContactFilter r0  #set BestContactFilter to our signal ID we found
-s largeDish Activate 0
 l r0 largeDish SignalStrength #wait for green bar
 yield
 breq r0 -1 -2
 l r0 largeDish MinimumWattsToContact
 l r1 largeDish WattsReachingContact
-brgt r1 r0 2 #if we already are reaching it, dont solve
+brgt r1 r0 3 #if we already are reaching it, dont solve
+s largeDish Activate 0
 jal solverRoutine
 s largeDish Activate 1
-l r0 largeDish InterrogationProgress
-yield
+l r0 largeDish SignalID
 beq r0 -1 findContact #if it's -1 then the signal was lost
-brne r0 1 -3 #if not 1, wait
+l r0 largeDish MinimumWattsToContact
+l r1 largeDish WattsReachingContact
+brlt r1 r0 -7 #if solver failed, retry
+l r0 largeDish InterrogationProgress
+brne r0 1 -4 #if not 1, wait
 s largeDish Setting 3000
 s db Setting 1 #trigger waiting flag on housing, set to 0 to continue
 waitForReset:
@@ -93,9 +91,10 @@ move r15 ra #store ra in r15
 loadSolver:
 l r0 largeDish SignalID
 beq r0 -1 findContact #if signal lost, restart
-l r0 largeDish SignalStrength
+l r0 largeDish Idle
 yield
-breq r0 -1 -4 #wait for dish to idle
+breq r0 0 -4 #wait for dish to idle
+yield
 l r1 largeDish Horizontal
 put solver r13 r1
 add r13 r13 1
@@ -115,9 +114,9 @@ l r0 solver Setting
 yield
 breq r0 1 -2 #wait for solver Setting to = 0
 get r0 solver 0
-s largeDish Vertical r0
-get r0 solver 1
 s largeDish Horizontal r0
+get r0 solver 1
+s largeDish Vertical r0
 l r0 largeDish Idle
 yield
 brne r0 1 -2 #wait for dish to idle

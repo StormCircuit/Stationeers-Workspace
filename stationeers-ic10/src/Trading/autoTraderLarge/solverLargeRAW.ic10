@@ -1,3 +1,5 @@
+
+
 # Errors have flipped order due to how `convertloop` converts values
 define _H0 0
 define _V0 1
@@ -18,7 +20,7 @@ alias y1 r6
 alias z1 r7
 alias x2 r8
 alias y2 r9
-alias z2 r10
+alias z2 r10 # shared
 
 alias h r11
 alias v r12 # shared
@@ -155,9 +157,8 @@ beqz r0 start
   add v v r0
   sqrt v v
 
-  atan2 v v y # v = atan2(v, y) * rad2deg + 0.01 (we add a very minor offset to avoid a bug)
+  atan2 v v y # v = atan2(v, y) * rad2deg
   mul v v rad2deg
-  add v v 0.01
 
   # we have the h, v coords in registers h, v
   put db 0 h
