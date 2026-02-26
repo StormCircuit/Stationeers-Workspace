@@ -1,31 +1,35 @@
-alias gateValve d2
-alias gasTempDevice d3
+alias outputValve d0
+alias inputValve d1
+alias gasTempDevice d2
 
 alias currentTemp r2
 
-define minTempKelvin 290
-define maxTempKelvin 295
+define minTempKelvin 275
+define maxTempKelvin 276
 
 start:
 #DEFAULT TO OFF ON STARTUP TO AVOID ISSUES
-s gateValve On 0
+s outputValve On 0
+s inputValve On 0
 yield
 
 initialize:
 
 closeValve:
-s gateValve On 0
+s outputValve On 0
+s inputValve On 0
 l currentTemp gasTempDevice Temperature
 s db Setting currentTemp
-ble currentTemp minTempKelvin openValve
+bgt currentTemp maxTempKelvin openValve
 yield
 sleep 10
 j closeValve
 
 openValve:
-s gateValve On 1
+s outputValve On 1
+s inputValve On 1
 l currentTemp gasTempDevice Temperature
 s db Setting currentTemp
-bgt currentTemp maxTempKelvin closeValve
+blt currentTemp minTempKelvin closeValve
 yield
 j openValve
