@@ -13,10 +13,9 @@ alias helmetIsOpenFlag r9
 alias filterCyclingFlag r10
 define minSafePress 35
 define maxSafePress 200
-define minSafeTemp 284
-define maxSafeTemp 300
+define minSafeTemp 269
+define maxSafeTemp 313.15
 s helmet SoundAlert 25
-sleep 3
 monitorLoop:
 #if user helmet is locked, give program control.
 #if user helmet is UNlocked, relinquish all program control until locked
@@ -106,7 +105,6 @@ j endSafetyChecks
 
 closeHelmet:
 s helmet Open 0
-s helmet Flush 1
 j ra
 openHelmet:
 s helmet Open 1
