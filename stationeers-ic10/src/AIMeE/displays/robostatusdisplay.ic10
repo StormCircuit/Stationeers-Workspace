@@ -20,6 +20,7 @@ statusWeatherEnd:
 sleep 2 #sleep to avoid flashing
 s statusLED Color 2
 s statusLED Mode 10
+l r0 robotXmitter Mode
 beq r0 0 statusIdle
 beq r0 2 statusMoving
 beq r0 3 statusMining
