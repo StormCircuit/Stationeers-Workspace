@@ -1,11 +1,11 @@
 
-alias radiatorValve d0
+alias input d0
 alias gasTempDevice d1
 
 alias currentTemp r2
 
-define minTempKelvin 450
-define maxTempKelvin 460
+define minTempKelvin 500
+define maxTempKelvin 510
 
 
 #simple schmitt trigger
@@ -13,7 +13,7 @@ define maxTempKelvin 460
 start:
 
 noCooling:
-s radiatorValve On 0
+s input On 0
 l currentTemp gasTempDevice Temperature
 s db Setting currentTemp
 bgeal currentTemp maxTempKelvin startCooling
@@ -21,7 +21,7 @@ yield
 j noCooling
 
 startCooling:
-s radiatorValve On 1
+s input On 1
 l currentTemp gasTempDevice Temperature
 s db Setting currentTemp
 blt currentTemp minTempKelvin noCooling
