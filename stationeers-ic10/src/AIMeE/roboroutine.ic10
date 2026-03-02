@@ -1,7 +1,8 @@
 alias robotXmitter d0  #=Based on Cows Are Evil, modified EXTENSIVELY by StormCircuit=
 alias recallLever d1   #Anything with a Setting. 1 = recall/reset error
-s robotXmitter Mode 0  #r2=stuck,r3=topOfStack,r4=WAYX,r5=WAYZ,r6=Error,r7=MiningError
-unload:                #r15=ra
+alias secondaryRecall d2 #secondary source of recall signal. does an OR check on above
+s robotXmitter Mode 0  #r2=stuck,r3=topOfStack,r4=WAYX,r5=WAYZ,r6=internal recall signal
+unload:                #r7=MiningError, r15=ra
 move sp 0 #realign sp
 get r3 db 511 #load new max waypoints at unload position
 jal batteryWeatherCheckRecall
@@ -104,20 +105,20 @@ put db 500 r7 #MiningErrorFlag
 ls r0 robotXmitter 0 Charge #check if below SP 505
 get r1 db 505 #check charge value against SP 505 in watts
 slt r6 r0 r1
-ls r0 robotXmitter 0 Damage #check BATTERY damage
-get r1 db 503
-sgt r0 r0 r1 #check BATTERY damage value against SP 503 in PERCENTAGE
-or r6 r6 r0 #r6 = 1 if either are bad
-brnez r6 9 #if damage/charge check = 1 then skip rest, SET error SIGNAL/Setting
+brnez r6 13 #if charge check = 1 then skip rest, SET error SIGNAL/Setting
 or r6 r6 r7 #if any above OR mining error, recall
 l r0 recallLever Setting
-seq r0 r0 1 #normalize the recall signal, MUST = 1
-or r6 r6 r0 #if lever OR damage/charge = 1 then r6 = 1
-breqz r0 4 #if lever set, error SIGNAL/Setting must clear, MiningError must clear
+sgt r0 r0 0 #normalize the recall signal
+brdns secondaryRecall 4 #if no secondary recall, skip secondary check
+l r1 secondaryRecall Setting
+sgt r1 r1 0 #normalize the secondary recall signal
+or r0 r0 r1 #combine recall signals
+or r6 r6 r0 #if recall signal OR charge error OR mining error then r6 = 1
+breqz r0 4 #if recall signal set, MiningError must clear
 s db Setting 0
 move r7 0
 jr 2
-s db Setting r6 #this means you can clear a battery or damage error by just fixing it
+s db Setting r6 #this means you can clear a battery error by just fixing it
 lb r0 1997212478 NextWeatherEventTime Sum
-or r6 r6 r0 #If damage/charge/Mining Error/recall signal/ then r6 = 1
+or r6 r6 r0 #If damage/charge/Mining Error/recall signal/weather then r6 = 1
 j ra
