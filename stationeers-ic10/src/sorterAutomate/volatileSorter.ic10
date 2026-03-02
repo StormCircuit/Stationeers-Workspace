@@ -1,7 +1,8 @@
 alias sorterToProgram d0
+move sp 0
+clr sorterToProgram
+s sorterToProgram Mode 1
 
-push HASH("ItemPureIceVolatiles")
-push HASH("ItemPureIceLiquidVolatiles")
 push HASH("ItemVolatiles")
 
 programLoop:
@@ -17,6 +18,6 @@ or r0 r0 SorterInstruction.FilterPrefabHashEquals
 #put it in stack address 0 of the sorter
 put d0 sp r0
 
-breq sp 1 2
+breq sp 0 2
 j programLoop
 #program end

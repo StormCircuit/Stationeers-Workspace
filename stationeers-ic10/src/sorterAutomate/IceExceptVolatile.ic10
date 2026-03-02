@@ -1,8 +1,10 @@
 alias sorterToProgram d0
 move sp 0
-clr d0
+clr sorterToProgram
+s sorterToProgram Mode 1
 
-push HASH("ItemIce")
+push HASH("ItemNitrice")
+push HASH("ItemOxite")
 
 programLoop:
 pop r0
