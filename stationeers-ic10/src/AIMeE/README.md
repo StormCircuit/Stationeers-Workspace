@@ -7,16 +7,16 @@
 6. Set recallLever to your lever you will use to trigger an aimee recall for this specific aimee
 7. Again, set the switch/lever/whatever to ON
 8. Turn all the IC10 on
-9. Set waypoints and configuration using stack/robomapsParallel
+9. Set waypoints and configuration using stack/roboCoordinator
 10. Turn lever off to turn on aimee
 
-This is readme mentioned in robomapsParallel for those who don't know french:
-**Using RobomapsParallel**
+This is readme mentioned in roboCoordinator for those who don't know french:
+**Using roboCoordinator**
 Instructions:
 1. Run robomapsStackloading once on the housing you intend to use.
 2. rename your roboroutine housings to aimee1 up to a max of aimee16.
 3. Using GPS tablet and write down X and Z coordinates (ignore y)
-4. Put them in for waypoints in robomapsParallel
+4. Put them in for waypoints in roboCoordinator
 5. Set LastWaypoint to the number you need (max 250)
 6. Edit the configuration variables or leave them alone
 7. Export to the chip, reinsert the ic10 chip into the robomaps housing
@@ -51,7 +51,6 @@ These can be adjusted in real time as they are loaded when checked.
 **SP 509** is MinimumOreError, if Aimee sees LESS ore than this, she will go home once TimeoutError is reached  
 **SP 508** is TimeoutError. Aimee will drive in circles doing nothing for this many seconds, attempting to mine, before she gives up and flags an error  
 **SP 505** is Charge Error. Aimee will flag a charge error if below this number in Watts  
-**SP 503** is Damage Error. Aimee will flag a damage error if BATTERY damage is ABOVE this PERCENTAGE  
 
 **Other Variables:**
 **SP 507** is current SP.  
