@@ -1,9 +1,10 @@
 alias hardsuit d0
+alias weatherStation d1
 
 monitorLoop:
-lb r0 1997212478 NextWeatherEventTime Maximum
+l r0 weatherStation NextWeatherEventTime
 yield
-bltz r0 monitorLoop
+blezal r0 monitorLoop
 jal stormAlert
 j monitorLoop
 
@@ -12,4 +13,5 @@ s hardsuit SoundAlert 17
 sleep 1
 s hardsuit SoundAlert 18
 sleep 300
+s hardsuit SoundAlert 0
 j ra
