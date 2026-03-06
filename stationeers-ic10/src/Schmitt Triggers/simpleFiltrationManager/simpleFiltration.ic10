@@ -1,11 +1,12 @@
+alias filtration d0
 
-alias radiatorValve d0
-alias gasTempDevice d2
+define filtrationPump HASH("Filtration Pump")
+define filtrationOutput HASH("Filtration Output Pump")
 
 alias currPressure r2
 
-define minPressurePa 5000
-define maxPressurePa 5500
+define minPressurePa 200
+define maxPressurePa 510
 
 
 #simple schmitt trigger
@@ -13,16 +14,24 @@ define maxPressurePa 5500
 start:
 
 lowPressure:
-s db Mode 0
-l currPressure db PressureInput
+sb -348054045 Mode 0
+sbn -321403609 filtrationPump On 0
+sbn 1310794736 filtrationPump On 0
+sbn -321403609 filtrationOutput On 0
+sbn 1310794736 filtrationOutput On 0
+l currPressure d0 PressureInput
 s db Setting currPressure
 bgeal currPressure maxPressurePa highPressure
 yield
 j lowPressure
 
 highPressure:
-s db Mode 1
-l currPressure gasTempDevice Temperature
+sb -348054045 Mode 1
+sbn -321403609 filtrationPump On 1
+sbn 1310794736 filtrationPump On 1
+sbn -321403609 filtrationOutput On 1
+sbn 1310794736 filtrationOutput On 1
+l currPressure d0 PressureInput
 s db Setting currPressure
 blt currPressure minPressurePa lowPressure
 yield
