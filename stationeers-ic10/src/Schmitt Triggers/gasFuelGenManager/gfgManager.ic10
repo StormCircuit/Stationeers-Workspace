@@ -1,50 +1,28 @@
-alias batteryGridPercentage r2
-alias batteryGridCharge r3
-alias batteryGridMaxCharge r4
 
-alias allBatteryMaxCharge r5
-alias allLargeBatteryMaxCharge r6
-alias allBatteryCharge r7
-alias allLargeBatteryCharge r8
+alias ratioChip d0
 
-define allBatteries -400115994
-define allLargeBatteries -1388288459
-define allGasFuelGenerators 1165997963
+define gfgHash 1165997963
+
+define minRatio 25
+define maxRatio 50
+
+
+#simple schmitt trigger
 
 start:
 
-checkCurrentGridCharge:
-lb allBatteryMaxCharge allBatteries Maximum Sum
-lb allLargeBatteryMaxCharge allLargeBatteries Maximum Sum
-add batteryGridMaxCharge allBatteryMaxCharge allLargeBatteryMaxCharge
-
-lb allBatteryCharge allBatteries Charge Sum
-lb allLargeBatteryCharge allLargeBatteries Charge Sum
-add batteryGridCharge allBatteryCharge allLargeBatteryCharge
-
-div batteryGridPercentage batteryGridCharge batteryGridMaxCharge
-s db Setting batteryGridPercentage
-blt batteryGridPercentage 0.3 turnAllGasFuelGeneratorsOn
+noGen:
+sb gfgHash On 0
+l r0 ratioChip Setting
+s db Setting r0
+blt r0 minRatio onGen
 yield
-j checkCurrentGridCharge
+j noGen
 
-turnAllGasFuelGeneratorsOn:
-sb allGasFuelGenerators On 1
-waitUntilBatteries90percent:
-lb allBatteryMaxCharge allBatteries Maximum Sum
-lb allLargeBatteryMaxCharge allLargeBatteries Maximum Sum
-add batteryGridMaxCharge allBatteryMaxCharge allLargeBatteryMaxCharge
-
-lb allBatteryCharge allBatteries Charge Sum
-lb allLargeBatteryCharge allLargeBatteries Charge Sum
-add batteryGridCharge allBatteryCharge allLargeBatteryCharge
-
-div batteryGridPercentage batteryGridCharge batteryGridMaxCharge
-
-s db Setting batteryGridPercentage
-bgt batteryGridPercentage 0.9 turnAllGasFuelGeneratorsOff
+onGen:
+sb gfgHash On 1
+l r0 ratioChip Setting
+s db Setting r0
+bgt r0 maxRatio noGen
 yield
-j waitUntilBatteries90percent
-turnAllGasFuelGeneratorsOff:
-sb allGasFuelGenerators On 0
-j checkCurrentGridCharge
+j onGen
