@@ -1,3 +1,4 @@
+clr db
 push 0 #no filter
 push -1374574351 #ore 1
 push 54412100 #alloy 2
