@@ -10,18 +10,26 @@ monitorLoop:
 
 brdns button1 4
 l r0 button1 Setting
-breq r0 0 2
+breq r0 0 4
+s pad1 Activate 0
+yield
 s pad1 Activate 1
 
 brdns button2 4
 l r0 button2 Setting
-breq r0 0 2
+breq r0 0 4
+s pad2 Activate 0
+yield
 s pad2 Activate 1
+
 
 brdns button3 4
 l r0 button3 Setting
-breq r0 0 2
+breq r0 0 4
+s pad3 Activate 0
+yield
 s pad3 Activate 1
+
 
 yield
 j monitorLoop
