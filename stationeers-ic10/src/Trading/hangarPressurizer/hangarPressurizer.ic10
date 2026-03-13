@@ -1,0 +1,77 @@
+alias gasSensor d0
+alias switch d1
+alias stateDisplay d2
+alias pressureDisplay d3
+define ventPrefabHash -785498334
+define intVentNameHash HASH("Interior Vent")
+define extVentNameHash HASH("Exterior Vent")
+define minPress 50
+
+#put switch in off state and depressurize building to start
+currSwitchOff:
+sbn ventPrefabHash intVentNameHash On 0
+l r0 switch Setting
+beq r0 1 evacuate #if switch on, evacuate first, then pressurize
+s stateDisplay Mode 10
+s stateDisplay Setting STR("Idle")
+l r0 gasSensor Pressure
+s pressureDisplay Mode 14
+mul r0 r0 1000 #convert to Pa
+s pressureDisplay Setting r0
+yield
+j currSwitchOff
+
+currSwitchOn:
+sbn ventPrefabHash intVentNameHash On 0
+l r0 switch Setting
+beq r0 0 depressurize
+s stateDisplay Mode 10
+s stateDisplay Setting STR("Idle")
+l r0 gasSensor Pressure
+s pressureDisplay Mode 14
+mul r0 r0 1000 #convert to Pa
+s pressureDisplay Setting r0
+yield
+j currSwitchOn
+
+evacuate:
+sb -1351081801 Open 0 #close hangar door otherwise we are being dumb
+sbn ventPrefabHash extVentNameHash On 1
+s stateDisplay Mode 10
+s stateDisplay Setting STR("Evac")
+l r0 gasSensor Pressure
+beq r0 0 pressurize #when pressure 0, pressurize with clean air
+s pressureDisplay Mode 14
+mul r0 r0 1000 #convert to Pa
+s pressureDisplay Setting r0
+yield
+j evacuate
+
+pressurize:
+sbn ventPrefabHash extVentNameHash On 0
+sbn ventPrefabHash intVentNameHash Mode 0
+sbn ventPrefabHash intVentNameHash On 1
+s stateDisplay Mode 10
+s stateDisplay Setting STR("Fill")
+l r0 gasSensor Pressure
+bge r0 minPress currSwitchOn #break when minPress kpa
+s pressureDisplay Mode 14
+mul r0 r0 1000 #convert to Pa
+s pressureDisplay Setting r0
+yield
+j pressurize
+
+depressurize:
+sbn ventPrefabHash intVentNameHash Mode 1
+sbn ventPrefabHash intVentNameHash On 1
+s stateDisplay Mode 10
+s stateDisplay Setting STR("Empty")
+l r0 gasSensor Pressure
+brgt r0 0 3 #when pressure 0, open hangar and break
+sb -1351081801 Open 1
+j currSwitchOff
+s pressureDisplay Mode 14
+mul r0 r0 1000 #convert to Pa
+s pressureDisplay Setting r0
+yield
+j depressurize
