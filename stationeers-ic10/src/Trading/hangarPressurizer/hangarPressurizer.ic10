@@ -1,11 +1,11 @@
 alias gasSensor d0
 alias switch d1
-alias stateDisplay d2
-alias pressureDisplay d3
-define ventPrefabHash -785498334
-define intVentNameHash HASH("Interior Vent")
-define extVentNameHash HASH("Exterior Vent")
-define minPress 50
+alias stateDisplay d2 #led display
+alias pressureDisplay d3 #led display
+define ventPrefabHash -785498334 #script only works with powered vent large
+define intVentNameHash HASH("Interior Vent") #vents used to pressurize/depressurize
+define extVentNameHash HASH("Exterior Vent") #vents used to evacuate toxic air
+define minPress 50 #change if you want to pressurize more than this
 
 #put switch in off state and depressurize building to start
 currSwitchOff:
