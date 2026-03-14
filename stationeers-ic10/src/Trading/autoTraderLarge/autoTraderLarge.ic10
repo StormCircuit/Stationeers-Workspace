@@ -1,7 +1,7 @@
 alias solver d0
 alias traderFilter d1
 alias medDish d2
-alias lrgDish d4
+alias lrgDish d3
 alias currFilter r4
 alias prevSignal r6
 alias currOffset r7
@@ -27,6 +27,7 @@ l r0 lrgDish Idle
 brne r0 1 -1
 yield
 s lrgDish Setting 50000
+sleep 2 #let contacts refresh
 l r0 lrgDish SignalID
 beq r0 -1 findContact #if it's -1 then the signal was lost
 l r0 lrgDish MinimumWattsToContact #check trader tier
@@ -93,7 +94,7 @@ put solver r13 r1
 add r13 r13 1
 breq r13 9 5 #r0 = 9 means solver is filled, branch
 l r0 lrgDish Horizontal
-add r0 r0 5
+add r0 r0 15
 s lrgDish Horizontal r0 #move dish 5 degrees
 j loadSolver
 s solver Setting 1
