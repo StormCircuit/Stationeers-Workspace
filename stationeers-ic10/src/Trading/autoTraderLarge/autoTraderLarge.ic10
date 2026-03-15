@@ -33,6 +33,7 @@ beq r0 -1 findContact #if it's -1 then the signal was lost
 l r0 lrgDish MinimumWattsToContact #check trader tier
 breq r0 -1 -3 #wait for min wattage to show up/green bar to finish
 blt r0 minWattsContact findContact #if the checks pass, proceed to contact routine
+sleep 2 #let logic catch up
 l r0 lrgDish MinimumWattsToContact
 l r1 lrgDish WattsReachingContact
 brgt r1 r0 2 #if we already are reaching it, dont solve
