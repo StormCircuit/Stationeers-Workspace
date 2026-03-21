@@ -32,26 +32,6 @@ s hardsuit On 1
 s hardsuit AirRelease 1
 
 #perform safety checks
-l ratioToxin helmet Combustion
-bgtz ratioToxin beginSuitPressurize
-blt ratioOxy 0.2 beginSuitPressurize
-l ratioToxin helmet RatioCarbonDioxide
-bgt ratioToxin 0.8 beginSuitPressurize
-l ratioToxin helmet RatioNitrogen
-bgt ratioToxin 0.8 beginSuitPressurize
-l ratioToxin helmet RatioPollutant
-bgt ratioToxin 0 beginSuitPressurize
-l ratioToxin helmet RatioLiquidPollutant
-bgt ratioToxin 0 beginSuitPressurize
-l ratioToxin helmet RatioNitrousOxide
-bgt ratioToxin 0 beginSuitPressurize
-l ratioToxin helmet RatioLiquidNitrousOxide
-bgt ratioToxin 0 beginSuitPressurize
-l ratioToxin helmet RatioVolatiles
-bgt ratioToxin 0 beginSuitPressurize
-l ratioToxin helmet RatioLiquidVolatiles
-bgt ratioToxin 0 beginSuitPressurize
-endToxinCheck:
 beginSafetyChecks:
 bgt externalPress maxSafePress beginSuitPressurize
 blt externalPress minSafePress beginSuitPressurize
