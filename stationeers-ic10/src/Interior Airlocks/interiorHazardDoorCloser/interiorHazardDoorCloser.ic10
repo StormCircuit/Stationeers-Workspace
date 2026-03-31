@@ -1,44 +1,68 @@
-# Hazard door closer based on CowsAreEvil airlock modified by Storm
 # closes doors if hazards are detected then sleeps for 15 seconds
 # after 15 seconds, checks again and closes if hazards are detected
-alias innerdoor d0
-alias outerdoor d1
-alias sensor d2
-alias LED d3
 alias airlockmode r10
-define PRESSUREINNER 20 #<-  Set inner pressure here
-define PRESSUREOUTER 20 #<-  Set outer pressure here
-define SENSOR -1252983604
-move airlockmode 1
+define ledHash 1944485013
+define sensHash -1252983604
+define glassDoor -324331872
+define compDoor -793837322
+define minPress 40
+define maxPress 170
+define minTemp 266.17
+define maxTemp 308.15
 
 monitorLoop:
 yield
+sb ledHash On 1
 jal checkMode
-breq airlockmode 1 3
-s outerdoor Open 0
-s innerdoor Open 0
-sleep 7
+beq airlockmode 0 checksOK
+sb glassDoor Open 0
+sb compDoor Open 0
+sb ledHash Color 4
+sleep 15
+j endChecks
+checksOK:
+sb ledHash Color 2
+endChecks:
 j monitorLoop
 
 checkMode:
-l r0 sensor Pressure
-lb r1 SENSOR Pressure Average
-lb r2 SENSOR Pressure Minimum
-sne airlockmode r0 r2 # Check for multiple sensors
-sap r0 r0 r1 0.15 # Max pressure difference %
-and airlockmode airlockmode r0
-l r0 sensor Temperature
-lb r1 SENSOR Temperature Minimum
-sap r0 r0 r1 0.15 # Max temperature difference %K
-and airlockmode airlockmode r0
-lb r0 SENSOR RatioVolatiles Maximum
-slt r0 r0 0.005 # Max volatiles %
-and airlockmode airlockmode r0
-lb r0 SENSOR RatioPollutant Maximum
-slt r0 r0 0.005 # Max Pollutants %
-and airlockmode airlockmode r0
+move airlockmode 0
+lb r0 sensHash Pressure Minimum
+sle r0 r0 minPress
+or airlockmode airlockmode r0
+lb r0 sensHash Pressure Maximum
+sge r0 r0 maxPress
+or airlockmode airlockmode r0
+
+lb r0 sensHash Temperature Minimum
+sle r0 r0 minTemp
+or airlockmode airlockmode r0
+lb r0 sensHash Temperature Maximum
+sge r0 r0 maxTemp
+or airlockmode airlockmode r0
+
+lb r0 sensHash Combustion Maximum
+seq r0 r0 1
+or airlockmode airlockmode r0
+
+lb r0 sensHash RatioMethane Maximum
+sge r0 r0 0.005 # Max volatiles %
+or airlockmode airlockmode r0
+lb r0 sensHash RatioHydrochloricAcid Maximum
+sge r0 r0 0.005 # Max Pollutants %
+or airlockmode airlockmode r0
+lb r0 sensHash RatioHydrazine Maximum
+sge r0 r0 0.005 # Max Pollutants %
+or airlockmode airlockmode r0
+lb r0 sensHash RatioSilanol Maximum
+sge r0 r0 0.005 # Max Pollutants %
+or airlockmode airlockmode r0
+lb r0 sensHash RatioHydrogen Maximum
+sge r0 r0 0.005 # Max Pollutants %
+or airlockmode airlockmode r0
+lb r0 sensHash RatioOzone Maximum
+sge r0 r0 0.005 # Max Pollutants %
+or airlockmode airlockmode r0
+
 s db Setting airlockmode
-mul r0 airlockmode -3
-add r0 r0 5
-s LED Color r0
 j ra
