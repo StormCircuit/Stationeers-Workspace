@@ -1,4 +1,11 @@
-clr db
+define MiningRange 30 #radius from center of mining site to search
+define LastWaypoint 6 #the mining site waypoint (must be last waypoint)
+define MinimumOreError 0 #EQUAL OR LESS than this causes error, will return home
+define TimeoutError 600 #EQUAL OR GREATER in seconds, after which checks MinimumOreError
+define PauseTimeOutAtStart 0 #1 for On, 0 for Off. Keeps aimee out until full for 20 mins
+define ChargeError 70000 #the watts level below which aimee flags a charge error
+define DamageError 0 #the percentage her BATTERY has damage above which Aimee flags error
+define UnloadRadius 2.5 #the radius from the unload point we can stop when unloading
 define x1 -645
 define z1 716
 define x2 -645
@@ -15,19 +22,28 @@ define x7 0
 define z7 0
 define x8 0
 define z8 0
-put db 0 x1
-put db 1 z1
-put db 2 x2
-put db 3 z2
-put db 4 x3
-put db 5 z3
-put db 6 x4
-put db 7 z4
-put db 8 x5
-put db 9 z5
-put db 10 x6
-put db 11 z6
-put db 12 x7
-put db 13 z7
-put db 14 x8
-put db 15 z8
+clr d0
+alias lstwp r6 #holding register for last waypoint
+mul lstwp LastWaypoint 2 #mul lastwaypoint by 2 as it's compared to sp
+put d0 0 x1
+put d0 1 z1
+put d0 2 x2
+put d0 3 z2
+put d0 4 x3
+put d0 5 z3
+put d0 6 x4
+put d0 7 z4
+put d0 8 x5
+put d0 9 z5
+put d0 10 x6
+put d0 11 z6
+put d0 12 x7
+put d0 13 z7
+put d0 14 x8
+put d0 15 z8
+put d0 511 lstwp #last waypoint * 2
+put d0 510 MiningRange
+put d0 509 MinimumOreError
+put d0 508 TimeoutError
+put d0 505 ChargeError
+put d0 503 DamageError
