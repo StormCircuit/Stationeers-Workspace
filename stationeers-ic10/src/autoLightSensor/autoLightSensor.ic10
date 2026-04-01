@@ -1,0 +1,11 @@
+#turn lights on if NOT day AND IF room occupied then wait 180 seconds before checking
+loop:
+lb r0 1076425094 Activate Maximum
+seq r0 r0 0 #is it night?
+lb r1 322782515 Activate Maximum
+or r2 r0 r1 #if night or occupied then turn on lights
+breqz r2 3 #if not day or not occupied then skip
+sb 555215790 On r2
+sleep 180
+yield
+j loop
