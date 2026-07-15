@@ -10,13 +10,13 @@
 9. Set waypoints and configuration using stack/roboCoordinator
 10. Turn lever off to release aimee. She should instantly begin following waypoints in increasing order starting at SP0
 
-**Error modes:**
+**Error modes:**  
 Aimee will set roboroutine's housing Setting to 1 to indicate an error.  
-This could mean one of two things:
-She did not find any ore at the mining site with the given mining range or
+This could mean one of two things:  
+She did not find any ore at the mining site with the given mining range or  
 Her battery is below 70,000 Kw. Small batteries will instantly error her  
 Any of these errors will cause the housing of roboroutine to have Setting = 1  
-Mining site errors can be cleared by having recallLever's Setting = 1. Doing so will make the roboroutine housing Setting go from 1 to 0 and reset her as if she never went to the mining site. If the site is still empty, she will flag as such and return.  
+Mining site errors can be cleared by having recallLever's Setting = 1. Doing so will make the roboroutine housing Setting go from 1  to 0 and reset her as if she never went to the mining site. If the site is still empty, she will flag as such and return.  
 Battery errors can only be cleared by recharging aimee  
 
 **Using roboCoordinator**
