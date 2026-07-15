@@ -1,0 +1,8 @@
+
+
+loop:
+lb r0 1076425094 Activate Maximum
+seqz r0 r0
+sb 555215790 On r0
+yield
+j loop

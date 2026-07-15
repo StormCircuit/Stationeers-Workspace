@@ -1,11 +1,15 @@
-#turn lights on if NOT day AND IF room occupied then wait 180 seconds before checking
+#turn lights on IF room occupied then wait 180 seconds before checking
 
 loop:
 lb r0 1076425094 Activate Maximum
-beq r0 1 endCheck #if day then skip
+beqz r0 checkOccupancy
+sb 555215790 On 0
+yield
+j loop
+
+checkOccupancy:
 lb r0 322782515 Activate Maximum
 sb 555215790 On r0
+breqz r0 2
 sleep 180
-endCheck:
-yield
 j loop
