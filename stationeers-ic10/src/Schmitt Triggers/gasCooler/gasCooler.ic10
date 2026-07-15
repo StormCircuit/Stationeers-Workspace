@@ -1,19 +1,15 @@
 
-alias input d0
-alias gasTempDevice d1
+alias gasTempDevice d0
 
-alias currentTemp r2
+alias currentTemp r4
 
-define minTempKelvin 500
-define maxTempKelvin 510
-
+define minTempKelvin 267
+define maxTempKelvin 268
 
 #simple schmitt trigger
 
-start:
-
 noCooling:
-s input On 0
+sb -2113838091 On 0
 l currentTemp gasTempDevice Temperature
 s db Setting currentTemp
 bgeal currentTemp maxTempKelvin startCooling
@@ -21,7 +17,7 @@ yield
 j noCooling
 
 startCooling:
-s input On 1
+sb -2113838091 On 1
 l currentTemp gasTempDevice Temperature
 s db Setting currentTemp
 blt currentTemp minTempKelvin noCooling

@@ -1,0 +1,40 @@
+
+alias gasTempDevice d0
+alias input1 d1
+alias input2 d2
+alias input3 d3
+
+alias currentTemp r4
+
+define minTempKelvin 233.15
+define maxTempKelvin 233.5
+
+#simple schmitt trigger
+
+noCooling:
+yield
+s input1 On 0
+s input2 On 0
+s input3 On 0
+l currentTemp gasTempDevice Temperature
+s db Setting currentTemp
+sge r0 currentTemp maxTempKelvin
+lb r1 1076425094 Activate Maximum
+seqz r1 r1 #if night, set to 1 (only cool at night)
+seq r0 r0 r1
+beq r0 1 startCooling
+j noCooling
+
+startCooling:
+yield
+s input1 On 1
+s input2 On 1
+s input3 On 1
+l currentTemp gasTempDevice Temperature
+s db Setting currentTemp
+slt r0 currentTemp minTempKelvin
+lb r1 1076425094 Activate Maximum
+seqz r1 r1  # (only cool at night)
+seq r0 r0 r1
+beq r0 1 noCooling
+j startCooling
