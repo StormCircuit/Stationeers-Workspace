@@ -1,24 +1,25 @@
-alias filtration d0
+alias pressureReading d0
 
-define filtrationPump HASH("Filtration Pump")
-define filtrationOutput HASH("Filtration Output Pump")
+define filtrationPump HASH("Waste Pump")
+define filtrationOutput HASH("Output Pump")
+define filtOverpressReg HASH("Overpressure Regulator")
 
-alias currPressure r2
+alias currPressure r4
 
 define minPressurePa 200
 define maxPressurePa 510
 
 
 #simple schmitt trigger
-
-start:
-
 lowPressure:
-sb -348054045 Mode 0
+s pressureReading On 1
+sb -348054045 On 0
 sbn -321403609 filtrationPump On 0
 sbn 1310794736 filtrationPump On 0
 sbn -321403609 filtrationOutput On 0
 sbn 1310794736 filtrationOutput On 0
+sbn 209854039 filtOverpressReg On 0
+sbn -1149857558 filtOverpressReg On 0
 l currPressure d0 PressureInput
 s db Setting currPressure
 bgeal currPressure maxPressurePa highPressure
@@ -26,11 +27,14 @@ yield
 j lowPressure
 
 highPressure:
-sb -348054045 Mode 1
+s pressureReading On 1
+sb -348054045 On 1
 sbn -321403609 filtrationPump On 1
 sbn 1310794736 filtrationPump On 1
 sbn -321403609 filtrationOutput On 1
 sbn 1310794736 filtrationOutput On 1
+sbn 209854039 filtOverpressReg On 1
+sbn -1149857558 filtOverpressReg On 1
 l currPressure d0 PressureInput
 s db Setting currPressure
 blt currPressure minPressurePa lowPressure
