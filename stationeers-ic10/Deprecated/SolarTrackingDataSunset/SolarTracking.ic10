@@ -1,12 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<InstructionData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <DateTime>133761675531032724</DateTime>
-  <GameVersion>0.2.5284.23867</GameVersion>
-  <Title>SolarTrackingDataSunrise</Title>
-  <Description>​</Description>
-  <Author>Rizzard of Oz</Author>
-  <WorkshopFileHandle>0</WorkshopFileHandle>
-  <Instructions>alias Sensor d0 # Kit (Sensor) &gt; Daylight Sensor
+alias Sensor d0 # Kit (Sensor) &gt; Daylight Sensor
 # Place sensor facing UP, not in an enclosed space
 alias Display d1 # Optional, Kit (Console)
 alias PanelType1 d2 # Any controllable Solar Panel
@@ -60,5 +52,4 @@ bdns PanelType2 start
 sb Panel2Hash Vertical AngleVertical
 sb Panel2Hash Horizontal AngleHorizontal
 
-j start</Instructions>
-</InstructionData>
+j start
