@@ -1,11 +1,14 @@
 
-alias valve d0
-alias pressureReadingDevice d1
+alias pressureReadingDevice d0
+alias input1 d1
+alias input2 d2
+alias input3 d3
+alias input4 d4
 
 alias currPressure r2
 
-define minPressurePa 18500
-define maxPressurePa 19000
+define minPressurePa 30000
+define maxPressurePa 35000
 
 
 #simple schmitt trigger
@@ -13,16 +16,21 @@ define maxPressurePa 19000
 start:
 
 lowPressure:
-s valve On 1
+s input1 On 1
+s input2 On 1
+s input3 On 1
+s input4 On 1
 l currPressure pressureReadingDevice Pressure
 s db Setting currPressure
-l currPressure pressureReadingDevice Pressure
 bgeal currPressure maxPressurePa highPressure
 yield
 j lowPressure
 
 highPressure:
-s valve On 0
+s input1 On 0
+s input2 On 0
+s input3 On 0
+s input4 On 0
 l currPressure pressureReadingDevice Pressure
 s db Setting currPressure
 blt currPressure minPressurePa lowPressure
