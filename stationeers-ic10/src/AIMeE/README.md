@@ -10,14 +10,6 @@
 9. Set waypoints and configuration using stack/roboCoordinator
 10. Turn lever off to release aimee. She should instantly begin following waypoints in increasing order starting at SP0
 
-This is readme mentioned in roboCoordinator for those who don't know french:
-**Using roboCoordinator**
-Instructions:
-1. Rename your roboroutine housings to aimee1 up to a max of aimee16.
-2. Open the roboCoordinator code and manually enter the waypoints to exit the base up to the mining site
-3. Turn the roboCoordinator housing on and it will write the waypoints to the labeled aimee1 to aimee16 housings
-4. Optional: hook a advanced tablet/hardsuit up as per the code. You can walk around and click "Activate" to send the current coordinates as the mining site which will instantly recall all the Aimees and write the waypoint.
-
 **Error modes:**
 Aimee will set roboroutine's housing Setting to 1 to indicate an error.  
 This could mean one of two things:
@@ -26,6 +18,13 @@ Her battery is below 70,000 Kw. Small batteries will instantly error her
 Any of these errors will cause the housing of roboroutine to have Setting = 1  
 Mining site errors can be cleared by having recallLever's Setting = 1. Doing so will make the roboroutine housing Setting go from 1 to 0 and reset her as if she never went to the mining site. If the site is still empty, she will flag as such and return.  
 Battery errors can only be cleared by recharging aimee  
+
+**Using roboCoordinator**
+Instructions:
+1. Rename your roboroutine housings to aimee1 up to a max of aimee16.
+2. Open the roboCoordinator code and manually enter the waypoints to exit the base up to the mining site
+3. Turn the roboCoordinator housing on and it will write the waypoints to the labeled aimee1 to aimee16 housings
+4. Optional: hook a advanced tablet/hardsuit up as per the code. You can walk around and click "Activate" to send the current coordinates as the mining site which will instantly recall all the Aimees and write the waypoint.
 
 **Configuration:**  
 These can be adjusted in real time as they are loaded when checked.  
