@@ -1,0 +1,30 @@
+
+
+
+idle:
+sb -2113838091 On 1 #turn analyzer on
+sb 938836756 On 0
+sb -785498334 On 0
+sb 1420719315 On 1
+lb r0 -2113838091 VolumeOfLiquid Maximum
+s db Setting r0
+slt r0 r0 20000 #if less than 20,000 liters then 1
+lb r1 -1252983604 Temperature Minimum
+sgt r1 r1 273.15 #if gas temp above 0c then 1
+seq r0 r0 r1
+beq r0 1 condensing
+yield
+j idle
+
+condensing:
+sb 2015439334 On 1  #turn analyzer on
+sb 938836756 On 1
+sb -785498334 On 1
+sb 1420719315 On 1
+lb r0 -2113838091 VolumeOfLiquid Maximum
+s db Setting r0
+bge r0 20000 idle #if MORE than 20,000 liters then branch
+lb r0 -1252983604 Temperature Minimum
+ble r0 273.15 idle #if gas temp below 0c then branch
+yield
+j condensing
