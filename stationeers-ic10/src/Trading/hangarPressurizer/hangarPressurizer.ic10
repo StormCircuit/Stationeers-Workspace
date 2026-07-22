@@ -1,77 +1,104 @@
-alias gasSensor d0
 alias switch d1
 alias stateDisplay d2 #led display
 alias pressureDisplay d3 #led display
+alias traderStatus d4 #led display
+alias landingPadData d5 #landing pad data
 define ventPrefabHash -785498334 #script only works with powered vent large
+define blastDoorPrefabHash 337416191 #blast door prefab hash
+define gasSensorPrefabHash -1252983604 #gas sensor prefab hash for batch pressure reads
 define intVentNameHash HASH("Interior Vent") #vents used to pressurize/depressurize
-define extVentNameHash HASH("Exterior Vent") #vents used to evacuate toxic air
+define extVentNameHash HASH("Exterior Vent") #vents used to evacuate toxic air before pressurizing
+define smalHangar 1736080881
+define medHangar -566348148
+define lrgHangar -1351081801
 define minPress 50 #change if you want to pressurize more than this
+define lowPressLock 25 #lock blastdoors below this pressure (kPa)
+define openPress 40 #open blastdoors above this pressure (kPa)
 
 #put switch in off state and depressurize building to start
 currSwitchOff:
+sb blastDoorPrefabHash Open 0
+sb blastDoorPrefabHash Lock 1
+sb smalHangar Open 1 #open hangars to let plane out
+sb medHangar Open 1
+sb lrgHangar Open 1
 sbn ventPrefabHash intVentNameHash On 0
+sbn ventPrefabHash extVentNameHash On 0
 l r0 switch Setting
-beq r0 1 evacuate #if switch on, evacuate first, then pressurize
+beq r0 1 evacuateToxicAir #if switch on, evacuate toxic air then pressurize
 s stateDisplay Mode 10
-s stateDisplay Setting STR("Idle")
-l r0 gasSensor Pressure
-s pressureDisplay Mode 14
-mul r0 r0 1000 #convert to Pa
-s pressureDisplay Setting r0
+s stateDisplay Setting STR("Prime")
+lb r0 gasSensorPrefabHash Pressure Minimum
 yield
 j currSwitchOff
 
 currSwitchOn:
 sbn ventPrefabHash intVentNameHash On 0
+sbn ventPrefabHash extVentNameHash On 0
 l r0 switch Setting
-beq r0 0 depressurize
+beq r0 0 depressurizeCleanAir
 s stateDisplay Mode 10
-s stateDisplay Setting STR("Idle")
-l r0 gasSensor Pressure
+s stateDisplay Setting STR("Safe!")
+lb r0 gasSensorPrefabHash Pressure Minimum
+sb blastDoorPrefabHash Open 0
+sb blastDoorPrefabHash Lock 0
 s pressureDisplay Mode 14
 mul r0 r0 1000 #convert to Pa
 s pressureDisplay Setting r0
 yield
 j currSwitchOn
 
-evacuate:
-sb -1351081801 Open 0 #close hangar door otherwise we are being dumb
+evacuateToxicAir:
+sb smalHangar Open 0 #close hangar
+sb medHangar Open 0
+sb lrgHangar Open 0
+sb blastDoorPrefabHash Open 0 #close hangar door otherwise we are being dumb
+sb blastDoorPrefabHash Lock 1
 sbn ventPrefabHash extVentNameHash On 1
+sbn ventPrefabHash extVentNameHash Mode 1
 s stateDisplay Mode 10
 s stateDisplay Setting STR("Evac")
-l r0 gasSensor Pressure
-beq r0 0 pressurize #when pressure 0, pressurize with clean air
+lb r0 gasSensorPrefabHash Pressure Minimum
+beq r0 0 pressurizeCleanAir #when pressure 0, pressurize with clean air
 s pressureDisplay Mode 14
 mul r0 r0 1000 #convert to Pa
 s pressureDisplay Setting r0
 yield
-j evacuate
+j evacuateToxicAir
 
-pressurize:
+pressurizeCleanAir:
 sbn ventPrefabHash extVentNameHash On 0
 sbn ventPrefabHash intVentNameHash Mode 0
 sbn ventPrefabHash intVentNameHash On 1
 s stateDisplay Mode 10
 s stateDisplay Setting STR("Fill")
-l r0 gasSensor Pressure
+sb blastDoorPrefabHash Open 0
+sb blastDoorPrefabHash Lock 1
+sb smalHangar Open 0
+sb medHangar Open 0
+sb lrgHangar Open 0
+lb r0 gasSensorPrefabHash Pressure Minimum
 bge r0 minPress currSwitchOn #break when minPress kpa
 s pressureDisplay Mode 14
 mul r0 r0 1000 #convert to Pa
 s pressureDisplay Setting r0
 yield
-j pressurize
+j pressurizeCleanAir
 
-depressurize:
+depressurizeCleanAir:
 sbn ventPrefabHash intVentNameHash Mode 1
 sbn ventPrefabHash intVentNameHash On 1
 s stateDisplay Mode 10
-s stateDisplay Setting STR("Empty")
-l r0 gasSensor Pressure
-brgt r0 0 3 #when pressure 0, open hangar and break
-sb -1351081801 Open 1
-j currSwitchOff
+s stateDisplay Setting STR("Depress")
+sb blastDoorPrefabHash Open 0
+sb blastDoorPrefabHash Lock 1
+sb smalHangar Open 0
+sb medHangar Open 0
+sb lrgHangar Open 0
+lb r0 gasSensorPrefabHash Pressure Minimum
+beq r0 0 currSwitchOff #when clean air depressurized, open hangar
 s pressureDisplay Mode 14
 mul r0 r0 1000 #convert to Pa
 s pressureDisplay Setting r0
 yield
-j depressurize
+j depressurizeCleanAir
