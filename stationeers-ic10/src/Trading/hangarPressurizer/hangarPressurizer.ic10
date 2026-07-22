@@ -5,7 +5,9 @@ alias pressureDisplay d3 #led display
 define ventPrefabHash -785498334 #script only works with powered vent large
 define intVentNameHash HASH("Interior Vent") #vents used to pressurize/depressurize
 define extVentNameHash HASH("Exterior Vent") #vents used to evacuate toxic air
-define minPress 50 #change if you want to pressurize more than this
+define occupancySensorPrefabHash 322782515 #batch occupancy sensors (Activate)
+define blastDoorPrefabHash 337416191 #blast doors lockdown
+define minPress 150 #change if you want to pressurize more than this
 
 #put switch in off state and depressurize building to start
 currSwitchOff:
@@ -24,15 +26,26 @@ j currSwitchOff
 currSwitchOn:
 sbn ventPrefabHash intVentNameHash On 0
 l r0 switch Setting
-beq r0 0 depressurize
+beq r0 0 requestDepressurize
 s stateDisplay Mode 10
 s stateDisplay Setting STR("Idle")
 l r0 gasSensor Pressure
+blt r0 minPress skipBlastDoorOpen
+sb blastDoorPrefabHash Lock 0
+sb blastDoorPrefabHash Open 1
+skipBlastDoorOpen:
 s pressureDisplay Mode 14
 mul r0 r0 1000 #convert to Pa
 s pressureDisplay Setting r0
 yield
 j currSwitchOn
+
+requestDepressurize:
+sb blastDoorPrefabHash Open 0
+sb blastDoorPrefabHash Lock 1
+lb r0 occupancySensorPrefabHash Activate Maximum
+beq r0 1 currSwitchOn #block depressurize while a player is detected
+j depressurize
 
 evacuate:
 sb -1351081801 Open 0 #close hangar door otherwise we are being dumb
@@ -62,6 +75,10 @@ yield
 j pressurize
 
 depressurize:
+sb blastDoorPrefabHash Open 0
+sb blastDoorPrefabHash Lock 1
+lb r0 occupancySensorPrefabHash Activate Maximum
+beq r0 1 currSwitchOn #abort depressurize if occupancy appears mid-cycle
 sbn ventPrefabHash intVentNameHash Mode 1
 sbn ventPrefabHash intVentNameHash On 1
 s stateDisplay Mode 10
