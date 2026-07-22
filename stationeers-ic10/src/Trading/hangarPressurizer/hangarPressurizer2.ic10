@@ -1,0 +1,115 @@
+alias gasSensor d0
+alias switch d1
+alias stateDisplay d2 #led display
+alias pressureDisplay d3 #led display
+alias landingPadDataPower d4
+define ventPrefabHash -785498334 #script only works with powered vent large
+define intVentNameHash HASH("Interior Vent") #vents used to pressurize/depressurize
+define extVentNameHash HASH("Exterior Vent") #vents used to evacuate toxic air
+define occupancySensorPrefabHash 322782515 #batch occupancy sensors (Activate)
+define blastDoorPrefabHash 337416191 #blast doors lockdown
+define minPress 150 #change if you want to pressurize more than this
+
+#put switch in off state and depressurize building to start
+currSwitchOff:
+sbn ventPrefabHash intVentNameHash On 0
+l r0 switch Setting
+beq r0 1 requestPressurize
+s stateDisplay Mode 10
+s stateDisplay Setting STR("Idle")
+l r0 gasSensor Pressure
+s pressureDisplay Mode 14
+mul r0 r0 1000 #convert to Pa
+s pressureDisplay Setting r0
+yield
+j currSwitchOff
+
+requestPressurize:
+l r0 landingPadDataPower Mode
+bne r0 4 requestDepressurize #safeguard: only allow pressurize while landed
+j evacuate
+
+currSwitchOn:
+sbn ventPrefabHash intVentNameHash On 0
+l r0 switch Setting
+beq r0 0 requestDepressurize
+l r0 landingPadDataPower Mode
+bne r0 4 requestDepressurize #safeguard: all non-landed states depressurize
+s stateDisplay Mode 10
+s stateDisplay Setting STR("Idle")
+l r0 gasSensor Pressure
+blt r0 minPress pressurize #re-fill if pressure drops while landed
+sb blastDoorPrefabHash Lock 0
+sb blastDoorPrefabHash Open 1
+skipBlastDoorOpen:
+s pressureDisplay Mode 14
+mul r0 r0 1000 #convert to Pa
+s pressureDisplay Setting r0
+yield
+j currSwitchOn
+
+requestDepressurize:
+sb blastDoorPrefabHash Open 0
+sb blastDoorPrefabHash Lock 1
+lb r0 occupancySensorPrefabHash Activate Maximum
+beq r0 1 currSwitchOn #block depressurize while a player is detected
+j depressurize
+
+evacuate:
+sb -1351081801 Open 0 #close hangar door otherwise we are being dumb
+sbn ventPrefabHash extVentNameHash On 1
+l r0 switch Setting
+beq r0 0 requestDepressurize
+l r1 landingPadDataPower Mode
+bne r1 4 requestDepressurize
+s stateDisplay Mode 10
+s stateDisplay Setting STR("Evac")
+l r0 gasSensor Pressure
+beq r0 0 pressurize #when pressure 0, pressurize with clean air
+s pressureDisplay Mode 14
+mul r0 r0 1000 #convert to Pa
+s pressureDisplay Setting r0
+yield
+j evacuate
+
+pressurize:
+sbn ventPrefabHash extVentNameHash On 0
+sbn ventPrefabHash intVentNameHash Mode 0
+sbn ventPrefabHash intVentNameHash On 1
+l r0 switch Setting
+beq r0 0 requestDepressurize
+l r1 landingPadDataPower Mode
+bne r1 4 requestDepressurize
+s stateDisplay Mode 10
+s stateDisplay Setting STR("Fill")
+l r0 gasSensor Pressure
+bge r0 minPress currSwitchOn #break when minPress kpa
+s pressureDisplay Mode 14
+mul r0 r0 1000 #convert to Pa
+s pressureDisplay Setting r0
+yield
+j pressurize
+
+depressurize:
+sb blastDoorPrefabHash Open 0
+sb blastDoorPrefabHash Lock 1
+lb r0 occupancySensorPrefabHash Activate Maximum
+beq r0 1 currSwitchOn #abort depressurize if occupancy appears mid-cycle
+l r0 switch Setting
+bne r0 1 continueDepressurize
+l r1 landingPadDataPower Mode
+beq r1 4 evacuate
+continueDepressurize:
+sbn ventPrefabHash intVentNameHash Mode 1
+sbn ventPrefabHash intVentNameHash On 1
+s stateDisplay Mode 10
+s stateDisplay Setting STR("Empty")
+l r0 gasSensor Pressure
+brgt r0 0 3 #when pressure 0, open hangar and break
+sb -1351081801 Open 1
+j currSwitchOff
+s pressureDisplay Mode 14
+mul r0 r0 1000 #convert to Pa
+s pressureDisplay Setting r0
+yield
+j depressurize
