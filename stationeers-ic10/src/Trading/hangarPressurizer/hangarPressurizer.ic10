@@ -29,19 +29,29 @@ beq r0 1 evacuateToxicAir #if switch on, evacuate toxic air then pressurize
 s stateDisplay Mode 10
 s stateDisplay Setting STR("Prime")
 lb r0 gasSensorPrefabHash Pressure Minimum
+s traderStatus Mode 10
+l r0 landingPadData Mode
+brne r0 4 3
+s traderStatus Setting STR("Ready")
+jr 2
+s traderStatus Setting STR("Empty")
 yield
 j currSwitchOff
 
 currSwitchOn:
 sbn ventPrefabHash intVentNameHash On 0
 sbn ventPrefabHash extVentNameHash On 0
+lb r0 gasSensorPrefabHash Pressure Minimum
+brle r0 25 4
+sb blastDoorPrefabHash Open 0
+sb blastDoorPrefabHash Lock 1
+jr 3
+sb blastDoorPrefabHash Open 1
+sb blastDoorPrefabHash Lock 0
 l r0 switch Setting
 beq r0 0 depressurizeCleanAir
 s stateDisplay Mode 10
 s stateDisplay Setting STR("Safe!")
-lb r0 gasSensorPrefabHash Pressure Minimum
-sb blastDoorPrefabHash Open 0
-sb blastDoorPrefabHash Lock 0
 s pressureDisplay Mode 14
 mul r0 r0 1000 #convert to Pa
 s pressureDisplay Setting r0
@@ -89,7 +99,7 @@ depressurizeCleanAir:
 sbn ventPrefabHash intVentNameHash Mode 1
 sbn ventPrefabHash intVentNameHash On 1
 s stateDisplay Mode 10
-s stateDisplay Setting STR("Depress")
+s stateDisplay Setting STR("Depres")
 sb blastDoorPrefabHash Open 0
 sb blastDoorPrefabHash Lock 1
 sb smalHangar Open 0
