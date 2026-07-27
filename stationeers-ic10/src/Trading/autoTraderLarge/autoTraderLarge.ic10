@@ -7,6 +7,7 @@ define minTraderWatts 200 #roughly 250 and above are far traders, needs large di
 findContact:
 s medDish BestContactFilter -1
 s lrgDish BestContactFilter -1
+s medDish Setting 1900
 s medDish Setting 2000
 s lrgDish Setting 2000
 
@@ -26,7 +27,7 @@ s medDish Vertical r0
 l r0 medDish Idle
 yield
 brne r0 1 -2 #wait for dish to idle
-yield
+sleep 1
 
 l r1 traderFilterDial Setting #update and check current filter
 l r0 medDish ContactTypeId
@@ -47,13 +48,14 @@ brne r0 1 -2
 s lrgDish Setting 49999 #workaround for a bug
 yield
 s lrgDish Setting 50000
-yield
+sleep 1
 l r0 lrgDish SignalID
 beq r0 -1 findContact
 l r0 lrgDish MinimumWattsToContact #check trader tier&complete green bar
 yield
 breq r0 -1 -4
 blt r0 minTraderWatts findContact #wrong tier
+
 l r0 lrgDish MinimumWattsToContact
 l r1 lrgDish WattsReachingContact
 blt r1 r0 findContact #not close enough, keep sweeping
