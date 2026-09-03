@@ -1,8 +1,8 @@
 #turn lights on IF room occupied then wait 180 seconds before checking
 
 loop:
-lb r0 1076425094 Activate Maximum
-beqz r0 checkOccupancy
+lb r0 322782515 Activate Maximum
+bnez r0 checkOccupancy
 sb 555215790 On 0
 yield
 j loop
