@@ -19,13 +19,13 @@ beq r0 1 lowPressure
 j idle
 
 lowPressure:
+s pressureReading On 1
 s LED On 1
 s LED Color 4
-sb gasUmbilical Open 1
 l r0 pressureReading Pressure
 s db Setting r0
 bgeal r0 maxPressurePa safetyCheck
-s pressureReading On 1
+sb gasUmbilical Open 1
 s fuelPump On 1
 yield
 j lowPressure
@@ -33,6 +33,7 @@ j lowPressure
 #allow regulators to depressurize over 45mpa
 safetyCheck:
 s lever On 0
+s fuelPump On 0
 s LED On 1
 s LED Color 3
 l r0 pressureReading Pressure
