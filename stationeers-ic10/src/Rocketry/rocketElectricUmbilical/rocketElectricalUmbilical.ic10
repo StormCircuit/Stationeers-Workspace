@@ -1,20 +1,21 @@
 alias lever d0
-alias electricUmbilical d1
 alias LED d2
+
+define electricUmbilical 1529453938
 
 awaitingActivation:
 s LED On 1
 s LED Color 2
-s electricUmbilical Open 0
-l r0 lever Open
-beq r0 1 openUmbilical
+sb electricUmbilical Open 0
+l r0 lever On
+beq r0 1 OnUmbilical
 yield
 j awaitingActivation
 
-openUmbilical:
+OnUmbilical:
 s LED On 1
 s LED Color 4
-s electricUmbilical Open 1
-l r0 lever Open
-beq r0 1 openUmbilical
+sb electricUmbilical Open 1
+l r0 lever On
+beq r0 1 OnUmbilical
 j awaitingActivation
