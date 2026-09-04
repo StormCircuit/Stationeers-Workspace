@@ -4,11 +4,14 @@ alias fuelPump d1
 alias lever d2
 alias LED d3
 
+define gasUmbilical -1814939203
+
 define maxPressurePa 45000
 
 idle:
 s pressureReading On 0
 s fuelPump On 0
+sb gasUmbilical Open 0
 s LED On 1
 s LED Color 2
 l r0 lever Setting
@@ -18,6 +21,7 @@ j idle
 lowPressure:
 s LED On 1
 s LED Color 4
+sb gasUmbilical Open 1
 l r0 pressureReading Pressure
 s db Setting r0
 bgeal r0 maxPressurePa safetyCheck
@@ -28,9 +32,11 @@ j lowPressure
 
 #allow regulators to depressurize over 45mpa
 safetyCheck:
+s lever On 0
 s LED On 1
 s LED Color 3
 l r0 pressureReading Pressure
 s db Setting r0
 bleal r0 maxPressurePa idle
+yield
 j safetyCheck

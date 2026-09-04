@@ -1,4 +1,4 @@
-alias activationLever d0
+alias lever d0
 alias cargoUmbilical d1
 alias LED d2
 
@@ -13,8 +13,7 @@ sb rocketCargoSmall Open 0
 sb rocketCargoMedium Open 0
 sb rocketCargoMedium On 0
 sb rocketCargoMedium On 0
-s activationLever Open 0
-l r0 activationLever Open
+l r0 lever On
 beq r0 1 unloadCargo
 yield
 j idle
@@ -27,7 +26,7 @@ sb rocketCargoMedium Open 1
 unloadingLoop:
 s LED On 1
 s LED Color 4
-l r0 activationLever Open
+l r0 lever On
 beq r0 0 cargoUnloadingDone
 lb r0 rocketCargoSmall Quantity Sum
 lb r1 rocketCargoMedium Quantity Sum
@@ -37,8 +36,10 @@ yield
 j unloadingLoop
 
 cargoUnloadingDone:
-sb rocketCargoMedium On 0
-sb rocketCargoMedium On 0
 sb rocketCargoSmall Open 0
 sb rocketCargoMedium Open 0
+sb rocketCargoMedium On 0
+sb rocketCargoSmall On 0
+yield
+s lever On 0
 j idle
