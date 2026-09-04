@@ -1,24 +1,20 @@
-alias activationLever d0
+alias lever d0
 alias electricUmbilical d1
 alias LED d2
 
-alias leverState r0
-
-start:
-s LED Color 3
-
 awaitingActivation:
-l leverState activationLever Open
-beq leverState 1 openUmbilical
+s LED On 1
+s LED Color 2
+s electricUmbilical Open 0
+l r0 lever Open
+beq r0 1 openUmbilical
 yield
 j awaitingActivation
 
 openUmbilical:
-s LED Color 0
+s LED On 1
+s LED Color 4
 s electricUmbilical Open 1
-awaitDeactivation:
-l leverState activationLever Open
-beq leverState 1 awaitDeactivation
-s LED Color 3
-s electricUmbilical Open 0
+l r0 lever Open
+beq r0 1 openUmbilical
 j awaitingActivation
