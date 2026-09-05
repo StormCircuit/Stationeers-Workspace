@@ -9,7 +9,7 @@ define gasUmbilical -1814939203
 define maxPressurePa 45000
 
 idle:
-s pressureReading On 0
+s pressureReading On 1
 s fuelPump On 0
 sb gasUmbilical Open 0
 s LED On 1
