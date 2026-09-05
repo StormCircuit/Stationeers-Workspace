@@ -1,0 +1,38 @@
+alias engAnaly d0
+alias enginePump d1
+alias storagAnaly d2
+
+define minPressurePa 44000
+
+#max turbo pump setting
+define maxClamp 20
+
+highPressure:
+s engAnaly On 1
+s storagAnaly On 1
+s enginePump On 0
+l r0 engAnaly Pressure
+s db Setting r0
+blt r0 minPressurePa lowPressure
+yield
+j highPressure
+
+lowPressure:
+s engAnaly On 1
+s storagAnaly On 1
+s enginePump On 1
+l r0 engAnaly Pressure
+bgeal r0 45000 highPressure
+
+#Pump setting = (target pressure- current output pressure)× target volum/ input pressure
+l r1 engAnaly Pressure
+sub r0 45000 r1
+l r1 engAnaly Volume
+mul r0 r0 r1
+l r1 storagAnaly Pressure
+div r0 r0 r1
+clamp r0 r0 1 maxClamp
+s enginePump Setting r0
+s db Setting r0
+yield
+j lowPressure
