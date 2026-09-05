@@ -1,0 +1,32 @@
+alias fuelMeter d0
+alias cargoMeter d1
+alias powerMeter d2
+alias fuelAnalyzer d3
+
+
+loop:
+s fuelMeter On 1
+s fuelMeter Color 3
+s cargoMeter On 1
+s cargoMeter Color 1
+s powerMeter On 1
+s powerMeter Color 5
+s fuelMeter Maximum 60000
+s cargoMeter Maximum 100
+s powerMeter Maximum 100
+
+l r0 fuelAnalyzer Pressure
+s fuelMeter Setting r0
+
+lb r0 -1125305264 Maximum Sum
+lb r1 -1125305264 Charge Sum
+div r0 r1 100
+s powerMeter Setting r0
+
+lb r0 -1493672123 Quantity Sum
+lb r1 1151864003 Quantity Sum
+add r0 r0 r1
+s cargoMeter Setting r0
+
+yield
+j loop
