@@ -19,6 +19,7 @@ yield
 j idle
 
 unloadCargo:
+s cargoUmbilical Open 1
 sb rocketCargoSmall On 1
 sb rocketCargoMedium On 1
 sb rocketCargoSmall Open 1
