@@ -1,0 +1,67 @@
+alias robotXmitter d0 #set to logic transmitter
+alias roboroutine d1 #roboroutine housing
+alias statusLED d2 #set to status display (must support text input)
+alias chargeLED d3 #set to charge level display (must support numeric input)
+alias errorLED d5 #set to mining site error indicator light (needs color)
+
+monitorLoop:
+
+
+ls r0 robotXmitter 0 Charge #if charge below 70,000 kw, flash on status
+blt r0 70000 statusBattery
+statusBattEnd:
+lb r0 1997212478 NextWeatherEventTime Sum #if weather != 0, set storm status
+bnez r0 statusWeather
+statusWeatherEnd:
+sleep 2 #sleep to avoid flashing
+s statusLED Color 2
+s statusLED Mode 10
+l r0 robotXmitter Mode
+beq r0 0 statusIdle
+beq r0 1 statusMoving
+beq r0 2 statusLoad
+beq r0 3 statusUnload
+statusCheckEnd:
+
+brdns chargeLED 5
+s chargeLED Mode 2
+s chargeLED Color 2
+ls r0 robotXmitter 0 Charge
+s chargeLED Setting r0
+
+brdns errorLED 9
+s errorLED Color 3
+l r0 roboroutine Setting
+breqz r0 3
+s errorLED On 1
+jr 2
+s errorLED On 0
+l r0 robotXmitter Mode
+s db Setting r0
+
+yield
+j monitorLoop
+
+statusIdle:
+s statusLED Setting STR("IDLE")
+j statusCheckEnd
+statusMoving:
+s statusLED Setting STR("MOVE")
+j statusCheckEnd
+statusLoad:
+s statusLED Setting STR("LOAD")
+j statusCheckEnd
+statusUnload:
+s statusLED Setting STR("OFLD")
+j statusCheckEnd
+
+statusWeather:
+sleep 1
+s statusLED Color 3
+s statusLED Setting STR("STRM")
+j statusWeatherEnd
+statusBattery:
+sleep 1
+s statusLED Color 3
+s statusLED Setting STR("CHRG")
+j statusBattEnd

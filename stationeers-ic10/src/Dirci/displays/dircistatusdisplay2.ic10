@@ -1,0 +1,28 @@
+alias robotXmitter d0 #set to logic transmitter
+alias posXLED d1 #set to position X display (must support numeric input)
+alias posZLED d2 #set to position Y display (must support numeric input)
+alias recallLever d4 #lever to trigger recall
+alias recallLED d5 #LED to indicate recall status
+monitorLoop:
+
+#position LED setting
+brdns posXLED 6
+s posXLED Color 2
+s posXLED Mode 0
+l r0 robotXmitter PositionX
+ceil r0 r0
+s posXLED Setting r0
+brdns posZLED 6
+s posZLED Mode 0
+s posZLED Color 2
+l r0 robotXmitter PositionZ
+ceil r0 r0
+s posZLED Setting r0
+
+#recall LED
+brdns recallLever 3
+l r0 recallLever Setting
+s recallLED On r0
+
+yield
+j monitorLoop
