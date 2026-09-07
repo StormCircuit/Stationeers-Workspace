@@ -1,0 +1,39 @@
+define LastWaypoint 6 #the mining site waypoint (must be last waypoint)
+define ChargeError 70000 #the watts level below which dirci flags a charge error
+define x1 -277
+define z1 -1207
+define x2 -275
+define z2 -1209
+define x3 -274
+define z3 -1237
+define x4 -256
+define z4 -1236
+define x5 -232
+define z5 -1044
+define x6 -214
+define z6 -1016
+define x7 0
+define z7 0
+define x8 0
+define z8 0
+clr d0
+alias lstwp r6 #holding register for last waypoint
+mul lstwp LastWaypoint 2 #mul lastwaypoint by 2 as it's compared to sp
+put d0 0 x1
+put d0 1 z1
+put d0 2 x2
+put d0 3 z2
+put d0 4 x3
+put d0 5 z3
+put d0 6 x4
+put d0 7 z4
+put d0 8 x5
+put d0 9 z5
+put d0 10 x6
+put d0 11 z6
+put d0 12 x7
+put d0 13 z7
+put d0 14 x8
+put d0 15 z8
+put d0 511 lstwp #last waypoint * 2
+put d0 505 ChargeError
