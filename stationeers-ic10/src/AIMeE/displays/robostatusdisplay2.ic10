@@ -26,7 +26,7 @@ brdns progressLED 14
 s progressLED Color 2
 s progressLED On 1
 s recallLED Color 2
-move r1 2
+move r1 2 #skip past battery and ic10 slots
 move numOccupiedSlots 0
 occupiedSlotsCalc:
 ls r0 robotXmitter r1 Occupied
