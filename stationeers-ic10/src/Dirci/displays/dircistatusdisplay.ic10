@@ -2,7 +2,7 @@ alias robotXmitter d0 #set to logic transmitter
 alias roboroutine d1 #roboroutine housing
 alias statusLED d2 #set to status display (must support text input)
 alias chargeLED d3 #set to charge level display (must support numeric input)
-alias errorLED d5 #set to mining site error indicator light (needs color)
+alias errorLED d5 #set to error indicator light (needs color)
 
 monitorLoop:
 

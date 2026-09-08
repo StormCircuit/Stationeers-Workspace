@@ -1,9 +1,15 @@
 alias robotXmitter d0 #set to logic transmitter
 alias posXLED d1 #set to position X display (must support numeric input)
 alias posZLED d2 #set to position Y display (must support numeric input)
+alias progressLED d3 #set to progress display (must support bar input)
 alias recallLever d4 #lever to trigger recall
 alias recallLED d5 #LED to indicate recall status
+
+alias numOccupiedSlots r15 #holding value for number of occupied slots
+
+
 monitorLoop:
+s recallLED Color 2
 
 #position LED setting
 brdns posXLED 6
@@ -18,6 +24,21 @@ s posZLED Color 2
 l r0 robotXmitter PositionZ
 ceil r0 r0
 s posZLED Setting r0
+
+#progress LED setting
+brdns progressLED 14
+s progressLED Color 2
+s progressLED On 1
+move r1 2 #skip past battery and ic10 slots
+move numOccupiedSlots 0
+occupiedSlotsCalc:
+ls r0 robotXmitter r1 Occupied
+add numOccupiedSlots numOccupiedSlots r0
+add r1 r1 1
+breq r1 12 2
+j occupiedSlotsCalc
+div numOccupiedSlots numOccupiedSlots 8
+s progressLED Setting numOccupiedSlots
 
 #recall LED
 brdns recallLever 3
