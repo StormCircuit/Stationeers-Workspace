@@ -1,36 +1,39 @@
 alias vending d0
 alias robotXmitter d1
 
+alias index r2
+alias currStatus r13
 alias vendOccupiedSlots r15
 alias roboOccuSlots r14
 
 monitorLoop:
+move currStatus 0
 
-move r1 2
+move index 2
 move vendOccupiedSlots 0
 vendOccupiedSlotsCalc:
-ls r0 vending r1 Occupied
-add vendOccupiedSlots vendOccupiedSlots r0
-add r1 r1 1
-breq r1 102 2
+ls r3 vending index Occupied
+add vendOccupiedSlots vendOccupiedSlots r3
+add index index 1
+breq index 102 2
 j vendOccupiedSlotsCalc
 
-move r1 2 #skip past battery and ic10 slots
+move index 2 #skip past battery and ic10 slots
 move roboOccuSlots 0
 roboSlotsCalc:
-ls r0 robotXmitter r1 Occupied
-add roboOccuSlots roboOccuSlots r0
-add r1 r1 1
-breq r1 12 2
+ls r3 robotXmitter index Occupied
+add roboOccuSlots roboOccuSlots r3
+add index index 1
+breq index 12 2
 j roboSlotsCalc
 
 
-
-#if no slots occupied AND Dirci is empty then recall Dirci 
+#if no slots occupied AND Dirci is empty then recall Dirci
+yield 
 seqz r0 vendOccupiedSlots
 seqz r1 roboOccuSlots
-seq r0 r1 r0
-s db Setting r0
+and currStatus r1 r0
+s db Setting currStatus
 
 yield
 j monitorLoop
