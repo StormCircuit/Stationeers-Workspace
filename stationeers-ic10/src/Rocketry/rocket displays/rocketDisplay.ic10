@@ -3,30 +3,45 @@ alias cargoMeter d1
 alias powerMeter d2
 alias fuelAnalyzer d3
 
-
-loop:
 s fuelMeter On 1
 s fuelMeter Color 3
 s cargoMeter On 1
 s cargoMeter Color 1
 s powerMeter On 1
 s powerMeter Color 5
-s fuelMeter Maximum 60000
-s cargoMeter Maximum 100
-s powerMeter Maximum 100
+s cargoMeter Maximum 1
 
+lb r0 -1125305264 Maximum Sum
+lb r1 -2123455080 Maximum Sum
+add r0 r1 r0
+s powerMeter Maximum r0
+
+s fuelMeter Maximum 45000
+
+loop:
 l r0 fuelAnalyzer Pressure
 s fuelMeter Setting r0
 
-lb r0 -1125305264 Maximum Sum
-lb r1 -1125305264 Charge Sum
-div r0 r1 100
+lb r0 -1125305264 Charge Sum
+lb r1 -2123455080 Charge Sum
+add r0 r1 r0
 s powerMeter Setting r0
 
-lb r0 -1493672123 Quantity Sum
-lb r1 1151864003 Quantity Sum
+lb r0 -1493672123 Ratio Average
+lb r1 1151864003 Ratio Average
+bnan r0 missingCargoSm
+bnan r1 missingCargoMe
 add r0 r0 r1
+div r0 r0 2
 s cargoMeter Setting r0
+j endCargo
+missingCargoSm:
+s cargoMeter Setting r1
+j endCargo
+missingCargoMe:
+s cargoMeter Setting r0
+j endCargo
+endCargo:
 
 yield
 j loop
