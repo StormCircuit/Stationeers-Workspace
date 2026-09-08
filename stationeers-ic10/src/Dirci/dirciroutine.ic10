@@ -12,9 +12,13 @@ yield
 brnez r6 -2 #skip back to homePoint loop
 s robotXmitter Mode 2
 yield
+move r2 0
+loadingLoop:
+add r2 r2 1
+beq r2 30 goingToWork #if stuck for 30 loops, go to work anyway
 l r0 robotXmitter Mode
 yield
-breq r0 2 -2 #wait till dirci NOT loading
+beq r0 2 loadingLoop #wait till dirci NOT loading
 
 goingToWork:
 jal batteryWeatherCheckRecall
