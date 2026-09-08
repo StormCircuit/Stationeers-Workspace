@@ -11,6 +11,7 @@ jal batteryWeatherCheckRecall
 yield
 brnez r6 -2 #skip back to homePoint loop
 s robotXmitter Mode 2
+yield
 l r0 robotXmitter Mode
 yield
 breq r0 2 -2 #wait till dirci NOT loading
@@ -32,6 +33,7 @@ j goingToWork
 
 unloadPoint:
 s robotXmitter Mode 3
+yield
 l r0 robotXmitter Mode
 yield
 brne r0 5 -2 #wait till empty
