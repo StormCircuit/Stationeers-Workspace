@@ -56,12 +56,12 @@ j goingHomeLoop #==END GOING homePoint LOOP==
 travel:
 move r15 ra #store ra
 travelLoop: #==BEGIN TRAVEL WAIT LOOP ON THIS LINE==
-s robotXmitter Mode 2  
+s robotXmitter Mode 1  
 l r0 robotXmitter PositionY
 s robotXmitter TargetY r0
 jal batteryWeatherCheckRecall
 breqz r6 5
-brlt r15 goingToWork 4 # if from gohome, skip next
+brge r15 goingToWork 4 # if from gohome, skip next
 move r15 goingHomeStart
 sub sp sp 2 #store gohome in r1, get last waypoint
 s robotXmitter Mode 0 #set robot to idle to trigger instant reverse
