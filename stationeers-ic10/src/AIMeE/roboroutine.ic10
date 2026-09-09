@@ -9,7 +9,7 @@ brne r7 1 2 #if mining error, then set unload while idle
 s robotXmitter Mode 4
 jal batteryWeatherCheckRecall
 yield
-bnez r6 unload #loop while recall/error
+brnez r6 -2 #loop while recall/error
 unloadWait:
 s robotXmitter Mode 4
 yield
