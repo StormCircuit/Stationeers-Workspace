@@ -25,6 +25,8 @@ s LED Color 4
 l r0 pressureReading Pressure
 s db Setting r0
 bgeal r0 maxPressurePa safetyCheck
+l r0 lever Setting
+beq r0 0 safetyCheck
 sb gasUmbilical Open 1
 s fuelPump On 1
 yield
@@ -38,6 +40,7 @@ s LED On 1
 s LED Color 3
 l r0 pressureReading Pressure
 s db Setting r0
-bleal r0 maxPressurePa idle
+add r1 maxPressurePa 50
+bleal r0 r1 idle
 yield
 j safetyCheck
