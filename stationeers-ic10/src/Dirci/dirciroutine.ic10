@@ -10,13 +10,13 @@ get r3 db 511 #load new max waypoints at homePoint position
 jal batteryWeatherCheckRecall
 yield
 brnez r6 -2 #skip back to homePoint loop
+move r2 0
 loadingLoop:
 s robotXmitter Mode 2
 yield
-move r2 0
 add r2 r2 1
 l r0 robotXmitter Mode
-beq r2 30 goingToWork #if stuck for 30 loops, go to work anyway
+beq r2 60 goingToWork #if stuck for 60 loops, go to work anyway
 beq r0 2 loadingLoop #wait till dirci NOT loading
 
 goingToWork:
