@@ -5,13 +5,16 @@ s robotXmitter Mode 0  #r2=stuck,r3=topOfStack,r4=WAYX,r5=WAYZ,r6=internal recal
 unload:                #r7=MiningError, r15=ra
 move sp 0 #realign sp
 get r3 db 511 #load new max waypoints at unload position
-jal batteryWeatherCheckRecall
-brnez r6 -2 #skip back to unload loop
+brne r7 1 2 #if mining error, then set unload while idle
 s robotXmitter Mode 4
+jal batteryWeatherCheckRecall
+yield
+bnez r6 unload #loop while recall/error
 unloadWait:
-yield  #=BEGIN UNLOAD LOOP=
+s robotXmitter Mode 4
+yield
 l r0 robotXmitter Mode
-beq r0 4 unloadWait  #=END UNLOAD LOOP=
+beq r0 4 unloadWait
 beq r0 0 goingToWork
 goingHomeStart:
 add sp sp 1 #accessible if mining/goingToWork
@@ -27,8 +30,7 @@ sub r5 r5 1
 s robotXmitter TargetX r4
 s robotXmitter TargetZ r5
 jal travel
-j goingHomeLoop #==END GOING HOME LOOP==
-
+j goingHomeLoop
 goingToWork:
 jal batteryWeatherCheckRecall
 bne r6 0 goingHomeStart
@@ -55,12 +57,11 @@ rand r1 #randomly flip sign
 brgt r1 0.5 2
 mul r0 r0 -1
 j ra #go back to goingToWork
-
 mineOreSearch:
 s robotXmitter Mode 3
 move r2 0
 miningWaitLoop:
-jal batteryWeatherCheckRecall  #==BEGIN MINING WAIT LOOP==#
+jal batteryWeatherCheckRecall
 bne r6 0 goingHomeStart
 add r2 r2 1 #add to stuck
 get r0 db 508 #timeout max stored at 508, if we go over we potentialy trigger a error
@@ -75,13 +76,12 @@ move r7 1
 j goingHomeStart #if mineables <= SP 509 AND wandering, error
 yield
 l r0 robotXmitter Mode
-beq r0 3 miningWaitLoop #==END MINING WAIT LOOP==
+beq r0 3 miningWaitLoop
 beq r0 6 goingHomeStart
 j mineOreSearch
-
 travel:
 move r15 ra #store ra
-travelLoop: #==BEGIN TRAVEL WAIT LOOP ON THIS LINE==
+travelLoop:
 s robotXmitter Mode 2  
 l r0 robotXmitter PositionY
 s robotXmitter TargetY r0
@@ -93,7 +93,7 @@ sub sp sp 2 #store gohome in r1, get last waypoint
 s robotXmitter Mode 0 #set robot to idle to trigger instant reverse
 yield
 l r0 robotXmitter Mode
-bne r0 0 travelLoop #==END TRAVEL WAIT LOOP ON THIS LINE==
+bne r0 0 travelLoop 
 j r15 #use stored ra, if error/recall is on then this is goingHome
 batteryWeatherCheckRecall:
 put db 507 sp #sp, all these are read only
@@ -120,5 +120,5 @@ move r7 0
 jr 2
 s db Setting r6 #this means you can clear a battery error by just fixing it
 lb r0 1997212478 NextWeatherEventTime Sum
-or r6 r6 r0 #If damage/charge/Mining Error/recall signal/weather then r6 = 1
+or r6 r6 r0 #OR: damage/charge/Mining Error/recall signal/weather
 j ra
