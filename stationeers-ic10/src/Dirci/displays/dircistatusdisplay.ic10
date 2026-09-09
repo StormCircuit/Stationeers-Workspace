@@ -7,8 +7,9 @@ alias errorLED d5 #set to error indicator light (needs color)
 monitorLoop:
 
 
-ls r0 robotXmitter 0 Charge #if charge below 70,000 kw, flash on status
-blt r0 70000 statusBattery
+ls r0 robotXmitter 0 Charge #if charge below SP 505, flash on status
+get r1 roboroutine 505 #check charge value against SP 505 in watts
+blt r0 r1 statusBattery
 statusBattEnd:
 lb r0 1997212478 NextWeatherEventTime Sum #if weather != 0, set storm status
 bnez r0 statusWeather
