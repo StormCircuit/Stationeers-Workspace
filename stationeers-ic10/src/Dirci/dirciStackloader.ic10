@@ -36,4 +36,4 @@ put db 13 z7
 put db 14 x8
 put db 15 z8
 put db 511 lstwp #last waypoint * 2
-put db 505 ChargeError
+put db 510 ChargeError
