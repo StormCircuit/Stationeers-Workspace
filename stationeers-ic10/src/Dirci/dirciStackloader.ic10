@@ -1,5 +1,5 @@
 define LastWaypoint 6 #the mining site waypoint (must be last waypoint)
-define ChargeError 70000 #the watts level below which dirci flags a charge error
+define ChargeError 20000 #the watts level below which dirci flags a charge error
 define x1 -277
 define z1 -1207
 define x2 -275
