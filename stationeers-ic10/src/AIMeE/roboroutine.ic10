@@ -5,7 +5,7 @@ s robotXmitter Mode 0    #r15=ra,r14=workError,r13=stuck,r12=topOfStack,
 arrivedHome:             #r0 thru r5 are temp registers
 move sp 0
 get r12 db 511 #load new max waypoints
-brne r14 1 2 #if mining error, then set unload before idle
+brne r14 1 2 #if work error, then set unload before idle
 s robotXmitter Mode 4
 jal batteryWeatherCheckRecall
 brnez r0 -1 #loop while recall/error
@@ -38,9 +38,9 @@ peek r2
 add sp sp 1
 peek r3
 blt sp r12 noOffset #if last waypoint in stack, randomize coords by given memory
-jal getMiningOffset
+jal getOffset
 add r2 r2 r0 #load WAYX
-jal getMiningOffset
+jal getOffset
 add r3 r3 r0 #load WAYZ
 noOffset:
 s robotXmitter TargetX r2
@@ -48,8 +48,8 @@ s robotXmitter TargetZ r3
 jal travel
 bge sp r12 workSite
 j goingToWork
-getMiningOffset:
-get r1 db 507 # mining range is stored at stack address 510 / is our max range
+getOffset:
+get r1 db 507 # offset range is stored at stack address 510 / is our max range
 rand r0
 mul r0 r1 r0 #store offset in r0 then randomly flip sign
 rand r1 #randomly flip sign
@@ -101,7 +101,7 @@ or r3 r0 r1 #combine recall signals, store in r3
 breqz r0 2 #if recall signal set, workerror must clear
 move r14 0
 ls r0 robotXmitter 0 Charge #check if below SP 505
-get r1 db 505 #check charge value against SP 510 in watts
+get r1 db 510 #check charge value against SP 510 in watts
 slt r2 r0 r1
 or r2 r2 r14 #if Charge OR work error then r2 = 1
 s db Setting r2 #this means you can clear a battery error by just fixing it
