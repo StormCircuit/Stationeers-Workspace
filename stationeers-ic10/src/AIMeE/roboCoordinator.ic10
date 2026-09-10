@@ -83,11 +83,10 @@ put r15 13 z7
 put r15 14 x8
 put r15 15 z8
 put r15 511 lstwp #last waypoint * 2
-put r15 510 MiningRange
+put r15 510 ChargeError
 put r15 509 minOre
 put r15 508 TimeoutError
-put r15 505 ChargeError
-put r15 503 DamageError
+put r15 507 MiningRange
 sub r0 lstwp 1
 put r15 r0 WAYZ
 sub r0 lstwp 2
