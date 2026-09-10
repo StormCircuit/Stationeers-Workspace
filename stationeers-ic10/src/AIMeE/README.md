@@ -17,7 +17,7 @@ She did not find any ore at the mining site with the given mining range or
 Her battery is below 70,000 Kw. Small batteries will instantly error her  
 Any of these errors will cause the housing of roboroutine to have Setting = 1  
 Mining site errors can be cleared by having recallLever's Setting = 1. Doing so will make the roboroutine housing Setting go from 1  to 0 and reset her as if she never went to the mining site. If the site is still empty, she will flag as such and return.  
-Battery errors can only be cleared by recharging aimee  
+Battery errors can only be cleared by recharging aimee and she will flicker back and forth as the code is designed around using nuclear batteries and having them swapped with full batteries
 
 **Using roboCoordinator**
 Instructions:
@@ -31,22 +31,15 @@ These can be adjusted in real time as they are loaded when checked.
 **robotXmitter** is a transmitter connected to an Aimee unit  
 **recallLever** is a device with a Setting. If this Setting = 1, and only 1, aimee will go and stay at home.  
 **SP 511** is the last waypoint multiplied by 2 which is literally the last SP address aimee will use before she begins mining  
-**SP 510** is the radius of the mining range centered on the final waypoint. Aimees will randomly go to a coordinate pair within that diameter, creating a circle around the waypoint over time
+around the waypoint over time
+**SP 510** is Charge Error. Aimee will flag a charge error if below this number in Watts  
 **SP 509** is Minimum Ore, if Aimee sees LESS ore than this, she will go home once the Timeout is reached  
 **SP 508** is Timeout. Aimee will drive in circles doing nothing for this many seconds, attempting to mine, before she gives up and flags an error and returns
-**SP 505** is Charge Error. Aimee will flag a charge error if below this number in Watts  
-
-**Read-only Variables:**
-**SP 506** is Aimee's ra register. You can determine where she is in the program with this 
-**SP 507** is current SP 
-**SP 504** is Aimee's internal stuck register. If this value exceeds SP 508 while mining, she will go home  
-**SP 502** is the set TargetZ  
-**SP 501** is the set TargetX
-**SP 500** is the public facing error flag. This will be 1 if Aimee has a mining or battery error.
+**SP 507** is the radius of the mining range centered on the final waypoint. Aimees will randomly go to a coordinate pair within that diameter, creating a circle
 
 **Resetting a stuck/broken aimee unit:**
 1. Turn recall lever on
 2. Pull roboroutine chip out and put it back in
 3. Put aimee at unload spot or with line of sight to it
 4. Turn recall lever off when ready
-5. Note: You can clear an error by setting the setting of recallSwitch, the device attached to roboroutine, to 1. This will set roboroutine's Setting to 0 indicating the error is cleared.
+5. Note: You can clear an error by setting the setting of recallSwitch to 1.
