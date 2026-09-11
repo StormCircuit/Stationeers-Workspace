@@ -37,6 +37,7 @@ yield
 j unloadingLoop
 
 cargoUnloadingDone:
+sleep 5
 sb rocketCargoSmall Open 0
 sb rocketCargoMedium Open 0
 sb rocketCargoMedium On 0
