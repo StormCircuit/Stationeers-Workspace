@@ -13,8 +13,9 @@ s robotXmitter Mode 2
 yield
 add r2 r2 1
 l r0 robotXmitter Mode
-beq r2 60 goingToWork #if stuck for 60 loops, go to work anyway
+beq r2 45 goingToWork #if stuck, go to work anyway (takes abt 45 secs to fill)
 beq r0 2 loadingLoop #wait till dirci NOT loading
+j goingToWork
 goingHomeStart:
 add sp sp 1 #accessible if working/goingToWork
 goingHomeLoop:
@@ -59,10 +60,18 @@ j ra #go back to goingToWork
 workSite:
 s robotXmitter Mode 3
 yield
+move r1 2 #skip past battery and ic10 slots
+move r2 0
+occupiedSlotsCalc:
 l r0 robotXmitter Mode
-yield
-brne r0 5 -4 #wait till empty
-j goingHomeStart
+beq r0 5 goingHomeStart #if robot is empty, go home
+ls r0 robotXmitter r1 Occupied
+add r2 r2 r0
+add r1 r1 1
+breq r1 11 2 #if reached the last slot, exit loop
+j occupiedSlotsCalc
+beqz r2 goingHomeStart #if no occupied slots, go home (attempt to speed Dirci up)
+j workSite #else recalculate until 0 or empty
 travel:
 move r15 ra #store ra
 travelLoop:
