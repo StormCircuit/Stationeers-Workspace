@@ -3,6 +3,7 @@ alias pressureReading d0
 alias fuelPump d1
 alias lever d2
 alias LED d3
+alias safetyValve d4
 
 define gasUmbilical -1814939203
 
@@ -10,6 +11,8 @@ define maxPressurePa 45000
 
 idle:
 s pressureReading On 1
+s safetyValve Setting 45050
+s safetyValve On 1
 s fuelPump On 0
 sb gasUmbilical Open 0
 s LED On 1
@@ -20,6 +23,8 @@ j idle
 
 lowPressure:
 s pressureReading On 1
+s safetyValve Setting 59000
+s safetyValve On 1
 s LED On 1
 s LED Color 4
 l r0 pressureReading Pressure
@@ -35,6 +40,8 @@ j lowPressure
 #allow regulators to depressurize over 45mpa
 safetyCheck:
 s lever On 0
+s safetyValve Setting 45000
+s safetyValve On 1
 s fuelPump On 0
 s LED On 1
 s LED Color 3
