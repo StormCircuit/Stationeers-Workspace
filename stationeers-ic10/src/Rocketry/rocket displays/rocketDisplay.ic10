@@ -5,11 +5,13 @@ alias fuelAnalyzer d3
 
 s fuelMeter On 1
 s fuelMeter Color 3
+brdns cargoMeter 4
 s cargoMeter On 1
 s cargoMeter Color 1
+s cargoMeter Maximum 1
 s powerMeter On 1
 s powerMeter Color 5
-s cargoMeter Maximum 1
+
 
 lb r0 -1125305264 Maximum Sum
 lb r1 -2123455080 Maximum Sum
@@ -27,6 +29,7 @@ lb r1 -2123455080 Charge Sum
 add r0 r1 r0
 s powerMeter Setting r0
 
+bdns cargoMeter endCargo
 lb r0 -1493672123 Ratio Average
 lb r1 1151864003 Ratio Average
 bnan r0 missingCargoSm
