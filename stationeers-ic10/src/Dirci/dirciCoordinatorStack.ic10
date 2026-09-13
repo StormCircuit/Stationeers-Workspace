@@ -1,0 +1,28 @@
+
+push -277
+push -1207
+push -275
+push -1209
+push -274
+push -1237
+push -256
+push -1236
+push -232
+push -1044
+push -214
+push -1016
+#11th stack index (starts at 0) (break at sp == 12)
+
+push -277
+push -1207
+push -275
+push -1209
+push -274
+push -1237
+push -256
+push -1236
+push -232
+push -1044
+push -214
+push -1016
+#23rd stack index (starts at 0) (break at sp == 24)
