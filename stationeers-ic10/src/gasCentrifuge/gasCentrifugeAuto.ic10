@@ -1,0 +1,58 @@
+alias gasFuge d0
+
+idle:
+s gasFuge On 0
+s gasFuge Throttle 0
+s gasFuge CombustionLimiter 0
+s gasFuge Open 0
+ls r0 gasFuge 0 Occupied
+beq r0 1 beginProcessing
+yield
+j idle
+
+beginProcessing:
+s gasFuge On 1
+l r0 gasFuge Rpm #make sure rpm and stress are 0
+seqz r0 r0
+l r1 gasFuge Stress
+seqz r1 r1
+or r0 r0 r1
+yield
+beq r0 1 beginProcessing
+s gasFuge Throttle 10
+s gasFuge CombustionLimiter 10
+l r0 gasFuge Rpm
+sgt r0 r0 245
+l r1 gasFuge Stress
+seqz r1 r1
+or r0 r0 r1
+beq r0 1 highRPM
+yield
+j beginProcessing
+
+highRPM:
+sleep 10 #let stress de-saturate a little bit more
+s gasFuge On 1
+s gasFuge Throttle 100
+s gasFuge CombustionLimiter 100
+ls r0 gasFuge 0 Occupied #check input slot
+yield
+bnez r0 highRPM
+sleep 2
+ls r0 gasFuge 0 Occupied #re-check input slot in case importing actively
+yield
+beqz r0 Unload
+j highRPM
+
+Unload:
+s gasFuge On 0
+s gasFuge Throttle 0
+s gasFuge CombustionLimiter 0
+s gasFuge Open 1
+ls r0 gasFuge 1 Occupied
+bnez r0 Unload
+sleep 2
+ls r0 gasFuge 1 Occupied #recheck output slot
+beqz r0 idle
+yield
+j Unload
