@@ -59,16 +59,20 @@ mul r0 r0 -1
 j ra #go back to goingToWork
 workSite:
 s robotXmitter Mode 3
+lb r0 1997212478 NextWeatherEventTime Sum
+brnez r0 -1 #if storm, shelter in place
+jal batteryWeatherCheckRecall
+bne r0 0 goingHomeStart #if recall, go home
 yield
 move r1 2 #skip past battery and ic10 slots
-move r2 0
+move r2 0 #reset iterable
 occupiedSlotsCalc:
 l r0 robotXmitter Mode
 beq r0 5 goingHomeStart #if robot is empty, go home
 ls r0 robotXmitter r1 Occupied
 add r2 r2 r0
 add r1 r1 1
-breq r1 11 2 #if reached the last slot, exit loop
+breq r1 12 2 #if reached the last slot, exit loop
 j occupiedSlotsCalc
 beqz r2 goingHomeStart #if no occupied slots, go home (attempt to speed Dirci up)
 j workSite #else recalculate until 0 or empty
