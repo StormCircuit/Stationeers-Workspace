@@ -6,7 +6,7 @@ arrivedHome:             #r0 thru r5 are temp registers
 move sp 0
 get r12 db 511 #load new max waypoints
 jal batteryWeatherCheckRecall
-brnez r0 -1 #loop while recall/error
+bnez r0 arrivedHome #loop while recall/error
 move r2 0
 loadingLoop:
 s robotXmitter Mode 2
