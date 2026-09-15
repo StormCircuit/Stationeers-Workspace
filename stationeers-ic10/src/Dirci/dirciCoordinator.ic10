@@ -10,14 +10,14 @@ alias vendOccuSlots r13 #holding var for occupied slots in vending machine
 alias roboOccuSlots r14 #holding var for occupied slots in Dirci
 
 define Route1Start 0
-define Route1End 12
+define Route1End 11
 define Route2Start 12
-define Route2End 32
+define Route2End 31
 
 #check both machines, if already on proper route then do nothing
 #after checking, if they need unloading, we should check Dirci
 put dirciRoutine 508 0 #initialize dirci reroute flag to 0
-move currStatus 1
+move currStatus 0
 l r0 recallSwitch Setting
 brnez r0 -1 #spin while recall switch is active
 monitorLoop:
@@ -82,16 +82,16 @@ move r1 Route2End
 beq targetStatus 2 routeLoad
 #placeholder for more routes
 routeLoad:
-move sp r0
+move r3 0 #dest index on dirciRoutine
 routeLoop:
 bgt r0 r1 endVendCheck
-peek r2
-put dirciRoutine r0 r2
+get r2 db r0               # Direct read from coordinator stack slot r0
+put dirciRoutine r3 r2     # Direct write to robot stack slot r3
 add r0 r0 1
-add sp sp 1
+add r3 r3 1
 j routeLoop
 endVendCheck:
-put dirciRoutine 511 r1 #load last waypoint into dirci's settings
+put dirciRoutine 511 r3 #load last waypoint count into dirci's settings
 move currStatus targetStatus #update status
 put dirciRoutine 508 3 #signal routine that load is complete
 get r0 dirciRoutine 508

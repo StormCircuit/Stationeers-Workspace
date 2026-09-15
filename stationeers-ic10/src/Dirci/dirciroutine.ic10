@@ -2,7 +2,7 @@ alias robotXmitter d0    #By Cows Are Evil, modified EXTENSIVELY by StormCircuit
 alias recallLever d1     #Anything with a Setting. Setting = 1 = recall/reset error
 alias secondaryRecall d2 #Optional secondary recall signal. OR's with above
 s robotXmitter Mode 0    #r15=ra,r14=workError,r13=stuck,r12=topOfStack,
-             #r0 thru r5 are temp registers
+                         #r0 thru r5 are temp registers
 arrivedHome:             
 move sp 0
 get r12 db 511 #load new max waypoints
