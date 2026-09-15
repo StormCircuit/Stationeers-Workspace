@@ -1,5 +1,6 @@
-#Route 1, used for space ice
-#11th stack index (starts at 0) (break at sp == 12)
+clr db
+move sp 0
+#Route 1, used for space ice (starts at 0) (break at sp == 12)
 push -277
 push -1207
 push -275
@@ -12,17 +13,24 @@ push -232
 push -1044
 push -214
 push -1016
-#Route 2, used for space ore
-#23rd stack index (starts at 0) (break at sp == 24)
-push -277
+#Route 2, used for space ore (starts at 12) (break at sp == 32)
+push -274
 push -1207
 push -275
 push -1209
-push -274
+push -274 #end of ramp
 push -1237
 push -256
-push -1236
-push -232
-push -1044
-push -214
-push -1016
+push -1236 #edge of crater
+push -265
+push -1158
+push -285
+push -1049
+push -421
+push -1046
+push -462
+push -1066
+push -464
+push -1046
+push -441
+push -1047

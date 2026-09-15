@@ -2,12 +2,25 @@ alias robotXmitter d0    #By Cows Are Evil, modified EXTENSIVELY by StormCircuit
 alias recallLever d1     #Anything with a Setting. Setting = 1 = recall/reset error
 alias secondaryRecall d2 #Optional secondary recall signal. OR's with above
 s robotXmitter Mode 0    #r15=ra,r14=workError,r13=stuck,r12=topOfStack,
-arrivedHome:             #r0 thru r5 are temp registers
+             #r0 thru r5 are temp registers
+arrivedHome:             
 move sp 0
 get r12 db 511 #load new max waypoints
+get r0 db 508 #load dirci reroute flag
+bne r0 1 endReroute #if no reroute flag, skip
+put db 508 2 #signal we're ready for reload
+get r0 db 508 #wait for load to be done
+brne r0 3 -1
+get r0 db 0
+get r1 db 1
+s robotXmitter TargetX r0
+s robotXmitter TargetZ r1
+jal travel #move to new vending machine
+put db 508 4 #signal that we're rerouting properly and done
+endReroute:
 jal batteryWeatherCheckRecall
 bnez r0 arrivedHome #loop while recall/error
-move r2 0
+move r2 0 #stuck counter
 loadingLoop:
 s robotXmitter Mode 2
 yield
@@ -17,9 +30,9 @@ beq r2 45 goingToWork #if stuck, go to work anyway (takes abt 45 secs to fill)
 beq r0 2 loadingLoop #wait till dirci NOT loading
 j goingToWork
 goingHomeStart:
-add sp sp 1 #accessible if working/goingToWork
+add sp sp 1 #accessible if working/goingToWork/rerouting
 goingHomeLoop:
-jal batteryWeatherCheckRecall #==BEGIN GOING arrivedHome LOOP==# update stack
+jal batteryWeatherCheckRecall
 ble sp 1 arrivedHome
 sub sp sp 1
 peek r3
