@@ -1,8 +1,8 @@
 alias robotXmitter d0
-alias recallSwitch d4
 alias dirciRoutine d1
-alias vending1 d2
-alias vending2 d3
+alias recallSwitch d2
+alias vending1 d3
+alias vending2 d4
 
 alias targetStatus r11 #route we want to switch to
 alias currStatus r12 #current vending we're operating on

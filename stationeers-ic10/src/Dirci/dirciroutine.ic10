@@ -10,12 +10,12 @@ jal getInventory
 bnez r0 endReroute #Dirci still has items, don't reroute
 get r0 db 508 #load dirci reroute flag
 beq r0 3 rerouteDone
-bne r0 1 endReroute #if no reroute flag, skip
-put db 508 2 #signal we're ready for reload
-get r0 db 508 #wait for load to be done
+bne r0 1 endReroute
+put db 508 2
+get r0 db 508 
 brne r0 3 -1
 move sp 4
-j goingHome #traverse last 2 waypoints home
+j goingHome
 rerouteDone:
 put db 508 4 #signal that we're rerouting properly and done
 endReroute:
