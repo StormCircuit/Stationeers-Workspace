@@ -6,16 +6,17 @@ s robotXmitter Mode 0    #r15=ra,r14=workError,r13=stuck,r12=topOfStack,
 arrivedHome:             
 move sp 0
 get r12 db 511 #load new max waypoints
+jal getInventory
+bnez r0 endReroute #Dirci still has items, don't reroute
 get r0 db 508 #load dirci reroute flag
+beq r0 3 rerouteDone
 bne r0 1 endReroute #if no reroute flag, skip
 put db 508 2 #signal we're ready for reload
 get r0 db 508 #wait for load to be done
 brne r0 3 -1
-get r0 db 0
-get r1 db 1
-s robotXmitter TargetX r0
-s robotXmitter TargetZ r1
-jal travel #move to new vending machine
+move sp 4
+j goingHome #traverse last 2 waypoints home
+rerouteDone:
 put db 508 4 #signal that we're rerouting properly and done
 endReroute:
 jal batteryWeatherCheckRecall
@@ -26,69 +27,54 @@ s robotXmitter Mode 2
 yield
 add r2 r2 1
 l r0 robotXmitter Mode
-beq r2 45 goingToWork #if stuck, go to work anyway (takes abt 45 secs to fill)
-beq r0 2 loadingLoop #wait till dirci NOT loading
+beq r0 4 goingToWork        # CargoFull -> ready to go to work
+blt r2 30 loadingLoop       # Give it at least 30 ticks to initiate before giving up
 j goingToWork
-goingHomeStart:
-add sp sp 1 #accessible if working/goingToWork/rerouting
-goingHomeLoop:
+goingHome:
 jal batteryWeatherCheckRecall
-ble sp 1 arrivedHome
+ble sp 0 arrivedHome
 sub sp sp 1
-peek r3
+get r3 db sp #load Z
 sub sp sp 1
-peek r2
-sub r2 r2 1 #basic collision avoidance
-sub r3 r3 1
+get r2 db sp #load X
 s robotXmitter TargetX r2
 s robotXmitter TargetZ r3
 jal travel
-j goingHomeLoop
+j goingHome
 goingToWork:
 jal batteryWeatherCheckRecall
-bne r0 0 goingHomeStart
+bne r0 0 goingHome
+get r2 db sp #load X
 add sp sp 1
-peek r2
+get r3 db sp #load Z
 add sp sp 1
-peek r3
-blt sp r12 noOffset #if last waypoint in stack, randomize coords by given memory
-jal getOffset
-add r2 r2 r0 #load WAYX
-jal getOffset
-add r3 r3 r0 #load WAYZ
-noOffset:
 s robotXmitter TargetX r2
 s robotXmitter TargetZ r3
 jal travel
 bge sp r12 workSite
 j goingToWork
-getOffset:
-get r1 db 509 # last wp range is stored at stack address 509 / is our max range
-rand r0
-mul r0 r1 r0 #store offset in r0 then randomly flip sign
-rand r1 #randomly flip sign
-brgt r1 0.5 2
-mul r0 r0 -1
-j ra #go back to goingToWork
 workSite:
 s robotXmitter Mode 3
 lb r0 1997212478 NextWeatherEventTime Sum
 brnez r0 -1 #if storm, shelter in place
 jal batteryWeatherCheckRecall
-bne r0 0 goingHomeStart #if recall, go home
-yield
+bne r0 0 goingHome #if recall, go home
+jal getInventory
+beqz r0 goingHome #if no occupied slots, go home (attempt to speed Dirci up)
+j workSite #else recalculate until 0 or empty
+getInventory:
 move r1 2 #skip past battery and ic10 slots
 move r2 0 #reset iterable
 occupiedSlotsCalc:
 l r0 robotXmitter Mode
-beq r0 5 goingHomeStart #if robot is empty, go home
+beq r0 5 goingHome #if robot is empty, go home
 ls r0 robotXmitter r1 Occupied
 add r2 r2 r0
 add r1 r1 1
 breq r1 12 2 #if reached the last slot, exit loop
 j occupiedSlotsCalc
-beqz r2 goingHomeStart #if no occupied slots, go home (attempt to speed Dirci up)
-j workSite #else recalculate until 0 or empty
+move r0 r2 #number of occupied slots in r0
+j ra
 travel:
 move r15 ra #store ra
 travelLoop:
@@ -98,7 +84,7 @@ s robotXmitter TargetY r0
 jal batteryWeatherCheckRecall
 breqz r0 5
 brlt r15 goingToWork 4 # if from gohome, skip next
-move r15 goingHomeStart
+move r15 goingHome
 sub sp sp 2 #get last waypoint
 s robotXmitter Mode 0 #set robot to idle to trigger instant reverse
 yield
