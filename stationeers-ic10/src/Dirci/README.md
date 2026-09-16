@@ -17,7 +17,7 @@ Memory addresses in the SP 500 range reserved for system configuration, status s
 
 | Stack Address | Name | Description |
 |:---:|---|---|
-| **500** | Reserved for inter IC10 communications. Do not touch or you can corrupt Dirci and the coordinator's memory. Meaning: READ-ONLY. |
+| **500** | Inter IC10 communications | Do not touch or you can corrupt Dirci and the coordinator's memory Meaning: READ-ONLY. |
 | **509** | Max Loading Ticks | Maximum ticks to wait in loading mode before forcing departure. |
 | **510** | Minimum Battery Cutoff | Minimum charge threshold in Watts before initiating emergency return-home routine. |
 | **511** | Route Length | Total number of stack values (waypoint pairs * 2) in the active route. |
