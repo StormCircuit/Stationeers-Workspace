@@ -1,0 +1,57 @@
+graph TD
+    %% Entry point & Boot
+    START([Boot / Reset]) --> Init[Init: put 508=0, r11=0, r12=0, Setting=0]
+    Init --> BootSpin{l r0 recallSwitch Setting}
+    BootSpin -- "brnez r0 -1 (Setting == 1)" --> BootSpin
+    BootSpin -- "fallthrough (Setting == 0)" --> monitorLoop
+
+    %% Main Monitoring & Loops
+    monitorLoop[monitorLoop: yield] --> roboSlotsCalc
+    roboSlotsCalc[roboSlotsCalc] -- "breq r0 12 2 / j roboSlotsCalc" --> roboSlotsCalc
+    roboSlotsCalc -- "bnez roboOccuSlots (Has Cargo)" --> monitorLoop
+    roboSlotsCalc -- "fallthrough (Dirci Empty)" --> vend1SlotsCalc
+
+    %% Vending Scans
+    vend1SlotsCalc[vend1SlotsCalc] -- "breq r0 102 2 / j vend1SlotsCalc" --> vend1SlotsCalc
+    vend1SlotsCalc -- "fallthrough" --> vend2SlotsCalc
+
+    vend2SlotsCalc[vend2SlotsCalc] -- "breq r0 102 2 / j vend2SlotsCalc" --> vend2SlotsCalc
+    vend2SlotsCalc -- "beqz vendOccuSlots (All Empty)" --> emptyRecall
+    vend2SlotsCalc -- "beq currStatus 1" --> checkV1Sticky
+    vend2SlotsCalc -- "beq currStatus 2" --> checkV2Sticky
+    vend2SlotsCalc -- "bgtz r4 (vending1 > 0)" --> pickV1
+    vend2SlotsCalc -- "j pickV2 (default)" --> pickV2
+
+    %% Empty / Park
+    emptyRecall[emptyRecall: s db Setting 1] -- "j monitorLoop" --> monitorLoop
+
+    %% Target Selection
+    checkV1Sticky[checkV1Sticky] -- "bgtz r4 (vending1 > 0)" --> pickV1
+    checkV1Sticky -- "j pickV2 (vending1 empty)" --> pickV2
+
+    checkV2Sticky[checkV2Sticky] -- "bgtz r5 (vending2 > 0)" --> pickV2
+    checkV2Sticky -- "j pickV1 (vending2 empty)" --> pickV1
+
+    pickV1[pickV1: targetStatus = 1] -- "j evalReroute" --> evalReroute
+    pickV2[pickV2: targetStatus = 2] -- "fallthrough" --> evalReroute
+
+    %% Handshake & Evaluation
+    evalReroute[evalReroute] -- "beq currStatus targetStatus" --> releaseLock
+    evalReroute -- "get r1 db 508 / beq r1 0" --> requestReroute
+    evalReroute -- "get r1 db 508 / beq r1 2" --> loadSelectedRoute
+    evalReroute -- "j monitorLoop (r1 == 1, in-transit)" --> monitorLoop
+
+    requestReroute[requestReroute: put 508 1] -- "j monitorLoop" --> monitorLoop
+
+    releaseLock[releaseLock: s db Setting 0] -- "j monitorLoop" --> monitorLoop
+
+    %% Route Loading & Handshake Completion
+    loadSelectedRoute[loadSelectedRoute: calc headers] -- "beq targetStatus 1 / 2" --> routeLoad
+    
+    routeLoad[routeLoad: init r3=0] --> routeLoop
+    routeLoop[routeLoop: copy waypoint] -- "r0 <= r1 / j routeLoop" --> routeLoop
+    routeLoop -- "bgt r0 r1" --> endVendCheck
+
+    endVendCheck[endVendCheck: put 511, 508=3] --> repositionWait{get r0 db 508}
+    repositionWait -- "brne r0 4 -1 (Waiting for Dock)" --> repositionWait
+    repositionWait -- "fallthrough (r0 == 4, put 508 0)" --> releaseLock
