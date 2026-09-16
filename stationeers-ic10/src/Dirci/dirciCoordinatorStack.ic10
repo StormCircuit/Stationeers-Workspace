@@ -1,7 +1,8 @@
 clr db
 move sp 0
-#Route 1, used for space ice (starts at 0) (break at sp == 12)
-push -277
+#Route 1, used for space ice (starts at 1, length 14)
+push 14
+push -278
 push -1207
 push -275
 push -1209
@@ -11,11 +12,14 @@ push -256
 push -1236
 push -232
 push -1044
+push -215
+push -1030
 push -214
 push -1016
-#Route 2, used for space ore (starts at 12) (break at sp == 32)
-push -275
-push -1207
+#Route 2, used for space ore (starts at 16, length 20)
+push 20
+push -274
+push -1206
 push -275
 push -1209
 push -274 #end of ramp
