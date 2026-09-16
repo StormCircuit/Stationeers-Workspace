@@ -12,6 +12,8 @@ j idle
 
 beginProcessing:
 s gasFuge On 1
+s gasFuge Throttle 10
+s gasFuge CombustionLimiter 10
 l r0 gasFuge Rpm #make sure rpm and stress are 0
 seqz r0 r0
 l r1 gasFuge Stress
