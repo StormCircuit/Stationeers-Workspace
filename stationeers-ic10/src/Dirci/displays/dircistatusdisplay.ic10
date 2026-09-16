@@ -14,7 +14,7 @@ statusBattEnd:
 lb r0 1997212478 NextWeatherEventTime Sum #if weather != 0, set storm status
 bnez r0 statusWeather
 statusWeatherEnd:
-sleep 2 #sleep to avoid flashing
+
 s statusLED Color 2
 s statusLED Mode 10
 l r0 robotXmitter Mode
@@ -60,9 +60,11 @@ statusWeather:
 sleep 1
 s statusLED Color 3
 s statusLED Setting STR("STRM")
+sleep 2 #sleep to avoid flashing
 j statusWeatherEnd
 statusBattery:
 sleep 1
 s statusLED Color 3
 s statusLED Setting STR("CHRG")
+sleep 2 #sleep to avoid flashing
 j statusBattEnd

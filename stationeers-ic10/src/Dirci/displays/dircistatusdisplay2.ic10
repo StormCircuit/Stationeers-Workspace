@@ -44,6 +44,4 @@ s progressLED Setting numOccupiedSlots
 brdns recallLever 3
 l r0 recallLever Setting
 s recallLED On r0
-
-yield
 j monitorLoop
