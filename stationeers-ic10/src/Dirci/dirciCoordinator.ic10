@@ -9,7 +9,7 @@ alias currStatus r12 #current vending we're operating on
 alias vendOccuSlots r13 #holding var for occupied slots in vending machine
 alias roboOccuSlots r14 #holding var for occupied slots in Dirci
 
-put dirciRoutine 508 0 #initialize dirci reroute flag to 0
+put dirciRoutine 500 0 #initialize dirci reroute flag to 0
 move currStatus 0
 move targetStatus 0
 s db Setting 0
@@ -75,14 +75,14 @@ move targetStatus 2
 evalReroute:
 # Check reroute status and handshake
 beq currStatus targetStatus releaseLock # Route matches: release lock and continue
-get r1 dirciRoutine 508
+get r1 dirciRoutine 500
 beq r1 0 requestReroute           # Dirci idle on old route -> request reroute
 beq r1 2 loadSelectedRoute        # Dirci home & ready -> proceed to load stack
 j monitorLoop                     # Otherwise waiting for Dirci to return home 
 
 requestReroute:
-put dirciRoutine 508 1            # Signal Dirci to prepare for route reload
-get r0 dirciRoutine 508
+put dirciRoutine 500 1            # Signal Dirci to prepare for route reload
+get r0 dirciRoutine 500
 brne r0 2 -1 #wait for dirciRoutine to acknowledge reroute request
 
 loadSelectedRoute:
@@ -111,10 +111,10 @@ j routeLoop
 endVendCheck:
 put dirciRoutine 511 r3 #load last waypoint count into dirci's settings
 move currStatus targetStatus #update status
-put dirciRoutine 508 3 #signal routine that load is complete
-get r0 dirciRoutine 508
+put dirciRoutine 500 3 #signal routine that load is complete
+get r0 dirciRoutine 500
 brne r0 4 -1 #wait for dirciRoutine to finish repositioning
-put dirciRoutine 508 0 #clear reroute flag
+put dirciRoutine 500 0 #clear reroute flag
 releaseLock:
 s db Setting 0 #release dirci lock
 j monitorLoop

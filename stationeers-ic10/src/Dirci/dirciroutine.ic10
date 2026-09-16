@@ -8,16 +8,16 @@ move sp 0
 get r12 db 511 #load new max waypoints
 jal getInventory
 bnez r0 endReroute #Dirci still has items, don't reroute
-get r0 db 508 #load dirci reroute flag
+get r0 db 500 #load dirci reroute flag
 beq r0 3 rerouteDone
 bne r0 1 endReroute
-put db 508 2
-get r0 db 508 
+put db 500 2
+get r0 db 500
 brne r0 3 -1
 move sp 4
 j goingHome
 rerouteDone:
-put db 508 4 #signal that we're rerouting properly and done
+put db 500 4 #signal that we're rerouting properly and done
 endReroute:
 jal batteryWeatherCheckRecall
 bnez r0 arrivedHome #loop while recall/error
@@ -27,9 +27,9 @@ s robotXmitter Mode 2
 yield
 add r2 r2 1
 l r0 robotXmitter Mode
-beq r0 4 goingToWork        # CargoFull -> ready to go to work
+beq r0 4 goingToWork# CargoFull -> instantly to go to work
 get r1 db 507 #load max loading ticks from setting
-blt r2 r1 loadingLoop       # Give it at least max loading ticks to initiate before giving up
+blt r2 r1 loadingLoop
 j goingToWork
 goingHome:
 jal batteryWeatherCheckRecall
