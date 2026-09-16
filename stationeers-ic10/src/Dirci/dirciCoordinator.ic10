@@ -9,76 +9,94 @@ alias currStatus r12 #current vending we're operating on
 alias vendOccuSlots r13 #holding var for occupied slots in vending machine
 alias roboOccuSlots r14 #holding var for occupied slots in Dirci
 
-define Route1Start 0
-define Route1End 11
-define Route2Start 12
-define Route2End 31
-
-#check both machines, if already on proper route then do nothing
-#after checking, if they need unloading, we should check Dirci
 put dirciRoutine 508 0 #initialize dirci reroute flag to 0
 move currStatus 0
+move targetStatus 0
+s db Setting 0
 l r0 recallSwitch Setting
 brnez r0 -1 #spin while recall switch is active
 monitorLoop:
 yield
-#begin with checking if dirci is empty
-move r0 2 #skip past battery and ic10 slots
+move r0 2
 move roboOccuSlots 0
-roboSlotsCalc:
+roboSlotsCalc: #calculate if dirci has any items currently
 ls r2 robotXmitter r0 Occupied
 add roboOccuSlots roboOccuSlots r2
 add r0 r0 1
 breq r0 12 2
 j roboSlotsCalc
-bnez roboOccuSlots monitorLoop #if not empty, loop
+breqz roboOccuSlots 3 #if not empty, loop
+s db Setting 0
+j monitorLoop
 
 #dirci is empty and so can be rerouted
-
 #find which vending machine needs unloading
 move vendOccuSlots 0
-move r0 2 #index iterable
-move r1 0 #holding var for occupied slots in vending machine
+move r0 2 
+move r1 0
 vend1SlotsCalc: #space ice vending machine
 ls r2 vending1 r0 Occupied
 add r1 r1 r2
 add r0 r0 1
 breq r0 102 2
 j vend1SlotsCalc
-breqz r1 2 #if NO occupied slots, skip next
-move targetStatus 1 #targetStatus = 1 (st vending machine)
-add vendOccuSlots r0 vendOccuSlots
-
-move r0 2 #index iterable
-move r1 0 #holding var for occupied slots in vending machine
+move r4 r1 #save vending1 count
+add vendOccuSlots vendOccuSlots r1
+move r0 2 
+move r1 0 
 vend2SlotsCalc: #space ore vending machine
 ls r2 vending2 r0 Occupied
 add r1 r1 r2
 add r0 r0 1
 breq r0 102 2
 j vend2SlotsCalc
-breqz r1 2 #if NO occupied slots, skip next
-move targetStatus 2 #targetStatus = 2 (nd vending machine)
-add vendOccuSlots r0 vendOccuSlots
+move r5 r1 #save vending2 count
+add vendOccuSlots vendOccuSlots r1
+brnez vendOccuSlots 3 #both vending machines empty & dirci empty -> recall
+s db Setting 1 #recall dirci / park at home when all empty
+j monitorLoop
 
-#begin check if dirci is available for reroute
+#sticky target selection: stay on current machine if it still has items
+beq currStatus 1 checkV1Sticky
+beq currStatus 2 checkV2Sticky
+bgtz r4 pickV1
+j pickV2
+checkV1Sticky:
+bgtz r4 pickV1
+j pickV2
+checkV2Sticky:
+bgtz r5 pickV2
+j pickV1
+pickV1:
+move targetStatus 1
+j evalReroute
+pickV2:
+move targetStatus 2
+evalReroute:
+# Check reroute status and handshake
+beq currStatus targetStatus releaseLock # Route matches: release lock and continue
 get r1 dirciRoutine 508
-bnez r1 monitorLoop #then dirci is not ready to have her route swapped, loop
-beq currStatus targetStatus monitorLoop #status unchanged, loop
+beq r1 0 requestReroute           # Dirci idle on old route -> request reroute
+beq r1 2 loadSelectedRoute        # Dirci home & ready -> proceed to load stack
+j monitorLoop                     # Otherwise waiting for Dirci to return home 
 
-put dirciRoutine 508 1 #flag dirciRoutine for rerouting
-
-#commit to changing her route now
-s db Setting 1 #issue a recall so we can have a stable handoff state and wait
+requestReroute:
+put dirciRoutine 508 1            # Signal Dirci to prepare for route reload
 get r0 dirciRoutine 508
-brne r0 2 -1 #wait for dirci to signal she's ready for loading
+brne r0 2 -1 #wait for dirciRoutine to acknowledge reroute request
 
-#begin route loading
-move r0 Route1Start
-move r1 Route1End
+loadSelectedRoute:
+#begin route loading, utilizing offsets from header as path length
+move r0 0 #Route 1 Header
+get r1 db r0 #Route 1 Length (14)
+add r1 r0 r1 #Route 1 End (0 + 14 = 14)
+add r0 r0 1 #Route 2 Start (15)
 beq targetStatus 1 routeLoad
-move r0 Route2Start
-move r1 Route2End
+move r0 r1 #Previous Route End
+add r0 r0 1 #Route 2 Header (15)
+get r1 db r0 #Route 2 Length (20)
+add r1 r0 r1 #Route 2 End (15 + 20 = 35)
+add r0 r0 1 #Route 2 Start (16)
 beq targetStatus 2 routeLoad
 #placeholder for more routes
 routeLoad:
@@ -97,5 +115,6 @@ put dirciRoutine 508 3 #signal routine that load is complete
 get r0 dirciRoutine 508
 brne r0 4 -1 #wait for dirciRoutine to finish repositioning
 put dirciRoutine 508 0 #clear reroute flag
+releaseLock:
 s db Setting 0 #release dirci lock
 j monitorLoop
