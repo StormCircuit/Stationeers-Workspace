@@ -10,7 +10,7 @@ alias vendOccuSlots r13 #holding var for occupied slots in vending machine
 alias roboOccuSlots r14 #holding var for occupied slots in Dirci
 
 put dirciRoutine 510 20000 #use 20,000 for charge error
-put dirciRoutine 509 40 #use 40 ticks until force from load to move out
+put dirciRoutine 509 45 #use 45 ticks until force from load to move out
 
 
 put dirciRoutine 500 0 #initialize dirci reroute flag to 0
