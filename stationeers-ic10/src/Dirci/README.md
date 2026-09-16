@@ -2,8 +2,8 @@
 1. Place 3 or 4 IC10 housings
 2. Put dirciroutine in 1, dircidisplay in another, and dircidisplay2 in another.
 3. If you want dirci to go to multiple vending machines then you'll need dirciCoordinator, else dirciStackloader
-4. dirciStackloader loads a single route that dirci goes up and down. You only need 3 housings for this.
-5. for dirciCoordinator, see dirciCoordinatorStack for loading the routes. dirciCoordinator is its own program and will need the 4th housing mentioned. Set screws as per their alias'.
+4. For dirciStackloader, setup the waypoints and settings below on dirciRoutine's IC10 chip. This configuration only requires 3 IC10 housings.
+5. For dirciCoordinator, see dirciCoordinatorStack for loading the routes. dirciCoordinator is its own program and will need the 4th housing mentioned. Set screws as per their alias'.
 6. Set the recallSwitch to on to ensure all start in idle state
 7. Once all IC10 are running and stack is properly configured, switch recall off and robot will automatically begin route.
 
