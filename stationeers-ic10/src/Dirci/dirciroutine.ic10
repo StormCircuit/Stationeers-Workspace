@@ -28,7 +28,7 @@ yield
 add r2 r2 1
 l r0 robotXmitter Mode
 beq r0 4 goingToWork# CargoFull -> instantly to go to work
-get r1 db 507 #load max loading ticks from setting
+get r1 db 509 #load max loading ticks from setting
 blt r2 r1 loadingLoop
 j goingToWork
 goingHome:
