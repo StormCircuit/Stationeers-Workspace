@@ -28,7 +28,8 @@ yield
 add r2 r2 1
 l r0 robotXmitter Mode
 beq r0 4 goingToWork        # CargoFull -> ready to go to work
-blt r2 30 loadingLoop       # Give it at least 30 ticks to initiate before giving up
+get r1 db 507 #load max loading ticks from setting
+blt r2 r1 loadingLoop       # Give it at least max loading ticks to initiate before giving up
 j goingToWork
 goingHome:
 jal batteryWeatherCheckRecall
