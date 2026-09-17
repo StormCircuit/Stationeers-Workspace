@@ -5,6 +5,8 @@ s gasFuge On 0
 s gasFuge Throttle 0
 s gasFuge CombustionLimiter 0
 s gasFuge Open 0
+l r0 gasFuge Reagents
+bnez r0 Unload
 ls r0 gasFuge 0 Occupied
 beq r0 1 beginProcessing
 yield
@@ -51,10 +53,7 @@ s gasFuge On 0
 s gasFuge Throttle 0
 s gasFuge CombustionLimiter 0
 s gasFuge Open 1
-ls r0 gasFuge 1 Occupied
-bnez r0 Unload
-sleep 2
-ls r0 gasFuge 1 Occupied #recheck output slot
-beqz r0 idle
 yield
-j Unload
+l r0 gasFuge Reagents
+bnez r0 Unload
+j idle
