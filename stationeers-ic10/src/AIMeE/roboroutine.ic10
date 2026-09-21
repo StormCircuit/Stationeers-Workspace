@@ -49,7 +49,7 @@ jal travel
 bge sp r12 workSite
 j goingToWork
 getOffset:
-get r1 db 507 # offset range is stored at stack address 510 / is our max range
+get r1 db 507 # offset range is stored at stack address 507 / is our max range
 rand r0
 mul r0 r1 r0 #store offset in r0 then randomly flip sign
 rand r1 #randomly flip sign
@@ -97,10 +97,10 @@ batteryWeatherCheckRecall:
 l r0 recallLever Setting
 brdns secondaryRecall 3 #if no secondary recall, skip secondary check
 l r1 secondaryRecall Setting
-or r0 r0 r1 #combine recall signals, store in r0
-breqz r0 2 #if recall signal set, workerror must clear
+or r3 r0 r1 #combine recall signals, store in r3
+breqz r3 2 #if recall signal set, workerror must clear
 move r14 0
-ls r0 robotXmitter 0 Charge #check if below SP 505
+ls r0 robotXmitter 0 Charge #check if below SP 510
 get r1 db 510 #check charge value against SP 510 in watts
 slt r2 r0 r1
 or r2 r2 r14 #if Charge OR work error then r2 = 1
