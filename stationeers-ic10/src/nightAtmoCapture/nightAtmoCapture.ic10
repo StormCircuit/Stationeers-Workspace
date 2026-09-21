@@ -1,0 +1,20 @@
+
+define minTemp 248.15
+
+idle:
+sb 938836756 On 0
+sb -785498334 On 0
+lb r0 -1252983604 Temperature Minimum
+slt r0 r0 minTemp #if gas temp below min then 1
+beq r0 1 capturing
+yield
+j idle
+
+capturing:
+sb 938836756 On 1
+sb -785498334 On 1
+lb r0 -1252983604 Temperature Minimum
+sgt r0 r0 minTemp #if gas temp above min then 1
+beq r0 1 idle #if gas temp above min then stop capturing
+yield
+j capturing
