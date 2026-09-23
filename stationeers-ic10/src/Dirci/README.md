@@ -13,6 +13,9 @@
 4. Reseat dirciroutine
 5. Turn off recall
 
+# Notes on route creation:
+The tablet's actual position in world is used for coordinates, not the player. Further, try to use the center of a large grid to ensure Dirci has room. Generally routes should act as line segments aligned to a grid. This will ensure Dirci has a clear route to the next waypoint. You want to create clear shots so at least one of the coordinates in a pair should match a coordinate from the previous (unless you go at a 45 degree angle).
+
 # DiRCI Configuration Registers
 
 Memory addresses in the SP 500 range reserved for system configuration, status signaling, and safety thresholds.
