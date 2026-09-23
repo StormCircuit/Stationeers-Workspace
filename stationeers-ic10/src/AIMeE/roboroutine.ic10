@@ -3,6 +3,8 @@ alias recallLever d1     #Anything with a Setting. Setting = 1 = recall/reset er
 alias secondaryRecall d2 #Optional secondary recall signal. OR's with above
 s robotXmitter Mode 0    #r15=ra,r14=workError,r13=stuck,r12=topOfStack,
 arrivedHome:             #r0 thru r5 are temp registers
+l r0 robotXmitter On
+breqz r0 -1
 move sp 0
 get r12 db 511 #load new max waypoints
 brne r14 1 2 #if work error, then set unload before idle
