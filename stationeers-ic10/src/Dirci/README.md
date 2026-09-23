@@ -7,6 +7,7 @@
 
 # Resetting system from a corrupted state:
 1. Turn Dirci off to ensure she doesn't die (this is always a safe action)
+    1a. Pick her up by the handle, hold alt, and click her power button
 2. Turn recall switch on to ensure program synchronization
 3. Reseat coordinator (this will make sure the reroute flag exists for dirci to see on startup)
 4. Reseat dirciroutine
