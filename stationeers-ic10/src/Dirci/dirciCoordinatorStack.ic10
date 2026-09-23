@@ -11,7 +11,7 @@ put dirciRoutine 509 45 #use 45 ticks until force from load to move out
 #Push Z1
 #Push X2
 #Push Z2 etc
-#Route 1, used for space ice (starts at 1, 14 waypoints)
+#Route 1, used for space ice (starts at 0, 14 waypoints)
 push 14
 push -439
 push -1037
