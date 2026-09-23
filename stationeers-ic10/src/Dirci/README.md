@@ -5,6 +5,13 @@
 6. Set the recallSwitch to on to ensure all start in idle state. Note: this is anything with a Setting. 1 = recall, 0 = Resume normal function. If using dirciCoordinator, set the secondaryRecall to dirciCoordinator.
 7. Once all IC10 are running and stack is properly configured, switch recall off and robot will automatically begin route.
 
+# Resetting system from a corrupted state:
+1. Turn Dirci off to ensure she doesn't die (this is always a safe action)
+2. Turn recall switch on to ensure program synchronization
+3. Reseat coordinator (this will make sure the reroute flag exists for dirci to see on startup)
+4. Reseat dirciroutine
+5. Turn off recall
+
 # DiRCI Configuration Registers
 
 Memory addresses in the SP 500 range reserved for system configuration, status signaling, and safety thresholds.
