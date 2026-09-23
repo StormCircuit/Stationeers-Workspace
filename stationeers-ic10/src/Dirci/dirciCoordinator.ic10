@@ -90,17 +90,20 @@ get r0 dirciRoutine 500
 brne r0 2 -1 #wait for dirciRoutine to acknowledge reroute request
 
 loadSelectedRoute:
-#begin route loading, utilizing offsets from header as path length
+#begin route loading, interpreting each route header as a waypoint count
+#Route data is stored as X/Z pairs, so we multiply by 2 to get the scalar stack length
 move r0 0 #Route 1 Header
-get r1 db r0 #Route 1 Length (14)
-add r1 r0 r1 #Route 1 End (0 + 14 = 14)
-add r0 r0 1 #Route 2 Start (15)
+get r1 db r0 #Route 1 Length (14 waypoints)
+mul r1 r1 2 #Route 1 Data Entries (28)
+add r1 r0 r1 #Route 1 End (0 + 28 = 28)
+add r0 r0 1 #Route 2 Start (1)
 beq targetStatus 1 routeLoad
 move r0 r1 #Previous Route End
-add r0 r0 1 #Route 2 Header (15)
-get r1 db r0 #Route 2 Length (20)
-add r1 r0 r1 #Route 2 End (15 + 20 = 35)
-add r0 r0 1 #Route 2 Start (16)
+add r0 r0 1 #Route 2 Header (29)
+get r1 db r0 #Route 2 Length (7 waypoints)
+mul r1 r1 2 #Route 2 Data Entries (14)
+add r1 r0 r1 #Route 2 End (29 + 14 = 43)
+add r0 r0 1 #Route 2 Start (30)
 beq targetStatus 2 routeLoad
 #placeholder for more routes
 routeLoad:

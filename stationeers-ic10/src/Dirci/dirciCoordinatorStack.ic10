@@ -11,42 +11,52 @@ put dirciRoutine 509 45 #use 45 ticks until force from load to move out
 #Push Z1
 #Push X2
 #Push Z2 etc
-#Route 1, used for space ice (starts at 1, length 14)
+#Route 1, used for space ice (starts at 1, 14 waypoints)
 push 14
-push -278
-push -1207
-push -275
-push -1208
-push -274
-push -1237
-push -256
-push -1236
-push -232
-push -1044
-push -215
-push -1030
-push -214
-push -1016
-#route 2 is optional, requires vending2
-#Route 2, used for space ore (starts at 16, length 20)
-push 20
-push -274
-push -1206
-push -275
-push -1208
-push -274 #end of ramp
-push -1237
-push -256
-push -1236 #edge of crater
-push -265
-push -1158
-push -285
-push -1049
-push -421
-push -1046
-push -462
-push -1066
-push -464
-push -1046
+push -439
+push -1037
 push -441
-push -1047
+push -1038
+push -439
+push -1041
+push -433 #outside the hangar door
+push -1041
+push -423 #top of ramp
+push -1035
+push -422
+push -1053
+push -415
+push -1053
+push -414  #end of ramp, at corner of The Span
+push -1033
+push -267  #rounding corner into Filtration
+push -1034
+push -266
+push -1041
+push -229
+push -1040
+push -228
+push -1037
+push -214
+push -1036
+push -214
+push -1032
+push -216
+push -1032
+#route 2 is optional, requires vending2
+#Route 2, used for space ore (starts at 29, 7 waypoints)
+push 7
+push -439
+push -1037
+push -441
+push -1038
+push -439
+push -1041
+push -433 #outside the hangar door
+push -1041
+push -433  #catwalk at edge of robotics lab
+push -1053
+push -424
+push -1053
+push -423 #unload point
+push -1068
