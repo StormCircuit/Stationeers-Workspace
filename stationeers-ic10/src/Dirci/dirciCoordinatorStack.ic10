@@ -11,19 +11,19 @@ put dirciRoutine 509 45 #use 45 ticks until force from load to move out
 #Push Z1
 #Push X2
 #Push Z2 etc
-#Route 1, used for space ice (starts at 0, 14 waypoints)
-push 14
-push -439
+#Route 1, used for space ice (starts at 0, 13 waypoints)
+push 13
+push -438
 push -1037
 push -441
-push -1038
+push -1037
 push -439
 push -1041
 push -433 #outside the hangar door
 push -1041
 push -423 #top of ramp
-push -1035
-push -422
+push -1038
+push -423
 push -1053
 push -415
 push -1053
@@ -33,30 +33,44 @@ push -267  #rounding corner into Filtration
 push -1034
 push -266
 push -1041
-push -229
+push -236
 push -1040
-push -228
-push -1037
-push -214
-push -1036
-push -214
-push -1032
-push -216
-push -1032
+push -236
+push -1035
+push -224
+push -1035
 #route 2 is optional, requires vending2
-#Route 2, used for space ore (starts at 29, 7 waypoints)
-push 7
-push -439
-push -1037
+#Route 2, used for space ore (starts at 27, 16 waypoints)
+push 16
+push -438
+push -1039
 push -441
-push -1038
+push -1039
 push -439
 push -1041
 push -433 #outside the hangar door
 push -1041
-push -433  #catwalk at edge of robotics lab
+push -423
+push -1038
+push -423
 push -1053
-push -424
+push -418
 push -1053
-push -423 #unload point
-push -1068
+push -415
+push -1053
+push -415
+push -1039
+push -413
+push -1039
+push -413
+push -1054
+push -417
+push -1053
+push -417
+push -1063
+push -405
+push -1063
+push -405
+push -1065
+push -402
+push -1065
