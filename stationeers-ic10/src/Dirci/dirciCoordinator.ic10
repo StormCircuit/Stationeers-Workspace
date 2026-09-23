@@ -47,7 +47,10 @@ j vend1SlotsCalc
 move r4 r1 #save vending1 count
 add vendOccuSlots vendOccuSlots r1
 move r0 2 
-move r1 0 
+move r1 0
+move r5 0 #default vending2 count when device is not linked
+
+bdns vending2 endVendCheck #vending2 is optional; skip its slot check if unlinked
 vend2SlotsCalc: #space ore vending machine
 ls r2 vending2 r0 Occupied
 add r1 r1 r2
@@ -60,6 +63,7 @@ brnez vendOccuSlots 3 #both vending machines empty & dirci empty -> recall
 s db Setting 1 #recall dirci / park at home when all empty
 j monitorLoop
 
+endVendCheck:
 #sticky target selection: stay on current machine if it still has items
 beq currStatus 1 checkV1Sticky
 beq currStatus 2 checkV2Sticky
@@ -106,13 +110,13 @@ beq targetStatus 2 routeLoad
 routeLoad:
 move r3 0 #dest index on dirciRoutine
 routeLoop:
-bgt r0 r1 endVendCheck
+bgt r0 r1 finishRouteLoad
 get r2 db r0               # Direct read from coordinator stack slot r0
 put dirciRoutine r3 r2     # Direct write to robot stack slot r3
 add r0 r0 1
 add r3 r3 1
 j routeLoop
-endVendCheck:
+finishRouteLoad:
 put dirciRoutine 511 r3 #load last waypoint count into dirci's settings
 move currStatus targetStatus #update status
 put dirciRoutine 500 3 #signal routine that load is complete
