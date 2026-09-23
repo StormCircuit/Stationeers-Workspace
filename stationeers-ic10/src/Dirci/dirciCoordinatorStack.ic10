@@ -25,16 +25,16 @@ push -423 #top of ramp
 push -1038
 push -423
 push -1053
-push -415
+push -415.2
 push -1053
-push -414  #end of ramp, at corner of The Span
+push -415  #end of ramp, at corner of The Span
 push -1033
 push -267  #rounding corner into Filtration
-push -1034
-push -266
+push -1033
+push -267
 push -1041
 push -236
-push -1040
+push -1041
 push -236
 push -1035
 push -224
