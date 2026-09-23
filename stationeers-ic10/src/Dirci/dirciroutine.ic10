@@ -99,7 +99,7 @@ l r0 recallLever Setting
 brdns secondaryRecall 3 #if no secondary recall, skip secondary check
 l r1 secondaryRecall Setting
 or r3 r0 r1 #combine recall signals, store in r3
-breqz r0 2 #if recall signal set, workerror must clear
+breqz r3 2 #if recall signal set, workerror must clear
 move r14 0
 ls r0 robotXmitter 0 Charge #check if below SP 505
 get r1 db 510 #check charge value against SP 510 in watts
