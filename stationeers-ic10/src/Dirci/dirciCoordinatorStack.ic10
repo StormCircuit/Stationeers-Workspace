@@ -1,5 +1,16 @@
 clr db
 move sp 0
+alias dirciRoutine d0
+#configure dirci below:
+put dirciRoutine 510 20000 #use 20,000 watts for charge error
+put dirciRoutine 509 45 #use 45 ticks until force from load to move out
+#Route format:
+#Length of the route in number of waypoints
+#Each waypoint represented by X and Y coordinates
+#Push X1
+#Push Z1
+#Push X2
+#Push Z2 etc
 #Route 1, used for space ice (starts at 1, length 14)
 push 14
 push -278
@@ -16,6 +27,7 @@ push -215
 push -1030
 push -214
 push -1016
+#route 2 is optional, requires vending2
 #Route 2, used for space ore (starts at 16, length 20)
 push 20
 push -274

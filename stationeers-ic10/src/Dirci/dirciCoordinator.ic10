@@ -1,17 +1,13 @@
-alias robotXmitter d0
-alias dirciRoutine d1
+alias dirciRoutine d0
+alias robotXmitter d1
 alias recallSwitch d2
 alias vending1 d3
-alias vending2 d4
+alias vending2 d4 #optional for a second route
 
 alias targetStatus r11 #route we want to switch to
 alias currStatus r12 #current vending we're operating on
 alias vendOccuSlots r13 #holding var for occupied slots in vending machine
 alias roboOccuSlots r14 #holding var for occupied slots in Dirci
-
-put dirciRoutine 510 20000 #use 20,000 for charge error
-put dirciRoutine 509 45 #use 45 ticks until force from load to move out
-
 
 put dirciRoutine 500 0 #initialize dirci reroute flag to 0
 move currStatus 0
