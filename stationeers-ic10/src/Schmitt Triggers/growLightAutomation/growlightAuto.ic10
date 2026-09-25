@@ -14,6 +14,7 @@ l lightTime lightTimeMemory Setting
 
 #initiate stopwatch and jump straight into a loop to begin infinite loop
 start:
+s stopWatch On 1
 s stopWatch Activate 1
 j lightsOnCycleLoop
 
