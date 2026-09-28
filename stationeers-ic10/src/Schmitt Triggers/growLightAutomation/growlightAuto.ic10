@@ -13,13 +13,11 @@ alias lightTime r1
 l lightTime lightTimeMemory Setting
 
 #initiate stopwatch and jump straight into a loop to begin infinite loop
-start:
-s stopWatch On 1
-s stopWatch Activate 1
-j lightsOnCycleLoop
 
 lightsOnCycle:
+s stopWatch On 1
 yield
+s stopWatch Activate 1
 sb allNetworkedGrowLights On 1
 lightsOnCycleLoop:
 l currCycleTime stopWatch Time
@@ -28,7 +26,9 @@ bge currCycleTime lightTime lightsOffCycle
 j lightsOnCycleLoop
 
 lightsOffCycle:
+s stopWatch On 1
 yield
+s stopWatch Activate 1
 sb allNetworkedGrowLights On 0
 lightsOffCycleLoop:
 l currCycleTime stopWatch Time
