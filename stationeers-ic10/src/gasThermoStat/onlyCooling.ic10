@@ -1,0 +1,23 @@
+
+alias currentTemp r4
+
+define minTempKelvin 303.15
+define maxTempKelvin 308.15
+
+#simple schmitt trigger
+
+noCooling:
+sb 938836756 On 0
+lb currentTemp -1252983604 Temperature Average
+s db Setting currentTemp
+bgeal currentTemp maxTempKelvin startCooling
+yield
+j noCooling
+
+startCooling:
+sb 938836756 On 1
+lb currentTemp -1252983604 Temperature Average
+s db Setting currentTemp
+blt currentTemp minTempKelvin noCooling
+yield
+j startCooling
