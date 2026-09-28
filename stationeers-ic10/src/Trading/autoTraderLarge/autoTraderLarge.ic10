@@ -2,8 +2,9 @@ alias traderFilterDial d0 # ignore r7
 alias medDish d1 #the above comment is for the ic10 ls, not for humans
 alias lrgDish d2
 alias currOffset r7
-define minTraderWatts 200 #roughly 250 and above are far traders, needs large dish
-
+define minTraderWatts 150   #roughly 250 and above are far traders, needs large dish
+                            #150 for medium and above
+                    
 findContact:
 s medDish BestContactFilter -1
 s lrgDish BestContactFilter -1
@@ -46,7 +47,7 @@ l r0 lrgDish Idle
 yield
 brne r0 1 -2
 s lrgDish Setting 49999 #workaround for a bug
-yield
+sleep 1
 s lrgDish Setting 50000
 sleep 1
 l r0 lrgDish SignalID
