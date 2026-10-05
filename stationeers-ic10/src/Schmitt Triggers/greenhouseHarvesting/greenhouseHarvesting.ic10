@@ -1,0 +1,31 @@
+#Put directly into a filtration housing (uses DB for everything)
+#also keep the filtration on
+
+define minPressurePa 30
+define maxPressurePa 35
+
+#simple schmitt trigger
+
+lowPressure:
+s db On 1
+s db Mode 0
+endCheckLow:
+l r0 db RatioOxygenOutput
+l r1 db PressureOutput
+mul r0 r0 r1
+s db Setting r0
+bgeal r0 maxPressurePa highPressure
+yield
+j lowPressure
+
+highPressure:
+s db On 1
+s db Mode 1
+endCheckHigh:
+l r0 db RatioOxygenOutput
+l r1 db PressureOutput
+mul r0 r0 r1
+s db Setting r0
+blt r0 minPressurePa lowPressure
+yield
+j highPressure
