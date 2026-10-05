@@ -1,0 +1,31 @@
+#Put directly into a filtration housing (uses DB for everything)
+#also keep the filtration on
+
+alias poweredVent d0
+
+define minPressurePa 40000
+define maxPressurePa 45000
+
+#simple schmitt trigger
+
+lowPressure:
+s db On 1
+s db Mode 1
+s d0 On 1
+endCheckLow:
+l r0 db PressureOutput
+s db Setting r0
+bgeal r0 maxPressurePa highPressure
+yield
+j lowPressure
+
+highPressure:
+s db On 1
+s db Mode 0
+s d0 On 0
+endCheckHigh:
+l r0 db PressureOutput
+s db Setting r0
+blt r0 minPressurePa lowPressure
+yield
+j highPressure
